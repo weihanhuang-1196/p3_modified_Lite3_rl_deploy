@@ -1,8 +1,6 @@
 /**
  * @file lite3_socket_policy_runner.hpp
  * @brief Lite3 策略运行器：通过 Unix Socket 接入 RKNN 推理服务
- * @author 中兵智能创新研究院(深圳)有限公司
- * @date 2024-05-30
  */
 
 #pragma once
