@@ -1,0 +1,6 @@
+# PPO 策略网络示例配置
+obs_dim: 108
+act_dim: 12
+hidden_sizes: [512, 256, 128]
+activation: tanh
+separate_actor_critic: false
