@@ -11,6 +11,7 @@
 | [`deployment_pipeline.md`](./deployment_pipeline.md) | `.pt→.onnx→.rknn` 转换细节与排错 | `export_pt_to_onnx.py`, `convert_to_rknn.py`, `collect_calib_data.py` |
 | [`runtime_service.md`](./runtime_service.md) | 端侧推理服务、Lite3 控制栈对接流程 | `lite3_rknn_service.py`, `run_rknn_agent.py` |
 | [`pipeline_code_reference.md`](./pipeline_code_reference.md) | RK3588 全链路代码资产索引、通信与数据闭环说明 | C++/Python 控制栈、RKNN 服务、数据流模块 |
+| [`control_stack_adapter.md`](./control_stack_adapter.md) | Lite3 控制栈启停与 RKNN Socket 适配指南 | `state_machine/rl_control_state_onnx.hpp`, `run_policy/lite3_socket_policy_runner.hpp` |
 
 ---
 
