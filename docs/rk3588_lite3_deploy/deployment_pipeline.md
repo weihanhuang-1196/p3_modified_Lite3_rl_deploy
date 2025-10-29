@@ -1,8 +1,8 @@
 # 部署流水线细解：`.pt → .onnx → .rknn`
 
-## 1. 策略资产准备
+## 1. 准备
 
-1. 从训练集群导出 `policy.pt` 与 `obs_stats.npz`。
+1. 导出 `policy.pt` 与 `obs_stats.npz`。
 2. 确认 YAML 配置（如 `example_actor_config.yaml`）与模型结构保持一致：
    ```yaml
    obs_dim: 108
@@ -133,5 +133,5 @@ rknn.export_rknn(args.output)
     "export_time": "2024-05-12T08:00:00Z"
   }
   ```
-- 在端侧 `/opt/models/<version>/` 建立独立目录，确保快速回滚与审计追踪。
+- 在端侧 `/opt/models/<version>/` 建立独立目录。
 
