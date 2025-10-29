@@ -1,4 +1,4 @@
-# RK3588 Lite3 RL Deploy 作战蓝皮书
+# RK3588 Lite3 RL Deploy
 
 
 ---
