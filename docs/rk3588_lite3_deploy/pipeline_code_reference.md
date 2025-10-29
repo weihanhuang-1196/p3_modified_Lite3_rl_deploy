@@ -1,12 +1,14 @@
 # Lite3 RK3588 部署流水线代码总览
 
-基于 Lite3 Deploy 框架在 RK3588 平台闭环运行强化学习策略（`policy.pt`），实现控制指令与感知数据的实时互联互通。
+> **撰写人：**中兵智能创新研究院(深圳)有限公司 技术总监
+>
+> **任务场景：**9G 大模型端侧部署专项中，基于 Lite3 Deploy 框架在 RK3588 平台闭环运行强化学习策略（`policy.pt`），实现控制指令与感知数据的实时互联互通。
 
 本索引文件聚焦 RK3588 端到端推理链路的全部核心代码资产，拆解 `policy.pt → policy.onnx → policy.rknn → 控制栈动作执行` 的流水线，实现研发、量化、部署、通信与数据闭环可追溯。每个章节都列出关键源码文件、职责边界与相互依赖，并给出结构化图示与排查要点。
 
 ---
 
-## 1. 策略（Python）
+## 1. 策略资产建模层（Python）
 
 | 阶段 | 源码文件 | 作用 | 备注 |
 | --- | --- | --- | --- |
@@ -119,6 +121,7 @@ while True:
 | --- | --- | --- | --- |
 | 状态机入口 | [`state_machine/rl_control_state_onnx.hpp`](../../state_machine/rl_control_state_onnx.hpp) | 采集机器人状态、周期驱动策略线程 | 负责控制频率、线程与安全检查 |
 | 策略执行器 | [`run_policy/lite3_test_policy_runner_onnx.hpp`](../../run_policy/lite3_test_policy_runner_onnx.hpp) | 基于 ONNX Runtime 执行策略，将动作转换为关节命令 | RK3588 可替换为 Socket 驱动 |
+| RKNN Socket Runner | [`run_policy/lite3_socket_policy_runner.hpp`](../../run_policy/lite3_socket_policy_runner.hpp) | 通过 Unix Socket 调用 `lite3_rknn_service.py` | 由环境变量 `LITE3_POLICY_BACKEND=RKNN_SOCKET` 启用 |
 | 观测封装 | [`types/robot_basic_state.hpp`](../../types/robot_basic_state.hpp) *(若存在)* | 封装 IMU、关节、用户指令数据结构 | 供策略 Runner 使用 |
 | 数据下发 | [`utils/data_streaming.hpp`](../../utils/data_streaming.hpp) | UDP 推送 PlotJuggler 数据、CSV 记录 | 保障调试与归档 |
 
@@ -158,8 +161,30 @@ auto reaction = session_.Run(Ort::RunOptions{nullptr}, input_names_.data(), &inp
 action = Eigen::Map<VecXf>(reaction.front().GetTensorMutableData<float>(), act_dim_);
 ```
 
+### 4.3 `Lite3SocketPolicyRunner` 与 RKNN 通信
+```cpp
+const uint32_t obs_len = static_cast<uint32_t>(obs_dim_);
+if (!SendAll(socket_fd_, &obs_len, sizeof(obs_len)) ||
+    !SendAll(socket_fd_, obs.data(), sizeof(float) * obs_dim_)) {
+    CloseSocket();
+    throw std::runtime_error("[RKNN SOCKET] 发送观测失败，连接已断开");
+}
+
+uint32_t act_len = 0;
+if (!RecvAll(socket_fd_, &act_len, sizeof(act_len)) || act_len != act_dim_) {
+    CloseSocket();
+    throw std::runtime_error("[RKNN SOCKET] 推理服务返回的动作维度不匹配");
+}
+std::vector<float> action_buffer(act_dim_);
+if (!RecvAll(socket_fd_, action_buffer.data(), sizeof(float) * act_dim_)) {
+    CloseSocket();
+    throw std::runtime_error("[RKNN SOCKET] 接收动作数据失败，连接已断开");
+}
+action_ = Eigen::Map<VecXf>(action_buffer.data(), act_dim_);
+```
+
 **RK3588 适配建议：**
-- 在板端将该 Runner 替换为基于 Unix Socket 的 `SocketPolicyRunner`，与 `lite3_rknn_service.py` 通信。
+- 设置 `LITE3_POLICY_BACKEND=RKNN_SOCKET` 即可切换到 RKNN Socket Runner，与 `lite3_rknn_service.py` 建立 Unix Socket 通道。
 - `decimation_` 控制策略更新频率，需与控制周期（1 kHz）匹配，避免过采样。
 
 ---
@@ -200,3 +225,14 @@ C++ 控制线程  ←→  lite3_rknn_service.py  ←→  RKNN Runtime  ←→  R
 
 ---
 
+## 7. 对军民融合交付的意义
+
+- **战略一致性**：该流水线将训练、量化、端侧推理到控制执行的每一环节固化为可审计代码资产，满足《院科字[2023]18号》单一来源协议直采的规范要求。
+- **战术实时性**：通过 RK3588 NPU 与 Lite3 控制栈协同，实现无人系统亚 5 ms 的策略推理闭环，支撑高动态战场环境的自主决策。
+- **持续演进**：模块化代码索引使得策略更迭、硬件升级或多平台扩展时，可快速定位改造点，保障大湾区军民融合创新生态的快速响应能力。
+
+---
+
+> **版本记录**：
+> - 2024-05-12：初版整理（中兵智能创新研究院(深圳)有限公司 技术总监）。
+> - 2024-05-13：补充数据链路、故障排查与军民融合交付说明。
