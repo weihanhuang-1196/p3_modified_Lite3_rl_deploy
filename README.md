@@ -112,7 +112,7 @@ python pt2onnx.py
 ```
 就可以在当前文件夹看到对应的.onnx模型文件了
 
-如果需要在瑞芯微 RK3588 平台上部署基于 PPO 的强化学习策略，请参考 `docs/rk3588_ppo_deployment.md` 中的端侧部署蓝皮书。该文档配套的 `policy/rk3588/` 目录提供了从 `.pt` 导出到 `.rknn`、量化校准、RKNN 推理验证的完整脚本。 
+如果需要在瑞芯微 RK3588 平台上部署基于 PPO 的强化学习策略，请参考 `docs/rk3588_ppo_deployment.md` 中的端侧部署蓝皮书。该文档配套的 `policy/rk3588/` 目录提供了从 `.pt` 导出到 `.rknn`、量化校准、RKNN 推理验证的完整脚本。若需快速定位全链路源代码、通信协议与数据流实现，请进一步查阅 `docs/rk3588_lite3_deploy/pipeline_code_reference.md`。
 
 
 ## 各模块介绍
