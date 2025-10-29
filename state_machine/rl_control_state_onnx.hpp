@@ -17,6 +17,9 @@
 #include "state_base.h"
 #include "policy_runner_base.hpp"
 #include "lite3_test_policy_runner_onnx.hpp"
+#include "lite3_socket_policy_runner.hpp"
+
+#include <cstdlib>
 
 
 
@@ -28,6 +31,7 @@ private:
 
     std::shared_ptr<PolicyRunnerBase> policy_ptr_;
     std::shared_ptr<Lite3TestPolicyRunnerONNX> test_policy_;
+    std::shared_ptr<Lite3SocketPolicyRunner> socket_policy_;
 
 
     
@@ -87,12 +91,20 @@ public:
     RLControlStateONNX(const RobotType& robot_type, const std::string& state_name, 
         std::shared_ptr<ControllerData> data_ptr):StateBase(robot_type, state_name, data_ptr){
         std::memset(&rbs_, 0, sizeof(rbs_));
-        test_policy_ = std::make_shared<Lite3TestPolicyRunnerONNX>("test_onnx");
-        policy_ptr_ = test_policy_;
+        const char* backend_env = std::getenv("LITE3_POLICY_BACKEND");
+        const std::string backend = backend_env ? backend_env : "";
+
+        if(backend == "RKNN_SOCKET"){
+            socket_policy_ = std::make_shared<Lite3SocketPolicyRunner>("rk3588_rknn");
+            policy_ptr_ = socket_policy_;
+        }else{
+            test_policy_ = std::make_shared<Lite3TestPolicyRunnerONNX>("test_onnx");
+            policy_ptr_ = test_policy_;
+        }
         if(!policy_ptr_){
-            std::cerr << "[ERROR] Failed to initialize ONNX policy runner." << std::endl;
+            std::cerr << "[ERROR] Failed to initialize policy runner." << std::endl;
             exit(0);
-        }  
+        }
         policy_ptr_->DisplayPolicyInfo();
         }
     ~RLControlStateONNX(){}
