@@ -1,9 +1,12 @@
 build
-*.zip
-.vscode
 devel
 logs
-
-third_party/libtorch
-third_party/x30_motion_sdk
-**/tmp/*
+install
+log
+.catkin_tools
+*.csv
+.cache
+# *.json
+__pycache__
+cmake_build
+src/**/package.xml

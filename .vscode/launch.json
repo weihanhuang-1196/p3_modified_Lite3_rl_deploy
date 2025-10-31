@@ -1,0 +1,65 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ROS 2: Launch Gazebo Simulation",
+            "type": "python",
+            "request": "launch",
+            "program": "/opt/ros/humble/bin/ros2",
+            "args": [
+                "launch",
+                "rl_sar",
+                "gazebo.launch.py", 
+                "rname:=panda7"
+            ],
+            "console": "integratedTerminal",
+            "env": {
+                "ROS_DISTRO": "humble",
+                "PYTHONPATH": "/opt/ros/humble/lib/python3.10/site-packages:${workspaceFolder}/install/lib/python3.10/site-packages:${env:PYTHONPATH}",
+                "LD_LIBRARY_PATH": "/opt/ros/humble/lib:${workspaceFolder}/install/lib:${env:LD_LIBRARY_PATH}",
+                "AMENT_PREFIX_PATH": "/opt/ros/humble:${workspaceFolder}/install:${env:AMENT_PREFIX_PATH}"
+            },
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "ROS 2: Run rl_sim Only",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/install/rl_sar/lib/rl_sar/rl_sim",
+            "args": [],
+            "stopAtEntry": true,  // 添加：在入口处暂停
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "ROS_DISTRO",
+                    "value": "humble"
+                },
+                {
+                    "name": "LD_LIBRARY_PATH", 
+                    "value": "/opt/ros/humble/lib:${workspaceFolder}/install/rl_sar/lib:${env:LD_LIBRARY_PATH}"
+                }
+            ],
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build",
+            "postDebugTask": "kill-ros"  // 添加调试后清理任务
+
+        },
+        {
+            "name": "ROS 2: Both Gazebo and rl_sim",
+            "type": "compound",
+            "configurations": [
+                "ROS 2: Launch Gazebo Simulation",
+                "ROS 2: Run rl_sim Only"
+            ],
+            "preLaunchTask": "build"
+        }
+    ]
+}

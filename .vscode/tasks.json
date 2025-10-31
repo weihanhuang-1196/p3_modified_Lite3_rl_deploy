@@ -1,0 +1,26 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "build",
+            "command": "colcon build --symlink-install --cmake-args '-DCMAKE_BUILD_TYPE=Debug' -Wall -Wextra -Wpedantic",
+            "options": {
+                "cwd": "${workspaceFolder}"  // 改为 workspaceFolder
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "kill-ros",
+            "type": "shell",
+            "command": "pkill -f 'ros2\\|gz\\|rl_sim' || true",
+            "problemMatcher": []
+        }
+    ],
+    "version": "2.0.0"
+}
