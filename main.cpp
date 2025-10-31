@@ -13,6 +13,6 @@ MotionStateFeedback StateBase::msfb_ = MotionStateFeedback();
 
 int main(){
     StateMachine state_machine(RobotType::Lite3);
-    state_machine.Run();
+    state_machine.Run();   //11
     return 0;
 }
