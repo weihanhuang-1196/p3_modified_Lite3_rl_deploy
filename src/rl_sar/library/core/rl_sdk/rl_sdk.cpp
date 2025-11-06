@@ -32,22 +32,29 @@ torch::Tensor RL::ComputeObservation()
         if (observation == "lin_vel")
         {
             obs_list.push_back(this->obs.lin_vel * this->params.lin_vel_scale);
+
+            std::cout << "lin_vel: " << this->obs.lin_vel << std::endl;
+
         }
         else if (observation == "ang_vel_body")
         {
             obs_list.push_back(this->obs.ang_vel * this->params.ang_vel_scale);
+            std::cout << "ang_vel_body: " << this->obs.ang_vel << std::endl;
         }
         else if (observation == "ang_vel_world")
         {
             obs_list.push_back(this->QuatRotateInverse(this->obs.base_quat, this->obs.ang_vel) * this->params.ang_vel_scale);
+            std::cout << "ang_vel_world: " << this->QuatRotateInverse(this->obs.base_quat, this->obs.ang_vel) << std::endl;
         }
         else if (observation == "gravity_vec")
         {
             obs_list.push_back(this->QuatRotateInverse(this->obs.base_quat, this->obs.gravity_vec));
+            std::cout << "gravity_vec: " << this->QuatRotateInverse(this->obs.base_quat, this->obs.gravity_vec) << std::endl;
         }
         else if (observation == "commands")
         {
             obs_list.push_back(this->obs.commands * this->params.commands_scale);
+            std::cout << "commands: " << this->obs.commands << std::endl;
         }
         else if (observation == "dof_pos")
         {
@@ -57,14 +64,17 @@ torch::Tensor RL::ComputeObservation()
                 dof_pos_rel[0][i] = 0.0;
             }
             obs_list.push_back(dof_pos_rel * this->params.dof_pos_scale);
+            std::cout << "dof_pos: " << dof_pos_rel << std::endl;
         }
         else if (observation == "dof_vel")
         {
             obs_list.push_back(this->obs.dof_vel * this->params.dof_vel_scale);
+            std::cout << "dof_vel: " << this->obs.dof_vel << std::endl;
         }
         else if (observation == "actions")
         {
             obs_list.push_back(this->obs.actions);
+            std::cout << "actions: " << this->obs.actions << std::endl;
         }
         else if (observation == "phase")
         {
@@ -79,6 +89,7 @@ torch::Tensor RL::ComputeObservation()
                 torch::cos(phase / 4),
             }, -1);
             obs_list.push_back(phase_tensor);
+            std::cout << "phase: " << phase_tensor << std::endl;
         }
         else if (observation == "g1_phase")
         {
@@ -91,6 +102,7 @@ torch::Tensor RL::ComputeObservation()
                 torch::cos(2 * 3.1415926f * phase),
             }, -1);
             obs_list.push_back(phase_tensor);
+            std::cout << "g1_phase: " << phase_tensor << std::endl;
         }
         else if (observation == "g1_mimic_phase")
         {
@@ -98,6 +110,7 @@ torch::Tensor RL::ComputeObservation()
             torch::Tensor count = torch::tensor({{motion_time}});
             torch::Tensor phase = count / this->motion_length;
             obs_list.push_back(phase);
+            std::cout << "g1_mimic_phase: " << phase << std::endl;
         }
     }
 
@@ -174,6 +187,8 @@ void RL::InitRL(std::string robot_path)
 
 void RL::ComputeOutput(const torch::Tensor &actions, torch::Tensor &output_dof_pos, torch::Tensor &output_dof_vel, torch::Tensor &output_dof_tau)
 {
+    // std::cout << std::endl;
+    // std::cout << "actions: " << actions << std::endl;
     torch::Tensor actions_scaled = actions * this->params.action_scale;
     torch::Tensor pos_actions_scaled = actions_scaled.clone();
     torch::Tensor vel_actions_scaled = torch::zeros_like(actions);
@@ -186,7 +201,22 @@ void RL::ComputeOutput(const torch::Tensor &actions, torch::Tensor &output_dof_p
     output_dof_pos = pos_actions_scaled + this->params.default_dof_pos;
     output_dof_vel = vel_actions_scaled;
     output_dof_tau = this->params.rl_kp * (all_actions_scaled + this->params.default_dof_pos - this->obs.dof_pos) - this->params.rl_kd * this->obs.dof_vel;
+
+    // std::cout <<std::endl <<"++++++++++++++++"<< std::endl;
+    // std::cout << "this->params.rl_kp: " << this->params.rl_kp << std::endl;
+    // std::cout << "all_actions_scaled: " << all_actions_scaled << std::endl;
+    // std::cout << "this->params.default_dof_pos: " << this->params.default_dof_pos << std::endl;
+    // std::cout << "this->obs.dof_pos: " << this->obs.dof_pos << std::endl;
+    // std::cout << "this->params.rl_kd: " << this->params.rl_kd << std::endl;
+    // std::cout << "this->obs.dof_vel: " << this->obs.dof_vel << std::endl;
+    
+
+    
+    // std::cout << "actions_scaled: " << actions_scaled << std::endl;
+
+    // std::cout << "output_dof_tau before clamp: " << output_dof_tau << std::endl;
     output_dof_tau = torch::clamp(output_dof_tau, -(this->params.torque_limits), this->params.torque_limits);
+    // std::cout << "output_dof_tau after clamp: " << output_dof_tau << std::endl;
 }
 
 torch::Tensor RL::QuatRotateInverse(torch::Tensor q, torch::Tensor v)

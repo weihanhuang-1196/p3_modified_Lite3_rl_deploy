@@ -80,7 +80,9 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "ranges": "cpp",
+        "filesystem": "cpp"
     },
     "C_Cpp.default.compileCommands": "${workspaceFolder}/build/rl_sar/compile_commands.json",
     // "C_Cpp.default.includePath": [
@@ -98,5 +100,6 @@
         "/home/linux20/yong_project/repo_code/rl_sar/install/robot_msgs/local/lib/python3.10/dist-packages",
         "/opt/ros/humble/lib/python3.10/site-packages",
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
-    ]
+    ],
+    "ros.distro": "noetic"
 }
