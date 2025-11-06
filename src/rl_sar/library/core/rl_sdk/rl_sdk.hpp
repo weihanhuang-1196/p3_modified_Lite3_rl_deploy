@@ -165,7 +165,23 @@ struct Observations
     torch::Tensor dof_pos;
     torch::Tensor dof_vel;
     torch::Tensor actions;
+
 };
+
+
+std::ostream& operator<<(std::ostream& os, const Observations& obs)
+{
+    os << "lin_vel: " << obs.lin_vel << std::endl;
+    os << "ang_vel: " << obs.ang_vel << std::endl;
+    os << "gravity_vec: " << obs.gravity_vec << std::endl;
+    os << "commands: " << obs.commands << std::endl;
+    os << "base_quat: " << obs.base_quat << std::endl;
+    os << "dof_pos: " << obs.dof_pos << std::endl;
+    os << "dof_vel: " << obs.dof_vel << std::endl;
+    os << "actions: " << obs.actions << std::endl;
+    return os;
+}
+
 
 class RL
 {

@@ -514,17 +514,24 @@ void RL_Sim::RunModel()
         this->obs.ang_vel = torch::tensor(this->robot_state.imu.gyroscope).unsqueeze(0);
         if (this->control.navigation_mode)
         {
-            this->obs.commands = torch::tensor({{this->cmd_vel.linear.x, this->cmd_vel.linear.y, this->cmd_vel.angular.z, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}});
+            this->obs.commands = torch::tensor({{this->cmd_vel.linear.x, this->cmd_vel.linear.y, this->cmd_vel.angular.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}});
         }
         else
         {
-            this->obs.commands = torch::tensor({{this->control.x, this->control.y, this->control.yaw, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}});
+            this->obs.commands = torch::tensor({{this->control.x, this->control.y, this->control.yaw, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}});
         }
         this->obs.base_quat = torch::tensor(this->robot_state.imu.quaternion).unsqueeze(0);
         this->obs.dof_pos = torch::tensor(this->robot_state.motor_state.q).narrow(0, 0, this->params.num_of_dofs).unsqueeze(0);
         this->obs.dof_vel = torch::tensor(this->robot_state.motor_state.dq).narrow(0, 0, this->params.num_of_dofs).unsqueeze(0);
 
+
+        
         this->obs.actions = this->Forward();
+
+        //std::cout << this->obs << std::endl;
+
+
+
         this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
 
         if (this->output_dof_pos.defined() && this->output_dof_pos.numel() > 0)

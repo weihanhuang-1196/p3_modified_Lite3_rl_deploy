@@ -2,6 +2,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "ROS 1: Run rl_sim Only",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/devel/lib/rl_sar/rl_sim",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "ROS_DISTRO",
+                    "value": "noetic"
+                }
+            ]
+        },
+        {
             "name": "ROS 2: Launch Gazebo Simulation",
             "type": "python",
             "request": "launch",

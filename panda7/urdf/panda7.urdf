@@ -31,7 +31,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/benjamin/panda7/meshes/trunk.dae" scale="1 1 1"/>
+        <mesh filename="../meshes/trunk.dae" scale="1 1 1"/>
       </geometry>
     </visual>
     <collision>
