@@ -97,8 +97,8 @@ RL_Sim::RL_Sim()
     }
 
     // subscriber
-    this->cmd_vel_subscriber = nh.subscribe<geometry_msgs::Twist>("/cmd_vel", 10, &RL_Sim::CmdvelCallback, this);
-    this->joy_subscriber = nh.subscribe<sensor_msgs::Joy>("/joy", 10, &RL_Sim::JoyCallback, this);
+    this->cmd_vel_subscriber = nh.subscribe<geometry_msgs::Twist>("/cmd_vel", 20, &RL_Sim::CmdvelCallback, this);
+    this->joy_subscriber = nh.subscribe<sensor_msgs::Joy>("/joy", 20, &RL_Sim::JoyCallback, this);
     this->model_state_subscriber = nh.subscribe<gazebo_msgs::ModelStates>("/gazebo/model_states", 10, &RL_Sim::ModelStatesCallback, this);
     for (int i = 0; i < this->params.num_of_dofs; ++i)
     {
