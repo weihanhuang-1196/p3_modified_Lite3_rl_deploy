@@ -69,188 +69,117 @@
 
 
 
-
-
-
-    <!-- Foot contacts. -->
-    <gazebo reference="FR_calf">
-        <sensor name="FR_foot_contact" type="contact">
-        <update_rate>100</update_rate>
-        <plugin name="contactPlugin" filename="libunitreeFootContactPlugin.so"/>
-        <contact>
-            <collision>FR_calf_fixed_joint_lump__FR_foot_collision_1</collision>
-        </contact>
-        </sensor>
-    </gazebo>
-    <gazebo reference="FL_calf">
-        <sensor name="FL_foot_contact" type="contact">
-        <update_rate>100</update_rate>
-        <plugin name="contactPlugin" filename="libunitreeFootContactPlugin.so"/>
-        <contact>
-            <collision>FL_calf_fixed_joint_lump__FL_foot_collision_1</collision>
-        </contact>
-        </sensor>
-    </gazebo>
-    <gazebo reference="RR_calf">
-        <sensor name="RR_foot_contact" type="contact">
-        <update_rate>100</update_rate>
-        <plugin name="contactPlugin" filename="libunitreeFootContactPlugin.so"/>
-        <contact>
-            <collision>RR_calf_fixed_joint_lump__RR_foot_collision_1</collision>
-        </contact>
-        </sensor>
-    </gazebo>
-    <gazebo reference="RL_calf">
-        <sensor name="RL_foot_contact" type="contact">
-        <update_rate>100</update_rate>
-        <plugin name="contactPlugin" filename="libunitreeFootContactPlugin.so"/>
-        <contact>
-            <collision>RL_calf_fixed_joint_lump__RL_foot_collision_1</collision>
-        </contact>
-        </sensor>
-    </gazebo>
-
-    <!-- Visualization of Foot contacts. -->
-    <gazebo reference="FR_foot">
-        <visual>
-            <plugin name="drawForcePlugin" filename="libunitreeDrawForcePlugin.so">
-                <topicName>FR_foot_contact</topicName>
-            </plugin>
-        </visual>
-    </gazebo>
-    <gazebo reference="FL_foot">
-        <visual>
-            <plugin name="drawForcePlugin" filename="libunitreeDrawForcePlugin.so">
-                <topicName>FL_foot_contact</topicName>
-            </plugin>
-        </visual>
-    </gazebo>
-    <gazebo reference="RR_foot">
-        <visual>
-            <plugin name="drawForcePlugin" filename="libunitreeDrawForcePlugin.so">
-                <topicName>RR_foot_contact</topicName>
-            </plugin>
-        </visual>
-    </gazebo>
-    <gazebo reference="RL_foot">
-        <visual>
-            <plugin name="drawForcePlugin" filename="libunitreeDrawForcePlugin.so">
-                <topicName>RL_foot_contact</topicName>
-            </plugin>
-        </visual>
-    </gazebo>
-
     </xacro:if>
 
 
 
     <gazebo reference="base">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
         <kp  value="100000.0"/>
-        <kd  value="10.0"/>
+        <kd  value="100.0"/>
     </gazebo>
 
 
     <!-- FL leg -->
     <gazebo reference="FL_hip">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
 
     </gazebo>
     <gazebo reference="FL_thigh">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
         <self_collide>0</self_collide>
-        <kp value="200000.0"/>   <!-- 2e5 -->
-        <kd value="20.0"/>
+        <kp value="1000000.0"/>   <!-- 2e5 -->
+        <kd value="100.0"/>
     </gazebo>
     <gazebo reference="FL_calf">
-        <mu1>0.8</mu1>
-        <mu2>0.8</mu2>
-        <self_collide>0</self_collide>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
     </gazebo>
     <gazebo reference="FL_foot">
-         <mu1>1.0</mu1>
-        <mu2>1.0</mu2>
-        <self_collide>0</self_collide>
-        <kp  value="200000.0"/>
-        <kd  value="20.0"/>
+         <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp  value="1000000.0"/>
+        <kd  value="100.0"/>
     </gazebo>
 
     <!-- FR leg -->
     <gazebo reference="FR_hip">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
     </gazebo>
     <gazebo reference="FR_thigh">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+         <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
         <self_collide>0</self_collide>
-        <kp value="200000.0"/>   <!-- 2e5 -->
-        <kd value="20.0"/>
+        <kp value="1000000.0"/>   <!-- 2e5 -->
+        <kd value="100.0"/>
     </gazebo>
     <gazebo reference="FR_calf">
-        <mu1>0.8</mu1>
-        <mu2>0.8</mu2>
-        <self_collide>0</self_collide>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
     </gazebo>
     <gazebo reference="FR_foot">
-        <mu1>1.0</mu1>
-        <mu2>1.0</mu2>
-        <self_collide>0</self_collide>
-        <kp  value="200000.0"/>
-        <kd  value="20.0"/>
+         <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp  value="1000000.0"/>
+        <kd  value="100.0"/>
     </gazebo>
 
     <!-- RL leg -->
     <gazebo reference="RL_hip">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
     </gazebo>
     <gazebo reference="RL_thigh">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
         <self_collide>0</self_collide>
-        <kp value="200000.0"/>   <!-- 2e5 -->
-        <kd value="20.0"/>
+        <kp value="1000000.0"/>   <!-- 2e5 -->
+        <kd value="100.0"/>
     </gazebo>
     <gazebo reference="RL_calf">
-        <mu1>0.8</mu1>
-        <mu2>0.8</mu2>
-        <self_collide>0</self_collide>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
     </gazebo>
     <gazebo reference="RL_foot">
-        <mu1>1.0</mu1>
-        <mu2>1.0</mu2>
-        <self_collide>0</self_collide>
-        <kp  value="200000.0"/>
-        <kd  value="20.0"/>
+         <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp  value="1000000.0"/>
+        <kd  value="100.0"/>
     </gazebo>
 
     <!-- RR leg -->
     <gazebo reference="RR_hip">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
     </gazebo>
     <gazebo reference="RR_thigh">
-        <mu1>0.6</mu1>
-        <mu2>0.6</mu2>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
         <self_collide>0</self_collide>
-        <kp value="200000.0"/>   <!-- 2e5 -->
-        <kd value="20.0"/>
+        <kp value="1000000.0"/>   <!-- 2e5 -->
+        <kd value="100.0"/>
     </gazebo>
     <gazebo reference="RR_calf">
-        <mu1>0.8</mu1>
-        <mu2>0.8</mu2>
-        <self_collide>0</self_collide>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
     </gazebo>
     <gazebo reference="RR_foot">
-        <mu1>1.0</mu1>
-        <mu2>1.0</mu2>
-        <self_collide>0</self_collide>
-        <kp  value="200000.0"/>
-        <kd  value="20.0"/>
+         <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp  value="1000000.0"/>
+        <kd  value="100.0"/>
     </gazebo>
 
 </robot>

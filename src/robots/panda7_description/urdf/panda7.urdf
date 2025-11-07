@@ -536,7 +536,7 @@
     <child link="RR_FOOT"/>
   </joint>
 <!-- imu -->
-  <!-- <link name="imu_link">
+  <link name="imu_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <mass value="0" />
@@ -544,11 +544,11 @@
     </inertial>
   </link>
   <joint name="imu_joint" type="fixed">
-    <origin xyz="-0.02557 0 0.04232" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
     <parent link="base" />
     <child link="imu_link" />
     <axis xyz="0 0 0" />
-  </joint> -->
+  </joint>
 <!-- imu -->
   <link name="RR_FOOT">
     <collision>
