@@ -461,10 +461,16 @@ void RL_Sim::RunModel()
     {
         this->episode_length_buf += 1;
         this->obs.ang_vel = this->robot_state.imu.gyroscope;
-        this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
+        if(this->robot_name == "panda7")
+            this->obs.commands = {this->control.x, this->control.y, this->control.yaw,0,0,0,0,0,0};
+        else
+            this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
         if (this->control.navigation_mode)
         {
-            this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z};
+            if(this->robot_name == "panda7")
+                this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z,0,0,0,0,0,0};
+            else
+                this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z};
         }
         this->obs.base_quat = this->robot_state.imu.quaternion;
         this->obs.dof_pos = this->robot_state.motor_state.q;
@@ -516,9 +522,20 @@ std::vector<float> RL_Sim::Forward()
     std::vector<float> actions;
     if (this->params.Get<std::vector<int>>("observations_history").size() != 0)
     {
-        this->history_obs_buf.insert(clamped_obs);
-        this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
-        actions = this->model->forward({this->history_obs});
+        if(this->robot_name == "panda7")
+        {
+            this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
+            actions = this->model->forward({clamped_obs,this->history_obs});
+            this->history_obs_buf.insert(clamped_obs);
+        }
+
+        else
+        {
+            this->history_obs_buf.insert(clamped_obs);
+            this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
+            actions = this->model->forward({this->history_obs});
+        }
+        
     }
     else
     {

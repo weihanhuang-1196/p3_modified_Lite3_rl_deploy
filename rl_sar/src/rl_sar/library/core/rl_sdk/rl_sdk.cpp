@@ -187,7 +187,8 @@ void RL::InitObservations()
     this->obs.lin_vel = {0.0f, 0.0f, 0.0f};
     this->obs.ang_vel = {0.0f, 0.0f, 0.0f};
     this->obs.gravity_vec = {0.0f, 0.0f, -1.0f};
-    this->obs.commands = {0.0f, 0.0f, 0.0f};
+
+    this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     this->obs.base_quat = {0.0f, 0.0f, 0.0f, 1.0f};
     this->obs.dof_pos = this->params.Get<std::vector<float>>("default_dof_pos");
     this->obs.dof_vel.clear();
