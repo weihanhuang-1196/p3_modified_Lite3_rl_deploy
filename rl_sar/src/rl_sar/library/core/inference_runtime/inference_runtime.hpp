@@ -54,6 +54,7 @@ public:
      */
     virtual std::vector<float> forward(const std::vector<std::vector<float>>& inputs) = 0;
 
+
     /**
      * @brief Get model type string
      * @return Model type ("torch" or "onnx")

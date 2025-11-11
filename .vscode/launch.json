@@ -41,7 +41,7 @@
             "name": "ROS 2: Run rl_sim Only",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/install/rl_sar/lib/rl_sar/rl_sim",
+            "program": "${workspaceFolder}/rl_sar/install/lib/rl_sar/rl_sim",
             "args": [],
             "stopAtEntry": true,  // 添加：在入口处暂停
             "cwd": "${workspaceFolder}",
@@ -52,7 +52,7 @@
                 },
                 {
                     "name": "LD_LIBRARY_PATH", 
-                    "value": "/opt/ros/humble/lib:${workspaceFolder}/install/rl_sar/lib:${env:LD_LIBRARY_PATH}"
+                    "value": "/opt/ros/humble/lib:${workspaceFolder}/rl_sar/install/lib:${env:LD_LIBRARY_PATH}"
                 }
             ],
             "MIMode": "gdb",
@@ -63,7 +63,6 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "build",
             "postDebugTask": "kill-ros"  // 添加调试后清理任务
 
         },

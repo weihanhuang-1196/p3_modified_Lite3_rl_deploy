@@ -37,7 +37,7 @@ bool TorchModel::load(const std::string& model_path)
     {
 #ifdef USE_TORCH
         // Load TorchScript model
-        model_ = torch::jit::load(model_path);
+        model_ = torch::jit::load(model_path, torch::kCPU);
         model_path_ = model_path;
         loaded_ = true;
         std::cout << LOGGER::INFO << "Successfully loaded Torch model: " << model_path << std::endl;
@@ -66,9 +66,6 @@ std::vector<float> TorchModel::forward(const std::vector<std::vector<float>>& in
 #ifdef USE_TORCH
     try
     {
-        // Convert input vector to Torch tensor (use first input only)
-        const auto& input = inputs[0];
-        auto input_tensor = torch::tensor(input, torch::kFloat32).reshape({1, static_cast<int64_t>(input.size())});
 
         // Disable gradient computation before each forward pass
         torch::autograd::GradMode::set_enabled(false);
@@ -76,11 +73,33 @@ std::vector<float> TorchModel::forward(const std::vector<std::vector<float>>& in
         // Ensure single-threaded execution (critical for performance!)
         torch::set_num_threads(1);
 
-        // Execute forward inference
-        auto output = model_.forward({input_tensor}).toTensor();
+    
+        if(inputs.size() > 1)
+        {
+            // Convert input vector to Torch tensor (use first input only)
+            const auto& input = inputs[0];
+            auto input_tensor = torch::tensor(input, torch::kFloat32).reshape({1,static_cast<int64_t>(input.size())});
+            const auto& input2 = inputs[1];
+            auto input2_tensor = torch::tensor(input2, torch::kFloat32).reshape({1,static_cast<int64_t>(input2.size())});
 
-        // Convert output tensor to vector
-        return torch_to_vector(output);
+            // std::vector<torch::jit::IValue> inputs_obs;
+            // inputs_obs.push_back(input_tensor);
+            // inputs_obs.push_back(input2_tensor);
+
+                    // Execute forward inference
+            auto output = model_.forward({input_tensor, input2_tensor}).toTensor();
+                    // Convert output tensor to vector
+            return torch_to_vector(output);
+        }else
+        {
+            // Convert input vector to Torch tensor (use first input only)
+            const auto& input = inputs[0];
+            auto input_tensor = torch::tensor(input, torch::kFloat32).reshape({1, static_cast<int64_t>(input.size())});
+            auto output = model_.forward({input_tensor}).toTensor();
+                    // Convert output tensor to vector
+            return torch_to_vector(output);
+        }
+
     }
     catch (const std::exception& e)
     {
@@ -91,6 +110,9 @@ std::vector<float> TorchModel::forward(const std::vector<std::vector<float>>& in
     throw std::runtime_error("Torch support not compiled");
 #endif
 }
+
+
+
 
 #ifdef USE_TORCH
 torch::Tensor TorchModel::vector_to_torch(const std::vector<float>& data, const std::vector<int64_t>& shape)
@@ -227,6 +249,8 @@ std::vector<float> ONNXModel::forward(const std::vector<std::vector<float>>& inp
     throw std::runtime_error("ONNX support not compiled");
 #endif
 }
+
+
 
 #ifdef USE_ONNX
 void ONNXModel::setup_input_output_info()
