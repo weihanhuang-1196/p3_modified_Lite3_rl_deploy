@@ -210,32 +210,62 @@ std::vector<float> ONNXModel::forward(const std::vector<std::vector<float>>& inp
         // Create memory info
         Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 
-        // Get input (use first input only)
-        const auto& input = inputs[0];
-        auto input_shape = session_->GetInputTypeInfo(0).GetTensorTypeAndShapeInfo().GetShape();
+        if(input_node_names_.size() != inputs.size())
+        {
+            std::cout << LOGGER::ERROR << "Input size mismatch: expected " << input_node_names_.size() << ", got " << inputs.size() << std::endl;
+            throw;
+        }
 
-        // Create input tensor
-        auto input_tensor = Ort::Value::CreateTensor<float>(
-            memory_info,
-            const_cast<float*>(input.data()),
-            input.size(),
-            input_shape.data(),
-            input_shape.size()
-        );
+        std::vector<Ort::Value> ort_inputs;
+        ort_inputs.reserve(input_node_names_.size());
+        
+        for (size_t i = 0; i < input_node_names_.size(); i++)
+        {
+            const auto& input = inputs[i];
+            auto input_shape = session_->GetInputTypeInfo(i)
+                                   .GetTensorTypeAndShapeInfo()
+                                   .GetShape();
+            
+            // 修正动态维度
+            for (auto& dim : input_shape)
+                if (dim < 0) dim = 1;
+                
+            // 检查总元素是否一致，不一致则强制用 input.size() 作为最后一维
+            int64_t total = 1;
+            for (auto d : input_shape) total *= d;
+            if (total != static_cast<int64_t>(input.size())) {
+                input_shape = {1, static_cast<int64_t>(input.size())};
+            }
 
-        // Prepare input/output names
-        const char* input_names[] = {input_node_names_[0].c_str()};
-        const char* output_names[] = {output_node_names_[0].c_str()};
+            auto input_tensor = Ort::Value::CreateTensor<float>(
+                memory_info,
+                const_cast<float*>(input.data()),
+                input.size(),
+                input_shape.data(),
+                input_shape.size());
 
-        // Execute inference
-        auto outputs = session_->Run(
+            ort_inputs.emplace_back(std::move(input_tensor));
+            
+        }
+
+                // --- 输入/输出名称 ---
+        std::vector<const char*> input_names;
+        for (auto& n : input_node_names_)
+            input_names.push_back(n.c_str());
+
+        std::vector<const char*> output_names;
+        for (auto& n : output_node_names_)
+            output_names.push_back(n.c_str());
+
+
+         auto outputs = session_->Run(
             Ort::RunOptions{nullptr},
-            input_names,
-            &input_tensor,
-            1,
-            output_names,
-            1
-        );
+            input_names.data(),
+            ort_inputs.data(),
+            ort_inputs.size(),
+            output_names.data(),
+            output_names.size());
+
 
         // Extract output data
         return extract_output_data(outputs);
