@@ -2,6 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run rl_sim_mujoco",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/rl_sar/cmake_build/bin/rl_sim_mujoco",
+            "args": ["panda7","scene_terrain"],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+        },
+        {
             "name": "ROS 1: Run rl_sim Only",
             "type": "cppdbg",
             "request": "launch",

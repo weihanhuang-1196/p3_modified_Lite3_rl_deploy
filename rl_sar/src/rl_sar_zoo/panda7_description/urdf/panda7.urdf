@@ -28,8 +28,6 @@
   <material name="white">
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
-
-
   <link name="base">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>

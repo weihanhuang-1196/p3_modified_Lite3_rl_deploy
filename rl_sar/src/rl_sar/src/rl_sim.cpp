@@ -524,9 +524,11 @@ std::vector<float> RL_Sim::Forward()
     {
         if(this->robot_name == "panda7")
         {
+            
             this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
             actions = this->model->forward({clamped_obs,this->history_obs});
             this->history_obs_buf.insert(clamped_obs);
+            
         }
 
         else
