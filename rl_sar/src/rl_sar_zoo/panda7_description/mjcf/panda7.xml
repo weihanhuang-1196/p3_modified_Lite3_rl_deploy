@@ -2,20 +2,19 @@
   <default>
     <default class="robot">
       <joint axis="0 1 0" damping="0.1" armature="0.01" frictionloss="0.2"/>
-      <motor ctrlrange="-23.7 23.7"/>
+      <!-- <motor ctrlrange="-23.7 23.7"/> -->
 
       <default class="abduction">
         <joint axis="1 0 0" range="-0.69 0.87"/>
         <motor ctrlrange="-160 160"/>
       </default>
       <default class="hip">
+        <motor ctrlrange="-180 180"/>
         <default class="front_hip">
           <joint range="-1.78 3.40"/>
-          <motor ctrlrange="-180 180"/>
         </default>
         <default class="back_hip">
           <joint range="-1.78 3.40"/>
-          <motor ctrlrange="-180 180"/>
         </default>
       </default>
       <default class="knee">
