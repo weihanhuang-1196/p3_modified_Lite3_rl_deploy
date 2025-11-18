@@ -5,6 +5,16 @@
 
 #include "rl_sim_mujoco.hpp"
 
+
+
+#define TIME_START auto __start = std::chrono::high_resolution_clock::now();
+#define TIME_END(msg) \
+    auto __end = std::chrono::high_resolution_clock::now(); \
+    std::cout << LOGGER::WARNING << msg << " took " \
+              << std::chrono::duration_cast<std::chrono::microseconds>(__end - __start).count() \
+              << " us\n";
+
+
 RL_Sim* RL_Sim::instance = nullptr;
 
 RL_Sim::RL_Sim(int argc, char **argv)
@@ -329,6 +339,7 @@ void RL_Sim::GetSysJoystick()
 
 void RL_Sim::RunModel()
 {
+    // TIME_START
     if (this->rl_init_done && simulation_running)
     {
         this->episode_length_buf += 1;
@@ -374,10 +385,17 @@ void RL_Sim::RunModel()
         this->CSVLogger(this->output_dof_tau, tau_est, this->obs.dof_pos, this->output_dof_pos, this->obs.dof_vel);
 #endif
     }
+
+    // TIME_END("RunModel")
 }
+
+
+
+
 
 std::vector<float> RL_Sim::Forward()
 {
+
     std::unique_lock<std::mutex> lock(this->model_mutex, std::try_to_lock);
 
     // If model is being reinitialized, return previous actions to avoid blocking
@@ -417,6 +435,8 @@ std::vector<float> RL_Sim::Forward()
     {
         return actions;
     }
+
+
 }
 
 void RL_Sim::Plot()
