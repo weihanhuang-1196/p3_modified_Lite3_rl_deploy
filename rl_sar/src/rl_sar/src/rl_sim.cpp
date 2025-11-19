@@ -530,7 +530,6 @@ std::vector<float> RL_Sim::Forward()
             this->history_obs_buf.insert(clamped_obs);
             
         }
-
         else
         {
             this->history_obs_buf.insert(clamped_obs);

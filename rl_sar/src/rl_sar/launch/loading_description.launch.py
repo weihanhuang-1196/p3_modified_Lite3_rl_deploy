@@ -28,6 +28,15 @@ def generate_launch_description():
         value_type=str
     )
 
+
+    controller_yaml = os.path.join(
+        get_package_share_directory('panda7_description'),
+        'config',
+        'robot_control.yaml'
+    )
+
+
+
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
@@ -36,16 +45,16 @@ def generate_launch_description():
         parameters=[{"robot_description": robot_description}],
     )
 
-    gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory("gazebo_ros"), "launch", "gazebo.launch.py")
-        ),
-        launch_arguments={
-            # "verbose": "true",
-            # "pause": "true",  # Not Available
-            "world": os.path.join(get_package_share_directory("rl_sar"), "worlds", wname + ".world"),
-        }.items(),
+    ros2_control_node =  Node(
+            package='controller_manager',
+            executable='ros2_control_node',
+            parameters=[
+                {'robot_description': robot_description},
+                controller_yaml
+                ],
+            output='screen',
     )
+
 
     spawn_entity = Node(
         package="gazebo_ros",
@@ -100,7 +109,7 @@ def generate_launch_description():
             default_value=TextSubstitution(text=""),
         ),
         robot_state_publisher_node,
-        gazebo,
+        ros2_control_node,
         spawn_entity,
         joint_state_broadcaster_node,
         # robot_joint_controller_node,  # Spawn in rl_sim.cpp

@@ -7,6 +7,7 @@
                 "${workspaceFolder}/src/rl_sar/include/**",
                 "${workspaceFolder}/src/**/include/**",
                 "${workspaceFolder}/install/rl_sar/include/**",
+                "${workspaceFolder}/install/rl_sar/robot_hw_interface/include/**",
                 
                 // ROS 2 路径
                 "/opt/ros/humble/include/**",
