@@ -37,6 +37,11 @@ hardware_interface::CallbackReturn RobotHWInterface::on_init(const hardware_inte
     "rl_sar/Robot_state", rclcpp::SystemDefaultsQoS(),
     std::bind(&RobotHWInterface::robot_state_callback, this, std::placeholders::_1));
 
+    std::thread t4([this]() {             
+        rclcpp::spin(node_);
+    });
+    t4.detach();
+
 
   std::cout << "----------- RobotHWInterface initialized successfully! ---------------" << std::endl;
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -72,7 +77,7 @@ std::vector<hardware_interface::CommandInterface> RobotHWInterface::export_comma
 hardware_interface::return_type RobotHWInterface::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   // std::cout << "Reading motor states from robot..." << std::endl;
-  rclcpp::spin_some(node_);
+  
 
   std::lock_guard<std::mutex> lock(mutex_);
   if(this->robot_state_.motor_state.size() == 0){

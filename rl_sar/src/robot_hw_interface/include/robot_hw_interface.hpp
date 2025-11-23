@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <thread>
 
 #include "robot_msgs/msg/motor_command.hpp"
 #include "robot_msgs/msg/motor_state.hpp"
