@@ -94,6 +94,13 @@ void ObservationBuffer::insert(const std::vector<float>& new_obs)
 
         // Insert new observation at the first position
         obs_buf[env_idx][0] = new_obs;
+
+        // for (int t = 0; t <  history_length - 1; ++t)
+        // {
+        //     obs_buf[env_idx][t] = obs_buf[env_idx][t + 1];
+        // }
+        // obs_buf[env_idx][history_length - 1] = new_obs;
+
     }
 }
 

@@ -104,6 +104,6 @@ def generate_launch_description():
         spawn_entity,
         joint_state_broadcaster_node,
         # robot_joint_controller_node,  # Spawn in rl_sim.cpp
-        # joy_node,
+        joy_node,
         param_node,
     ])

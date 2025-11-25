@@ -34,7 +34,7 @@ hardware_interface::CallbackReturn RobotHWInterface::on_init(const hardware_inte
         "/imu", rclcpp::SystemDefaultsQoS());
   
   robot_state_subscriber_ = node_->create_subscription<robot_msgs::msg::RobotState>(
-    "rl_sar/Robot_state", rclcpp::SystemDefaultsQoS(),
+    "rl_sar/Robot_State", rclcpp::SystemDefaultsQoS(),
     std::bind(&RobotHWInterface::robot_state_callback, this, std::placeholders::_1));
 
     std::thread t4([this]() {             

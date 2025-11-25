@@ -461,13 +461,13 @@ void RL_Sim::RunModel()
     {
         this->episode_length_buf += 1;
         this->obs.ang_vel = this->robot_state.imu.gyroscope;
-        if(this->robot_name == "panda7")
+        if(this->robot_name == "panda7" || this->robot_name == "panda3")
             this->obs.commands = {this->control.x, this->control.y, this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
         else
             this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
         if (this->control.navigation_mode)
         {
-            if(this->robot_name == "panda7")
+            if(this->robot_name == "panda7" || this->robot_name == "panda3")
                 this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
             else
                 this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z};
@@ -522,7 +522,7 @@ std::vector<float> RL_Sim::Forward()
     std::vector<float> actions;
     if (this->params.Get<std::vector<int>>("observations_history").size() != 0)
     {
-        if(this->robot_name == "panda7")
+        if(this->robot_name == "panda7" || this->robot_name == "panda3")
         {
             
             this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
