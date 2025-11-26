@@ -54,7 +54,12 @@ void RL::StateController(const RobotState<float>* state, RobotCommand<float>* co
         this->control.y = 0.0f;
         this->control.yaw = 0.0f;
     }
-    if (this->control.current_keyboard == Input::Keyboard::N || this->control.current_gamepad == Input::Gamepad::X)
+    // if (this->control.current_keyboard == Input::Keyboard::N || this->control.current_gamepad == Input::Gamepad::X)
+    // {
+    //     this->control.navigation_mode = !this->control.navigation_mode;
+    //     std::cout << std::endl << LOGGER::INFO << "Navigation mode: " << (this->control.navigation_mode ? "ON" : "OFF") << std::endl;
+    // }
+    if (this->control.current_keyboard == Input::Keyboard::N)
     {
         this->control.navigation_mode = !this->control.navigation_mode;
         std::cout << std::endl << LOGGER::INFO << "Navigation mode: " << (this->control.navigation_mode ? "ON" : "OFF") << std::endl;
@@ -216,6 +221,7 @@ void RL::InitControl()
     this->control.x = 0.0f;
     this->control.y = 0.0f;
     this->control.yaw = 0.0f;
+    this->control.stand = 0.0f;
 }
 
 void RL::InitJointNum(size_t num_joints)
@@ -230,6 +236,7 @@ void RL::InitRL(std::string robot_config_path)
 {
     std::lock_guard<std::mutex> lock(this->model_mutex);
 
+
     this->ReadYaml(robot_config_path, "config.yaml");
 
     // init joint num first
@@ -239,6 +246,7 @@ void RL::InitRL(std::string robot_config_path)
     this->InitObservations();
     this->InitOutputs();
     this->InitControl();
+
 
     // init obs history
     const auto& observations_history = this->params.Get<std::vector<int>>("observations_history");  // avoid dangling reference
@@ -256,6 +264,64 @@ void RL::InitRL(std::string robot_config_path)
         throw std::runtime_error("Failed to load model from: " + model_path);
     }
 }
+
+void RL::InitRL(std::string robot_config_path, std::string fsm_name)
+{
+    try
+    {
+        if(this->models.count(fsm_name))
+        {
+            std::lock_guard<std::mutex> lock(this->model_mutex);
+
+            if (this->current_rl_fsm_name.compare(fsm_name) == 0)
+            {
+                return;
+            }
+            
+
+            this->ReadYaml(robot_config_path, "config.yaml");
+            // init joint num first
+            this->InitJointNum(this->params.Get<int>("num_of_dofs"));
+            // init rl
+            this->InitObservations();
+            this->InitOutputs();
+            this->InitControl();
+            // init obs history
+            const auto& observations_history = this->params.Get<std::vector<int>>("observations_history");  // avoid dangling reference
+            if (!observations_history.empty())
+            {
+                int history_length = *std::max_element(observations_history.begin(), observations_history.end()) + 1;
+                this->history_obs_buf = ObservationBuffer(1, this->obs_dims, history_length, this->params.Get<std::string>("observations_history_priority"));
+            }
+            this->models.at(this->current_rl_fsm_name) = std::move(this->model);
+            this->model = std::move(this->models.at(fsm_name));
+            this->current_rl_fsm_name = fsm_name;
+        }
+        else
+        {
+            if(!this->current_rl_fsm_name.empty())
+            {
+                std::lock_guard<std::mutex> lock(this->model_mutex);
+                this->models.at(this->current_rl_fsm_name) = std::move(this->model);
+            }
+            this->InitRL(robot_config_path);
+            std::lock_guard<std::mutex> lock(this->model_mutex);
+            this->models.emplace(fsm_name, std::move(this->model));
+            this->model = std::move(this->models.at(fsm_name));
+            this->current_rl_fsm_name = fsm_name;
+            
+        }
+        
+        
+    }
+    catch(const std::runtime_error& e)
+    {
+        throw e;
+    }
+    
+}
+
+
 
 void RL::ComputeOutput(const std::vector<float> &actions, std::vector<float> &output_dof_pos, std::vector<float> &output_dof_vel, std::vector<float> &output_dof_tau)
 {

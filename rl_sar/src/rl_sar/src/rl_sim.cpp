@@ -414,6 +414,8 @@ void RL_Sim::JoyCallback(
     if (this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::DPadDown);
     if (this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::DPadLeft);
     if (this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::DPadRight);
+    if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
+    if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::LB_A);
     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::LB_B);
     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::LB_X);
@@ -439,6 +441,7 @@ void RL_Sim::JoyCallback(
     this->control.x = this->joy_msg.axes[1]; // LY
     this->control.y = this->joy_msg.axes[0]; // LX
     this->control.yaw = this->joy_msg.axes[3]; // RX
+    this->control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
 }
 
 #if defined(USE_ROS1)
@@ -462,13 +465,23 @@ void RL_Sim::RunModel()
         this->episode_length_buf += 1;
         this->obs.ang_vel = this->robot_state.imu.gyroscope;
         if(this->robot_name == "panda7" || this->robot_name == "panda3")
-            this->obs.commands = {this->control.x, this->control.y, this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+        {
+            if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+                this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+            else
+                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+        }
         else
             this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
         if (this->control.navigation_mode)
         {
             if(this->robot_name == "panda7" || this->robot_name == "panda3")
-                this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+            {
+                if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+                    this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+                else
+                    this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+            }
             else
                 this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z};
         }

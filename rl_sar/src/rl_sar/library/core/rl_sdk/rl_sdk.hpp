@@ -16,6 +16,7 @@
 #include <memory>
 #include <fstream>
 #include <mutex>
+#include <unordered_map>
 
 #include <yaml-cpp/yaml.h>
 #include "fsm.hpp"
@@ -119,6 +120,7 @@ struct Control
     float y = 0.0f;
     float yaw = 0.0f;
     bool navigation_mode = false;
+    float stand = 0.0f;
 
     void SetKeyboard(Input::Keyboard keyboad)
     {
@@ -208,6 +210,7 @@ public:
     void InitOutputs();
     void InitControl();
     void InitRL(std::string robot_config_path);
+    void InitRL(std::string robot_config_path, std::string fsm_name);
     void InitJointNum(size_t num_joints);
 
     // rl functions
@@ -252,6 +255,9 @@ public:
 
     // rl module
     std::unique_ptr<InferenceRuntime::Model> model;
+    std::unordered_map<std::string, std::unique_ptr<InferenceRuntime::Model>> models;
+    std::string current_rl_fsm_name = "";
+
     // output buffer
     std::vector<float> output_dof_tau;
     std::vector<float> output_dof_pos;

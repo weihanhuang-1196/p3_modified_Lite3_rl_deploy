@@ -104,11 +104,15 @@ public:
         {
             if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::RB_DPadUp)
             {
-                return "RLFSMStateRLLocomotion";
+                return "RLFSMStateRLWalk";
             }
             else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
             {
                 return "RLFSMStateGetDown";
+            }
+            else if (rl.control.current_keyboard == Input::Keyboard::Num6)
+            {
+                return "RLFSMStateRLStand";
             }
         }
         return state_name_;
@@ -149,10 +153,81 @@ public:
     }
 };
 
-class RLFSMStateRLLocomotion : public RLFSMState
+class RLFSMStateRLStand : public RLFSMState
 {
 public:
-    RLFSMStateRLLocomotion(RL *rl) : RLFSMState(*rl, "RLFSMStateRLLocomotion") {}
+    RLFSMStateRLStand(RL *rl) : RLFSMState(*rl, "RLFSMStateRLStand") {}
+    float percent_transition = 0.0f;
+    void Enter() override
+    {
+        percent_transition = 0.0f;
+        rl.episode_length_buf = 0;
+
+        // read params from yaml
+        rl.config_name = "himloco";
+        std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/stand";
+        try
+        {
+            rl.InitRL(robot_config_path, "RLFSMStateRLStand");
+            rl.now_state = *fsm_state;
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << LOGGER::ERROR << "InitRL() failed: " << e.what() << std::endl;
+            rl.rl_init_done = false;
+            rl.fsm.RequestStateChange("RLFSMStatePassive");
+        }
+    }
+
+    void Run() override
+    {
+        // position transition from last default_dof_pos to current default_dof_pos
+        if (Interpolate(percent_transition, rl.now_state.motor_state.q, rl.params.Get<std::vector<float>>("default_dof_pos"), 0.5f, "Policy transition", true)) return;
+
+        if (!rl.rl_init_done) rl.rl_init_done = true;
+
+        std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] x:" << rl.control.x << " y:" << rl.control.y << " yaw:" << rl.control.yaw << std::flush;
+        RLControl();
+    }
+
+    void Exit() override
+    {
+        rl.rl_init_done = false;
+    }
+
+    std::string CheckChange() override
+    {
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X)
+        {
+            return "RLFSMStatePassive";
+        }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
+        {
+            return "RLFSMStateGetDown";
+        }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
+        {
+            return "RLFSMStateGetUp";
+        }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::RB_DPadUp)
+        {
+            return "RLFSMStateRLWalk";
+        }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num6)
+        {
+            return "RLFSMStateRLStand";
+        }
+        return state_name_;
+    }
+    
+};
+
+
+
+class RLFSMStateRLWalk : public RLFSMState
+{
+public:
+    RLFSMStateRLWalk(RL *rl) : RLFSMState(*rl, "RLFSMStateRLWalk") {}
 
     float percent_transition = 0.0f;
 
@@ -163,10 +238,10 @@ public:
 
         // read params from yaml
         rl.config_name = "himloco";
-        std::string robot_config_path = rl.robot_name + "/" + rl.config_name;
+        std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/walk";
         try
         {
-            rl.InitRL(robot_config_path);
+            rl.InitRL(robot_config_path, "RLFSMStateRLWalk");
             rl.now_state = *fsm_state;
         }
         catch (const std::exception& e)
@@ -209,8 +284,13 @@ public:
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::RB_DPadUp)
         {
-            return "RLFSMStateRLLocomotion";
+            return "RLFSMStateRLWalk";
         }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num6)
+        {
+            return "RLFSMStateRLStand";
+        }
+        
         return state_name_;
     }
 };
@@ -230,8 +310,10 @@ public:
             return std::make_shared<panda7_fsm::RLFSMStateGetUp>(rl);
         else if (state_name == "RLFSMStateGetDown")
             return std::make_shared<panda7_fsm::RLFSMStateGetDown>(rl);
-        else if (state_name == "RLFSMStateRLLocomotion")
-            return std::make_shared<panda7_fsm::RLFSMStateRLLocomotion>(rl);
+        else if (state_name == "RLFSMStateRLWalk")
+            return std::make_shared<panda7_fsm::RLFSMStateRLWalk>(rl);
+        else if (state_name == "RLFSMStateRLStand")
+            return std::make_shared<panda7_fsm::RLFSMStateRLStand>(rl);
         return nullptr;
     }
     std::string GetType() const override { return "panda7"; }
@@ -241,7 +323,8 @@ public:
             "RLFSMStatePassive",
             "RLFSMStateGetUp",
             "RLFSMStateGetDown",
-            "RLFSMStateRLLocomotion"
+            "RLFSMStateRLWalk",
+            "RLFSMStateRLStand"
         };
     }
     std::string GetInitialState() const override { return initial_state_; }
