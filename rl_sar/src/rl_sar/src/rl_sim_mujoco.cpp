@@ -295,6 +295,8 @@ void RL_Sim::GetSysJoystick()
     if (this->sys_js_axis[6] < 0) this->control.SetGamepad(Input::Gamepad::DPadRight);
     if (this->sys_js_axis[7] > 0 && this->sys_js_button[2].on_press) this->control.SetGamepad(Input::Gamepad::X);
     if (this->sys_js_axis[7] < 0 && this->sys_js_button[2].on_press) this->control.SetGamepad(Input::Gamepad::X);
+    if (this->sys_js_axis[7] > 0 && this->sys_js_button[3].on_press) this->control.SetGamepad(Input::Gamepad::Y);
+    if (this->sys_js_axis[7] < 0 && this->sys_js_button[3].on_press) this->control.SetGamepad(Input::Gamepad::Y);
     if (this->sys_js_button[4].pressed && this->sys_js_button[0].on_press) this->control.SetGamepad(Input::Gamepad::LB_A);
     if (this->sys_js_button[4].pressed && this->sys_js_button[1].on_press) this->control.SetGamepad(Input::Gamepad::LB_B);
     if (this->sys_js_button[4].pressed && this->sys_js_button[2].on_press) this->control.SetGamepad(Input::Gamepad::LB_X);
