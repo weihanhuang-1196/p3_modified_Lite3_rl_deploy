@@ -121,6 +121,7 @@ struct Control
     float yaw = 0.0f;
     bool navigation_mode = false;
     float stand = 0.0f;
+    float height = 0.0f;
 
     void SetKeyboard(Input::Keyboard keyboad)
     {

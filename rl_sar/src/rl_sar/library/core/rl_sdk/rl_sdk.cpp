@@ -222,6 +222,7 @@ void RL::InitControl()
     this->control.y = 0.0f;
     this->control.yaw = 0.0f;
     this->control.stand = 0.0f;
+    this->control.height = 0.0f;
 }
 
 void RL::InitJointNum(size_t num_joints)

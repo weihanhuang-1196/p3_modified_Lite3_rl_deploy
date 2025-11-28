@@ -338,6 +338,7 @@ void RL_Sim::GetSysJoystick()
         this->sys_js_active = false;
     }
     this->control.stand = (this->sys_js_axis[7] < 0 ? 1.0f : 0.0f);
+    this->control.height = -float(this->sys_js_axis[4]) / float(this->sys_js_max_value);
 }
 
 void RL_Sim::RunModel()
@@ -351,6 +352,8 @@ void RL_Sim::RunModel()
         {
             if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
                 this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+            else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
+                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
             else
                 this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
         }

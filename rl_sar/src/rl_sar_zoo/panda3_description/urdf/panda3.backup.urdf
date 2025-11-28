@@ -35,9 +35,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 -0.013"/>
+      <origin rpy="0 0 0" xyz="0 0 -0.0125"/>
       <geometry>
-        <box size="0.32 0.30 0.14"/>
+        <box size="0.32 0.315 0.16"/>
       </geometry>
     </collision>
     <collision>
@@ -53,6 +53,24 @@
       </geometry>
     </collision>
   </link>
+
+<!-- imu -->
+  <link name="imu_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+  </link>
+  <joint name="imu_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="imu_link" />
+    <axis xyz="0 0 0" />
+  </joint>
+<!-- imu -->
+
+
   <link
     name="FL_hip">
     <inertial>
@@ -148,9 +166,9 @@
       </geometry>
     </collision>
     <collision>
-      <origin rpy="0 0 0" xyz="-0.021 0 -0.135"/>
+      <origin rpy="0 0 0" xyz="-0.021 0 -0.16"/>
       <geometry>
-        <box size="0.040 0.03 0.16"/>
+        <box size="0.050 0.03 0.21"/>
       </geometry>
     </collision>
   </link>
@@ -167,8 +185,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-1.62"
-      upper="3.735"
+      lower="-1.571"
+      upper="3.75"
       effort="60"
       velocity="19.9" />
   </joint>
@@ -203,9 +221,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.14"/>
+      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.125"/>
       <geometry>
-        <box size="0.18 0.02 0.045"/>
+        <box size="0.22 0.02 0.0495"/>
       </geometry>
     </collision>
     <collision>
@@ -234,8 +252,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-2.443"
-      upper="0.524"
+      lower="-2.53"
+      upper="0.35"
       effort="90"
       velocity="19.9" />
   </joint>
@@ -270,9 +288,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0.005 0 0.005"/>
+      <origin rpy="0 0 0" xyz="0 0 0.005"/>
       <geometry>
-        <sphere radius="0.03"/>
+        <sphere radius="0.027"/>
       </geometry>
     </collision>
   </link>
@@ -384,9 +402,9 @@
       </geometry>
     </collision>
     <collision>
-      <origin rpy="0 0 0" xyz="-0.021 0 -0.135"/>
+      <origin rpy="0 0 0" xyz="-0.021 0 -0.16"/>
       <geometry>
-        <box size="0.040 0.03 0.16"/>
+        <box size="0.050 0.03 0.21"/>
       </geometry>
     </collision>
   </link>
@@ -403,8 +421,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-1.62"
-      upper="3.73"
+      lower="-1.57"
+      upper="3.75"
       effort="60"
       velocity="19.9" />
   </joint>
@@ -439,9 +457,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.14"/>
+      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.125"/>
       <geometry>
-        <box size="0.18 0.02 0.045"/>
+        <box size="0.22 0.02 0.0495"/>
       </geometry>
     </collision>
     <collision>
@@ -470,8 +488,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-2.44"
-      upper="0.52"
+      lower="-2.53"
+      upper="0.35"
       effort="90"
       velocity="19.9" />
   </joint>
@@ -506,9 +524,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0.005 0 0.005"/>
+      <origin rpy="0 0 0" xyz="0 0 0.005"/>
       <geometry>
-        <sphere radius="0.03"/>
+        <sphere radius="0.027"/>
       </geometry>
     </collision>
   </link>
@@ -620,9 +638,9 @@
       </geometry>
     </collision>
     <collision>
-      <origin rpy="0 0 0" xyz="-0.021 0 -0.135"/>
+      <origin rpy="0 0 0" xyz="-0.021 0 -0.16"/>
       <geometry>
-        <box size="0.040 0.03 0.16"/>
+        <box size="0.050 0.03 0.21"/>
       </geometry>
     </collision>
   </link>
@@ -639,8 +657,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-1.62"
-      upper="3.73"
+      lower="-1.57"
+      upper="3.75"
       effort="60"
       velocity="19.9" />
   </joint>
@@ -675,9 +693,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.14"/>
+      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.125"/>
       <geometry>
-        <box size="0.18 0.02 0.045"/>
+        <box size="0.22 0.02 0.0495"/>
       </geometry>
     </collision>
     <collision>
@@ -706,8 +724,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-2.44"
-      upper="0.52"
+      lower="-2.53"
+      upper="0.35"
       effort="90"
       velocity="19.9" />
   </joint>
@@ -742,9 +760,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0.005 0 0.005"/>
+      <origin rpy="0 0 0" xyz="0 0 0.005"/>
       <geometry>
-        <sphere radius="0.03"/>
+        <sphere radius="0.027"/>
       </geometry>
     </collision>
   </link>
@@ -856,9 +874,9 @@
       </geometry>
     </collision>
     <collision>
-      <origin rpy="0 0 0" xyz="-0.021 0 -0.135"/>
+      <origin rpy="0 0 0" xyz="-0.021 0 -0.16"/>
       <geometry>
-        <box size="0.040 0.03 0.16"/>
+        <box size="0.050 0.03 0.21"/>
       </geometry>
     </collision>
   </link>
@@ -875,8 +893,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-1.62"
-      upper="3.73"
+      lower="-1.57"
+      upper="3.752"
       effort="4.8"
       velocity="19.9" />
   </joint>
@@ -911,9 +929,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.14"/>
+      <origin rpy="0 1.5707963267948966 0" xyz="0.01 0 -0.125"/>
       <geometry>
-        <box size="0.18 0.02 0.045"/>
+        <box size="0.22 0.02 0.0495"/>
       </geometry>
     </collision>
     <collision>
@@ -942,8 +960,8 @@
     <axis
       xyz="0 1 0" />
     <limit
-      lower="-2.44"
-      upper="0.52"
+      lower="-2.53"
+      upper="0.35"
       effort="90"
       velocity="19.9" />
   </joint>
@@ -978,9 +996,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0.005 0 0.005"/>
+      <origin rpy="0 0 0" xyz="0 0 0.005"/>
       <geometry>
-        <sphere radius="0.03"/>
+        <sphere radius="0.027"/>
       </geometry>
     </collision>
   </link>
@@ -997,4 +1015,131 @@
     <axis
       xyz="0 0 0" />
   </joint>
+
+  <transmission name="FL_hip_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FL_hip_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FL_hip_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="FL_thigh_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FL_thigh_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FL_thigh_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="FL_calf_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FL_calf_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FL_calf_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="FR_hip_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FR_hip_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FR_hip_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="FR_thigh_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FR_thigh_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FR_thigh_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="FR_calf_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="FR_calf_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="FR_calf_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="RL_hip_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RL_hip_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="RL_hip_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="RL_thigh_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RL_thigh_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="RL_thigh_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="RL_calf_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RL_calf_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="RL_calf_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="RR_hip_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RR_hip_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="RR_hip_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="RR_thigh_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RR_thigh_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="RR_thigh_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="RR_calf_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="RR_calf_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="RR_calf_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+
+
 </robot>
