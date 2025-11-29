@@ -27,8 +27,8 @@ hardware_interface::CallbackReturn RobotHWInterface::on_init(const hardware_inte
   hw_states_efforts_.resize(info_.joints.size(), 0.0);
 
   node_ = rclcpp::Node::make_shared("robot_hw_interface");
-  robot_command_publisher_ = node_->create_publisher<robot_msgs::msg::RobotCommand>(
-    "rl_sar/Robot_Command", rclcpp::SystemDefaultsQoS());
+  rt_robot_command_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<robot_msgs::msg::RobotCommand>>(
+      node_->create_publisher<robot_msgs::msg::RobotCommand>("rl_sar/Robot_Command", rclcpp::SystemDefaultsQoS()));
 
   imu_publisher_ = node_->create_publisher<sensor_msgs::msg::Imu>(
         "/imu", rclcpp::SystemDefaultsQoS());
@@ -36,6 +36,12 @@ hardware_interface::CallbackReturn RobotHWInterface::on_init(const hardware_inte
   robot_state_subscriber_ = node_->create_subscription<robot_msgs::msg::RobotState>(
     "rl_sar/Robot_State", rclcpp::SystemDefaultsQoS(),
     std::bind(&RobotHWInterface::robot_state_callback, this, std::placeholders::_1));
+
+
+    joints_command_subscriber_ = node_->create_subscription<robot_msgs::msg::RobotCommand>(
+        "robot_joint_controller/command", rclcpp::SystemDefaultsQoS(), 
+        std::bind(&RobotHWInterface::set_command_callback, this, std::placeholders::_1));
+
 
     std::thread t4([this]() {             
         rclcpp::spin(node_);
@@ -78,18 +84,20 @@ hardware_interface::return_type RobotHWInterface::read(const rclcpp::Time & /*ti
 {
   // std::cout << "Reading motor states from robot..." << std::endl;
   
+  auto robot_state = rt_robot_state_ptr_.readFromRT();
 
-  std::lock_guard<std::mutex> lock(mutex_);
-  if(this->robot_state_.motor_state.size() == 0){
+  if(!robot_state)
     return hardware_interface::return_type::OK;
-  }
+
+  if(robot_state->motor_state.size() == 0)
+    return hardware_interface::return_type::OK;
 
 
     for (uint i = 0; i < hw_states_positions_.size(); i++)
   {
-    hw_states_positions_[i] = this->robot_state_.motor_state[i].q;
-    hw_states_velocities_[i] = this->robot_state_.motor_state[i].dq;
-    hw_states_efforts_[i] = this->robot_state_.motor_state[i].tau_est;
+    hw_states_positions_[i] = robot_state->motor_state[i].q;
+    hw_states_velocities_[i] = robot_state->motor_state[i].dq;
+    hw_states_efforts_[i] = robot_state->motor_state[i].tau_est;
   }
 
 
@@ -101,38 +109,69 @@ hardware_interface::return_type RobotHWInterface::write(const rclcpp::Time & /*t
   // std::cout << "write motor commands to robot..." << std::endl;
   robot_msgs::msg::RobotCommand command_msg;
   command_msg.motor_command.resize(hw_commands_.size());
+  auto joint_commands = rt_command_ptr_.readFromRT();
   for (uint i = 0; i < hw_commands_.size(); i++)
   {
     // This is a simplified mapping. In a real robot, you would have a more complex mapping
     // between the joint command and the motor command.
     command_msg.motor_command[i].tau = hw_commands_[i];
+    if (joint_commands && joint_commands->motor_command.size() == hw_commands_.size())
+    {
+        command_msg.motor_command[i].mode = joint_commands->motor_command[i].mode;
+        command_msg.motor_command[i].q = joint_commands->motor_command[i].q;
+        command_msg.motor_command[i].dq = joint_commands->motor_command[i].dq;
+        command_msg.motor_command[i].kp = joint_commands->motor_command[i].kp;
+        command_msg.motor_command[i].kd = joint_commands->motor_command[i].kd;
+    }
+    else
+    {
+        command_msg.motor_command[i].q = 0.0;
+        command_msg.motor_command[i].dq = 0.0;
+        command_msg.motor_command[i].kp = 0.0;
+        command_msg.motor_command[i].kd = 0.0;
+        command_msg.motor_command[i].mode = 0;
+    }
+      
+
   }
-  robot_command_publisher_->publish(command_msg);
+  if(rt_robot_command_publisher_ && rt_robot_command_publisher_->trylock())
+  {
+      rt_robot_command_publisher_->msg_ = command_msg;
+      rt_robot_command_publisher_->unlockAndPublish();
+  }
   return hardware_interface::return_type::OK;
 }
 
 void RobotHWInterface::robot_state_callback(const robot_msgs::msg::RobotState::SharedPtr msg)
 {
+  last_robot_state_ = *msg;
+  rt_robot_state_ptr_.writeFromNonRT(last_robot_state_);
 
-  std::lock_guard<std::mutex> lock(mutex_);
-  this->robot_state_ = *msg;
 
-   this->imu_.orientation.x = msg->imu.quaternion[1];
+  this->imu_.orientation.x = msg->imu.quaternion[1];
   this->imu_.orientation.y = msg->imu.quaternion[2];
   this->imu_.orientation.z = msg->imu.quaternion[3];
   this->imu_.orientation.w = msg->imu.quaternion[0];
-
+  
   this->imu_.angular_velocity.x = msg->imu.gyroscope[0];
   this->imu_.angular_velocity.y = msg->imu.gyroscope[1];
   this->imu_.angular_velocity.z = msg->imu.gyroscope[2];
-
+  
   this->imu_.linear_acceleration.x = msg->imu.accelerometer[0];
   this->imu_.linear_acceleration.y = msg->imu.accelerometer[1];
   this->imu_.linear_acceleration.z = msg->imu.accelerometer[2];
+
   // std::cout<<"publishing imu data"<<std::endl;
 
   this->imu_publisher_->publish(this->imu_);
 
+}
+
+
+void RobotHWInterface::set_command_callback(const robot_msgs::msg::RobotCommand::SharedPtr msg)
+{
+    last_command_ = *msg;
+    rt_command_ptr_.writeFromNonRT(last_command_);
 }
 
 

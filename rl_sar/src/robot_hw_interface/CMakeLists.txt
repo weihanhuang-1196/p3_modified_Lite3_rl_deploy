@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(robot_msgs REQUIRED)
+find_package(realtime_tools REQUIRED)
 
 add_library(robot_hw_interface SHARED
   src/robot_hw_interface.cpp
@@ -25,6 +26,7 @@ ament_target_dependencies(robot_hw_interface
   hardware_interface
   pluginlib
   robot_msgs
+  realtime_tools
 )
 
 install(TARGETS
@@ -64,6 +66,7 @@ pluginlib_export_plugin_description_file(
 
 ament_export_dependencies(
   hardware_interface
+  realtime_tools
 )
 
 

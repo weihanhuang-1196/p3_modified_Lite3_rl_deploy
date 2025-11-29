@@ -14,6 +14,10 @@
   <depend>pluginlib</depend>
   <depend>robot_msgs</depend>
 
+  <build_depend>realtime_tools</build_depend>
+  <exec_depend>realtime_tools</exec_depend>
+  <!-- <depend>realtime_tools</depend> -->
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
 

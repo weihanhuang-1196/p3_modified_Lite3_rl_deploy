@@ -286,6 +286,7 @@ void RL_Sim::GetState(RobotState<float> *state)
 
 void RL_Sim::SetCommand(const RobotCommand<float> *command)
 {
+    int motor_enable = this->motor_enabled ? 1 : 0;
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {
 #if defined(USE_ROS1)
@@ -294,12 +295,14 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
         this->joint_publishers_commands[this->params.Get<std::vector<int>>("joint_mapping")[i]].kp = command->motor_command.kp[i];
         this->joint_publishers_commands[this->params.Get<std::vector<int>>("joint_mapping")[i]].kd = command->motor_command.kd[i];
         this->joint_publishers_commands[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau = command->motor_command.tau[i];
+        this->joint_publishers_commands[this->params.Get<std::vector<int>>("joint_mapping")[i]].mode = motor_enable;
 #elif defined(USE_ROS2)
         this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].q = command->motor_command.q[i];
         this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].dq = command->motor_command.dq[i];
         this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].kp = command->motor_command.kp[i];
         this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].kd = command->motor_command.kd[i];
         this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau = command->motor_command.tau[i];
+        this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].mode = motor_enable;
 #endif
     }
 
@@ -445,6 +448,20 @@ void RL_Sim::JoyCallback(
     this->control.yaw = this->joy_msg.axes[3]; // RX
     this->control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
     this->control.height = this->joy_msg.axes[4];
+
+    if(this->joy_msg.buttons[7] == 1)
+    {
+        motor_enable_changed = true;
+    }
+
+    if (this->joy_msg.buttons[7] == 0 && motor_enable_changed)
+    {
+        motor_enable_changed = false;
+        this->motor_enabled = !this->motor_enabled;
+    }
+
+
+
 }
 
 #if defined(USE_ROS1)

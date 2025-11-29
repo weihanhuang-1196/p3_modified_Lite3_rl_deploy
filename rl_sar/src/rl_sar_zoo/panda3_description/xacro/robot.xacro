@@ -4,7 +4,11 @@
 
     <xacro:include filename="$(find panda3_description)/urdf/panda3.urdf"/>
     <!-- gazebo sim -->
-    <xacro:include filename="$(find panda3_description)/xacro/gazebo.xacro"/>
+    <!-- <xacro:include filename="$(find panda3_description)/xacro/gazebo.xacro"/> -->
+
+    <!-- real robot -->
+    <xacro:include filename="$(find panda7_description)/xacro/real.xacro"/>
+
 
 
 </robot>
