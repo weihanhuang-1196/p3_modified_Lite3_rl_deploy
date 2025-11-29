@@ -23,7 +23,7 @@ def generate_launch_description():
         Command([
             "xacro ",
             Command(["echo -n ", Command(["ros2 pkg prefix ", rname, "_description"])]),
-            "/share/", rname, "_description/xacro/robot.xacro"
+            "/share/", rname, "_description/xacro/robot_real.xacro"
         ]),
         value_type=str
     )
