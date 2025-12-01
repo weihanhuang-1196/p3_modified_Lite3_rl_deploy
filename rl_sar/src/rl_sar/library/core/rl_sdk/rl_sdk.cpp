@@ -674,7 +674,7 @@ void RLFSMState::RLControl()
             }
             fsm_command->motor_command.kp[i] = rl.params.Get<std::vector<float>>("rl_kp")[i];
             fsm_command->motor_command.kd[i] = rl.params.Get<std::vector<float>>("rl_kd")[i];
-            fsm_command->motor_command.tau[i] = 0;
+            fsm_command->motor_command.tau[i] = 0.0f;
         }
     }
 }

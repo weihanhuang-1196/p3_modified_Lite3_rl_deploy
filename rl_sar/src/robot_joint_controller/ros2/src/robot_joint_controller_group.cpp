@@ -144,6 +144,7 @@ controller_interface::InterfaceConfiguration RobotJointControllerGroup::state_in
     {
         state_interfaces_config.names.push_back(joint_name + "/" + HW_IF_POSITION);
         state_interfaces_config.names.push_back(joint_name + "/" + HW_IF_EFFORT);
+        // state_interfaces_config.names.push_back(joint_name + "/" + HW_IF_VELOCITY);
     }
 
     return state_interfaces_config;
@@ -238,7 +239,7 @@ void RobotJointControllerGroup::UpdateFunc(const double &period_seconds)
     std::vector<double> currentPos(joint_names_.size(), 0.0);
     std::vector<double> currentVel(joint_names_.size(), 0.0);
     std::vector<double> calcTorque(joint_names_.size(), 0.0);
-
+    std::cout << "RobotJointControllerGroup::UpdateFunc period_seconds: " << period_seconds << std::endl;
     for (int index = 0; index < joint_names_.size(); ++index)
     {
         // set command data
@@ -260,6 +261,7 @@ void RobotJointControllerGroup::UpdateFunc(const double &period_seconds)
         EffortLimit(servo_command_.torque, index);
 
         currentPos[index] = state_interfaces_[index * 2].get_value();
+        // currentVel[index] = state_interfaces_[index * 3 + 2].get_value();
         currentVel[index] = (currentPos[index] - (double)(last_state_.motor_state[index].q)) / period_seconds;
         calcTorque[index] = servo_command_.pos_stiffness * (servo_command_.pos - currentPos[index]) + servo_command_.vel_stiffness * (servo_command_.vel - currentVel[index]) + servo_command_.torque;
         EffortLimit(calcTorque[index], index);

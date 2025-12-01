@@ -38,9 +38,9 @@ public:
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
+        if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
         {
-            return "RLFSMStateRLStand";
+            return "RLFSMStateGetUp";
         }
         return state_name_;
     }
@@ -188,7 +188,7 @@ public:
 
         if (!rl.rl_init_done) rl.rl_init_done = true;
 
-        std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] stand:" << rl.control.stand << std::flush;
+        // std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] stand:" << rl.control.stand << std::flush;
         RLControl();
     }
 
@@ -415,6 +415,6 @@ private:
     std::string initial_state_;
 };
 
-REGISTER_FSM_FACTORY(Panda3FSMFactory, "RLFSMStateRLStand")
+REGISTER_FSM_FACTORY(Panda3FSMFactory, "RLFSMStatePassive")
 
 #endif // PANDA3_FSM_HPP

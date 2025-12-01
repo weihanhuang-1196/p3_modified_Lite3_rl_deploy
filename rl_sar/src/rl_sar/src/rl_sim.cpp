@@ -536,7 +536,8 @@ void RL_Sim::RunModel()
         std::vector<float> tau_est(this->params.Get<int>("num_of_dofs"), 0.0f);
         for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
         {
-            tau_est[i] = this->joint_efforts[this->params.Get<std::vector<std::string>>("joint_controller_names")[i]];
+            // tau_est[i] = this->joint_efforts[this->params.Get<std::vector<std::string>>("joint_controller_names")[i]];
+            tau_est[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau_est;
         }
         this->CSVLogger(this->output_dof_tau, tau_est, this->obs.dof_pos, this->output_dof_pos, this->obs.dof_vel);
 #endif

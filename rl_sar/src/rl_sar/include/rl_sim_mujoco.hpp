@@ -103,6 +103,8 @@ private:
     std::map<std::string, float> joint_velocities;
     std::map<std::string, float> joint_efforts;
     void StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names);
+
+
 };
 
 #endif // RL_SIM_HPP

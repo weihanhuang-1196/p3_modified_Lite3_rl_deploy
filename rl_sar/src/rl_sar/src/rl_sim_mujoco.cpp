@@ -187,6 +187,21 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
 {
     if (mj_data)
     {
+#if 0    // 使用上次位置计算速度
+        static std::vector<double> last_q = std::vector<double>(this->params.Get<int>("num_of_dofs"), 0.0);
+        double current_q, current_dq;
+        for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
+        {
+            current_q = mj_data->sensordata[this->params.Get<std::vector<int>>("joint_mapping")[i]];
+            current_dq = (current_q - last_q[i]) / (double)this->params.Get<float>("dt");
+            mj_data->ctrl[this->params.Get<std::vector<int>>("joint_mapping")[i]] =
+                command->motor_command.tau[i] +
+                command->motor_command.kp[i] * (command->motor_command.q[i] - current_q) +
+                // command->motor_command.kd[i] * (command->motor_command.dq[i] - mj_data->sensordata[this->params.Get<std::vector<int>>("joint_mapping")[i] + this->params.Get<int>("num_of_dofs")]);
+                command->motor_command.kd[i] *(command->motor_command.dq[i] - current_dq);
+            last_q[i] = current_q;
+        }
+#else   // 使用传感器速度
         for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
         {
             mj_data->ctrl[this->params.Get<std::vector<int>>("joint_mapping")[i]] =
@@ -194,7 +209,10 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
                 command->motor_command.kp[i] * (command->motor_command.q[i] - mj_data->sensordata[this->params.Get<std::vector<int>>("joint_mapping")[i]]) +
                 command->motor_command.kd[i] * (command->motor_command.dq[i] - mj_data->sensordata[this->params.Get<std::vector<int>>("joint_mapping")[i] + this->params.Get<int>("num_of_dofs")]);
         }
+#endif
     }
+
+
 }
 
 void RL_Sim::RobotControl()
@@ -463,7 +481,7 @@ void RL_Sim::Plot()
         this->plot_real_joint_pos[i].erase(this->plot_real_joint_pos[i].begin());
         this->plot_target_joint_pos[i].erase(this->plot_target_joint_pos[i].begin());
         this->plot_real_joint_pos[i].push_back(mj_data->sensordata[i]);
-        // this->plot_target_joint_pos[i].push_back();  // TODO
+        this->plot_target_joint_pos[i].push_back(this->robot_command.motor_command.q[i]);  // TODO
         plt::subplot(this->params.Get<int>("num_of_dofs"), 1, i + 1);
         plt::named_plot("_real_joint_pos", this->plot_t, this->plot_real_joint_pos[i], "r");
         plt::named_plot("_target_joint_pos", this->plot_t, this->plot_target_joint_pos[i], "b");

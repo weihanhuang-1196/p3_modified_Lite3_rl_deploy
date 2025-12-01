@@ -21,7 +21,7 @@ class Config:
         self.weight_decay = 0.0
         self.epochs = 200
         self.batch_size = 128
-        self.device = "cuda:0"
+        self.device = "cpu"
         self.in_dim = 6
         self.units = 32
         self.layers = 2

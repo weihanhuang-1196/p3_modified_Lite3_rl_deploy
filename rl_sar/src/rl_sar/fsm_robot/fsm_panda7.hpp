@@ -165,7 +165,7 @@ public:
 
         // read params from yaml
         rl.config_name = "himloco";
-        std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/stand";
+        std::string robot_config_path = rl.robot_name + "/" + rl.config_name;
         try
         {
             rl.InitRL(robot_config_path, "RLFSMStateRLStand");
@@ -238,7 +238,7 @@ public:
 
         // read params from yaml
         rl.config_name = "himloco";
-        std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/walk";
+        std::string robot_config_path = rl.robot_name + "/" + rl.config_name;
         try
         {
             rl.InitRL(robot_config_path, "RLFSMStateRLWalk");
