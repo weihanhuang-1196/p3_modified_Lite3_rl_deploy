@@ -173,6 +173,10 @@ void RL_Sim::GetState(RobotState<float> *state)
         state->imu.gyroscope[0] = mj_data->sensordata[3 * this->params.Get<int>("num_of_dofs") + 4];
         state->imu.gyroscope[1] = mj_data->sensordata[3 * this->params.Get<int>("num_of_dofs") + 5];
         state->imu.gyroscope[2] = mj_data->sensordata[3 * this->params.Get<int>("num_of_dofs") + 6];
+        std::cout << LOGGER::DEBUG << "Gyro: "
+                  << state->imu.gyroscope[0] << ", "
+                  << state->imu.gyroscope[1] << ", "
+                  << state->imu.gyroscope[2] << std::endl;
 
         for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
         {

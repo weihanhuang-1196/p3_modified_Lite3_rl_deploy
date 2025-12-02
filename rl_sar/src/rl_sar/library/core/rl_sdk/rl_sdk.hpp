@@ -232,6 +232,7 @@ public:
 
     // control
     Control control;
+    bool motor_enabled;
     void KeyboardInterface();
 
     // history buffer
@@ -266,6 +267,9 @@ public:
 
     // thread safety
     std::mutex model_mutex;
+
+
+    
 };
 
 class RLFSMState : public FSMState

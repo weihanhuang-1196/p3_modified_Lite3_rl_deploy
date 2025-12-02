@@ -26,7 +26,7 @@ public:
     {
         for (int i = 0; i < rl.params.Get<int>("num_of_dofs"); ++i)
         {
-            // fsm_command->motor_command.q[i] = fsm_state->motor_state.q[i];
+            fsm_command->motor_command.q[i] = fsm_state->motor_state.q[i];
             fsm_command->motor_command.dq[i] = 0;
             fsm_command->motor_command.kp[i] = 0;
             fsm_command->motor_command.kd[i] = 8;
@@ -38,7 +38,7 @@ public:
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
+        if (rl.motor_enabled && (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B))
         {
             return "RLFSMStateGetUp";
         }
@@ -188,7 +188,7 @@ public:
 
         if (!rl.rl_init_done) rl.rl_init_done = true;
 
-        // std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] stand:" << rl.control.stand << std::flush;
+        std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] stand:" << rl.control.stand << std::flush;
         RLControl();
     }
 

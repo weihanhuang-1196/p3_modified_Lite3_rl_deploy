@@ -62,7 +62,7 @@ private:
 
     // motor enable change flag
     bool motor_enable_changed = false;
-    bool motor_enabled = false;
+    
 
     // rl functions
     std::vector<float> Forward() override;
