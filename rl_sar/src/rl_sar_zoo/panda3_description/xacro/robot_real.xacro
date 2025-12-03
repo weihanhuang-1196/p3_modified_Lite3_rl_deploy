@@ -6,7 +6,7 @@
 
 
     <!-- real robot -->
-    <xacro:include filename="$(find panda7_description)/xacro/real.xacro"/>
+    <xacro:include filename="$(find panda3_description)/xacro/real.xacro"/>
 
 
 

@@ -29,7 +29,7 @@ public:
             fsm_command->motor_command.q[i] = fsm_state->motor_state.q[i];
             fsm_command->motor_command.dq[i] = 0;
             fsm_command->motor_command.kp[i] = 0;
-            fsm_command->motor_command.kd[i] = 8;
+            fsm_command->motor_command.kd[i] = rl.params.Get<double>("damping_kd");
             fsm_command->motor_command.tau[i] = 0;
         }
     }
@@ -41,6 +41,10 @@ public:
         if (rl.motor_enabled && (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B))
         {
             return "RLFSMStateGetUp";
+        }
+        else if (rl.motor_enabled && (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A))
+        {
+            return "RLFSMStateRLStand";
         }
         return state_name_;
     }
@@ -106,7 +110,7 @@ public:
             {
                 return "RLFSMStateRLWalk";
             }
-            else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
+            else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
             {
                 return "RLFSMStateRLStand";
             }

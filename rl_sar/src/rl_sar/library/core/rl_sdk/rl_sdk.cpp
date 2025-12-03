@@ -64,6 +64,7 @@ void RL::StateController(const RobotState<float>* state, RobotCommand<float>* co
         this->control.navigation_mode = !this->control.navigation_mode;
         std::cout << std::endl << LOGGER::INFO << "Navigation mode: " << (this->control.navigation_mode ? "ON" : "OFF") << std::endl;
     }
+    
 }
 
 std::vector<float> RL::ComputeObservation()
@@ -223,7 +224,6 @@ void RL::InitControl()
     this->control.yaw = 0.0f;
     this->control.stand = 0.0f;
     this->control.height = 0.0f;
-    this->motor_enabled = false;
 }
 
 void RL::InitJointNum(size_t num_joints)

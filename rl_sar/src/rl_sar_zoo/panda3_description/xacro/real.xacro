@@ -24,10 +24,11 @@
             <xacro:joint_interface joint_name="${prefix}_calf_joint" />
         </xacro:macro>
 
-        <xacro:leg_joints prefix="FR"/>
+        
         <xacro:leg_joints prefix="FL"/>
-        <xacro:leg_joints prefix="RR"/>
+        <xacro:leg_joints prefix="FR"/>
         <xacro:leg_joints prefix="RL"/>
+        <xacro:leg_joints prefix="RR"/>
 
     </ros2_control>
 

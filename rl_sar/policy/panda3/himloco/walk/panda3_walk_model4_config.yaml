@@ -1,8 +1,8 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
-# dt 为7ms训练的模型
+
 panda3/himloco/walk:
-  model_name: "panda3_walk_model8.onnx"
+  model_name: "panda3_walk_model4.onnx"
   num_observations: 51
   observations: [ "ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
   observations_history: [9,8,7,6,5,4,3,2,1,0]  # 0 is the latest observation

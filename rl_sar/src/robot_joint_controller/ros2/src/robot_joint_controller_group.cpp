@@ -239,7 +239,8 @@ void RobotJointControllerGroup::UpdateFunc(const double &period_seconds)
     std::vector<double> currentPos(joint_names_.size(), 0.0);
     std::vector<double> currentVel(joint_names_.size(), 0.0);
     std::vector<double> calcTorque(joint_names_.size(), 0.0);
-    std::cout << "RobotJointControllerGroup::UpdateFunc period_seconds: " << period_seconds << std::endl;
+    // std::cout << "RobotJointControllerGroup::UpdateFunc period_seconds: " << period_seconds << std::endl;
+    // std::cout << "joint_names_" << std::endl;
     for (int index = 0; index < joint_names_.size(); ++index)
     {
         // set command data

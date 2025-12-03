@@ -173,10 +173,10 @@ void RL_Sim::GetState(RobotState<float> *state)
         state->imu.gyroscope[0] = mj_data->sensordata[3 * this->params.Get<int>("num_of_dofs") + 4];
         state->imu.gyroscope[1] = mj_data->sensordata[3 * this->params.Get<int>("num_of_dofs") + 5];
         state->imu.gyroscope[2] = mj_data->sensordata[3 * this->params.Get<int>("num_of_dofs") + 6];
-        std::cout << LOGGER::DEBUG << "Gyro: "
-                  << state->imu.gyroscope[0] << ", "
-                  << state->imu.gyroscope[1] << ", "
-                  << state->imu.gyroscope[2] << std::endl;
+        // std::cout << LOGGER::DEBUG << "Gyro: "
+        //           << state->imu.gyroscope[0] << ", "
+        //           << state->imu.gyroscope[1] << ", "
+        //           << state->imu.gyroscope[2] << std::endl;
 
         for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
         {
@@ -363,6 +363,22 @@ void RL_Sim::GetSysJoystick()
     }
     this->control.stand = (this->sys_js_axis[7] < 0 ? 1.0f : 0.0f);
     this->control.height = -float(this->sys_js_axis[4]) / float(this->sys_js_max_value);
+
+
+
+    if(this->sys_js_button[7].pressed)
+    {
+        motor_enable_changed = true;
+    }
+
+    if (this->sys_js_button[7].pressed && motor_enable_changed)
+    {
+        motor_enable_changed = false;
+        this->motor_enabled = !this->motor_enabled;
+    }
+
+
+
 }
 
 void RL_Sim::RunModel()

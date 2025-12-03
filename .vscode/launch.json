@@ -29,6 +29,25 @@
             ]
         },
         {
+            "name": "ROS 1: Run rl_sim_gazebo Only",
+            "type": "python",
+            "request": "launch",
+            "program": "/opt/ros/humble/bin/ros2",
+            "args": [
+                "launch",
+                "rl_sar",
+                "gazebo.launch.py", 
+                "rname:=panda3"
+            ],
+            "console": "integratedTerminal",
+            "env": {
+                "ROS_DISTRO": "humble",
+                "PYTHONPATH": "/opt/ros/humble/lib/python3.10/site-packages:${workspaceFolder}/rl_sar/install/lib/python3.10/site-packages:${env:PYTHONPATH}",
+                "LD_LIBRARY_PATH": "/opt/ros/humble/lib:${workspaceFolder}/rl_sar/install/lib:${env:LD_LIBRARY_PATH}",
+                "AMENT_PREFIX_PATH": "/opt/ros/humble:${workspaceFolder}/rl_sar/install:${env:AMENT_PREFIX_PATH}"
+            },
+        },
+        {
             "name": "ROS 2: Launch Gazebo Simulation",
             "type": "python",
             "request": "launch",

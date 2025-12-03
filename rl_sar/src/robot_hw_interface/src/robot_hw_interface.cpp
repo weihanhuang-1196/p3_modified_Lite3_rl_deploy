@@ -28,7 +28,7 @@ hardware_interface::CallbackReturn RobotHWInterface::on_init(const hardware_inte
 
   node_ = rclcpp::Node::make_shared("robot_hw_interface");
   rt_robot_command_publisher_ = std::make_shared<realtime_tools::RealtimePublisher<robot_msgs::msg::RobotCommand>>(
-      node_->create_publisher<robot_msgs::msg::RobotCommand>("rl_sar/Robot_Command", rclcpp::SystemDefaultsQoS()));
+      node_->create_publisher<robot_msgs::msg::RobotCommand>("rl_sar/Robot_Commands", rclcpp::SystemDefaultsQoS()));
 
   imu_publisher_ = node_->create_publisher<sensor_msgs::msg::Imu>(
         "/imu", rclcpp::SystemDefaultsQoS());
@@ -64,6 +64,7 @@ std::vector<hardware_interface::StateInterface> RobotHWInterface::export_state_i
       info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &hw_states_velocities_[i]));
     state_interfaces.emplace_back(hardware_interface::StateInterface(
       info_.joints[i].name, hardware_interface::HW_IF_EFFORT, &hw_states_efforts_[i]));
+      std::cout << "Exporting state interface for joint: " << info_.joints[i].name << std::endl;
   }
 
   return state_interfaces;
@@ -123,14 +124,14 @@ hardware_interface::return_type RobotHWInterface::write(const rclcpp::Time & /*t
         command_msg.motor_command[i].kp = joint_commands->motor_command[i].kp;
         command_msg.motor_command[i].kd = joint_commands->motor_command[i].kd;
     }
-    else
-    {
-        command_msg.motor_command[i].q = 0.0;
-        command_msg.motor_command[i].dq = 0.0;
-        command_msg.motor_command[i].kp = 0.0;
-        command_msg.motor_command[i].kd = 0.0;
-        command_msg.motor_command[i].mode = 0;
-    }
+    // else
+    // {
+    //     command_msg.motor_command[i].q = 0.0;
+    //     command_msg.motor_command[i].dq = 0.0;
+    //     command_msg.motor_command[i].kp = 0.0;
+    //     command_msg.motor_command[i].kd = 0.0;
+    //     command_msg.motor_command[i].mode = 0;
+    // }
       
 
   }

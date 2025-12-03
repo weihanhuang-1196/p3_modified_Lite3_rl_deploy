@@ -188,7 +188,7 @@ struct Observations
 class RL
 {
 public:
-    RL() {};
+    RL():motor_enable_changed(false), motor_enabled(false){};
     ~RL() {};
 
     YamlParams params;
@@ -233,6 +233,8 @@ public:
     // control
     Control control;
     bool motor_enabled;
+    // motor enable change flag
+    bool motor_enable_changed;
     void KeyboardInterface();
 
     // history buffer
