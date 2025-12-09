@@ -12,10 +12,11 @@ from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    rname = LaunchConfiguration("rname")
+    robot_name = "panda3"
+    rname = robot_name
 
     wname = "stairs"
-    robot_name = "panda3"
+    
 
     robot_description = ParameterValue(
         Command([
@@ -57,13 +58,16 @@ def generate_launch_description():
         }],
     )
 
+    panda3 = Node(
+        package="rl_sar",
+        executable="rl_real_panda3",
+        name="rl_real_panda3",
+        output="screen"
+    )
+
     return LaunchDescription([
-        DeclareLaunchArgument(
-            "rname",
-            description="Robot name (e.g., a1, go2)",
-            default_value=TextSubstitution(text=""),
-        ),
         robot_state_publisher_node,
         joy_node,
         param_node,
+        panda3
     ])
