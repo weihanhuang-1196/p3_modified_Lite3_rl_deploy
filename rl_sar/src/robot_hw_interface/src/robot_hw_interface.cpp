@@ -137,6 +137,7 @@ hardware_interface::return_type RobotHWInterface::write(const rclcpp::Time & /*t
   }
   if(rt_robot_command_publisher_ && rt_robot_command_publisher_->trylock())
   {
+      command_msg.header.stamp = node_->get_clock()->now();
       rt_robot_command_publisher_->msg_ = command_msg;
       rt_robot_command_publisher_->unlockAndPublish();
   }

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # 新pd 这个能站。
 panda3/himloco/walk:
-  model_name: "panda3_walk_model12.onnx"
+  model_name: "Dec03_19-26-38_test_barlowtwins.onnx"
   num_observations: 51
   observations: [ "ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
   observations_history: [9,8,7,6,5,4,3,2,1,0]  # 0 is the latest observation

@@ -1,0 +1,1 @@
+./cmake_build/bin/rl_sim_mujoco panda3 scene_terrain
