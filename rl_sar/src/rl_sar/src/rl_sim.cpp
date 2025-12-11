@@ -123,6 +123,10 @@ RL_Sim::RL_Sim(int argc, char **argv)
     this->robot_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
         this->ros_namespace + "robot_joint_controller/command", rclcpp::SystemDefaultsQoS());
 
+    this->actions_publisher = ros2_node->create_publisher<robot_msgs::msg::Actions>(
+        this->ros_namespace + "actions", rclcpp::SystemDefaultsQoS());
+
+
     // subscriber
     this->cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
         "/cmd_vel", rclcpp::SystemDefaultsQoS(),
@@ -364,6 +368,20 @@ void RL_Sim::RobotControl()
     this->control.ClearInput();
 
     this->SetCommand(&this->robot_command);
+
+    std::vector<float> actions;
+    if (this->output_actions_queue.try_pop(actions))
+    {
+        if(actions.empty())return;
+        robot_msgs::msg::Actions actions_msg;
+        actions_msg.actions.resize(actions.size());
+        for (size_t i = 0; i < 12; i++)
+        {
+            actions_msg.actions[i] = actions[i];
+        }
+        this->actions_publisher->publish(actions_msg);
+    }
+
 }
 
 #if defined(USE_ROS1)
@@ -515,6 +533,8 @@ void RL_Sim::RunModel()
 
         this->obs.actions = this->Forward();
         this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
+
+        output_actions_queue.push(this->obs.actions); // for logging
 
         if (!this->output_dof_pos.empty())
         {

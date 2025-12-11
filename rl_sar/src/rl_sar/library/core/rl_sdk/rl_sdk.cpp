@@ -660,8 +660,8 @@ bool RLFSMState::Interpolate(
 
 void RLFSMState::RLControl()
 {
-    std::vector<float> _output_dof_pos, _output_dof_vel;
-    if (rl.output_dof_pos_queue.try_pop(_output_dof_pos) && rl.output_dof_vel_queue.try_pop(_output_dof_vel))
+    std::vector<float> _output_dof_pos, _output_dof_vel, _output_dof_tau;
+    if (rl.output_dof_pos_queue.try_pop(_output_dof_pos) && rl.output_dof_vel_queue.try_pop(_output_dof_vel) && rl.output_dof_tau_queue.try_pop(_output_dof_tau))
     {
         for (int i = 0; i < rl.params.Get<int>("num_of_dofs"); ++i)
         {
@@ -673,9 +673,13 @@ void RLFSMState::RLControl()
             {
                 fsm_command->motor_command.dq[i] = _output_dof_vel[i];
             }
+            if (!_output_dof_tau.empty())
+            {
+                fsm_command->motor_command.tau[i] = _output_dof_tau[i];
+            }
             fsm_command->motor_command.kp[i] = rl.params.Get<std::vector<float>>("rl_kp")[i];
             fsm_command->motor_command.kd[i] = rl.params.Get<std::vector<float>>("rl_kd")[i];
-            fsm_command->motor_command.tau[i] = 0.0f;
+            // fsm_command->motor_command.tau[i] = 0.0f;
         }
     }
 }

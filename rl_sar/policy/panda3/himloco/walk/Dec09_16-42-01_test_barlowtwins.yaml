@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # 新pd 这个能站。
 panda3/himloco/walk:
-  model_name: "Dec10_16-21-36_test_barlowtwinsmodel_15000.onnx"
+  model_name: "Dec09_16-42-01_test_barlowtwins.onnx"
   num_observations: 51
   observations: [ "ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
   observations_history: [9,8,7,6,5,4,3,2,1,0]  # 0 is the latest observation
@@ -16,14 +16,14 @@ panda3/himloco/walk:
                        100, 100, 100,
                        100, 100, 100,
                        100, 100, 100]
-  rl_kp:  [115, 115, 115,
-            115, 115, 115,
-            115, 115, 115,
-            115, 115, 115]
-  rl_kd: [2.875, 2.875, 2.875,
-             2.875, 2.875, 2.875,
-             2.875, 2.875, 2.875,
-             2.875, 2.875, 2.875]
+  rl_kp: [50, 55, 36,
+             50, 55, 36,
+             50, 55, 36,
+             50, 55, 36]
+  rl_kd: [1.375, 2, 0.6,
+             1.375, 2, 0.6,
+             1.375, 2, 0.6,
+             1.375, 2, 0.6]
   fixed_kp: [60, 60, 60,
              60, 60, 60,
              60, 60, 60,

@@ -209,7 +209,7 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
         for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
         {
             mj_data->ctrl[this->params.Get<std::vector<int>>("joint_mapping")[i]] =
-                command->motor_command.tau[i] +
+                // command->motor_command.tau[i] +
                 command->motor_command.kp[i] * (command->motor_command.q[i] - mj_data->sensordata[this->params.Get<std::vector<int>>("joint_mapping")[i]]) +
                 command->motor_command.kd[i] * (command->motor_command.dq[i] - mj_data->sensordata[this->params.Get<std::vector<int>>("joint_mapping")[i] + this->params.Get<int>("num_of_dofs")]);
         }

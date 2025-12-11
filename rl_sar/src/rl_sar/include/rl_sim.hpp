@@ -43,6 +43,7 @@
 #include <geometry_msgs/msg/twist.hpp>
 #include <std_srvs/srv/empty.hpp>
 #include <rcl_interfaces/srv/get_parameters.hpp>
+#include "robot_msgs/msg/actions.hpp"
 #endif
 
 #include "matplotlibcpp.h"
@@ -119,6 +120,7 @@ private:
     void CmdvelCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
     void RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg);
     void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
+    rclcpp::Publisher<robot_msgs::msg::Actions>::SharedPtr actions_publisher;
 #endif
 
     // others
@@ -127,6 +129,8 @@ private:
     std::map<std::string, float> joint_velocities;
     std::map<std::string, float> joint_efforts;
     void StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names);
+
+    tbb::concurrent_queue<std::vector<float>> output_actions_queue;
 };
 
 #endif // RL_SIM_HPP

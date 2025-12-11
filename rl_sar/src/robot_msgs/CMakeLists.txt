@@ -15,6 +15,7 @@ if($ENV{ROS_DISTRO} MATCHES "noetic")
     RobotCommand.msg
     RobotState.msg
     IMU.msg
+    Actions.msg
   )
   generate_messages(
     DEPENDENCIES
@@ -44,6 +45,7 @@ elseif($ENV{ROS_DISTRO} MATCHES "foxy|humble")
     "msg/RobotCommand.msg"
     "msg/RobotState.msg"
     "msg/IMU.msg"
+    "msg/Actions.msg"
     DEPENDENCIES std_msgs
   )
   ament_package()

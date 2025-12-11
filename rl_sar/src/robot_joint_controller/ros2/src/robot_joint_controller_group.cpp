@@ -264,7 +264,7 @@ void RobotJointControllerGroup::UpdateFunc(const double &period_seconds)
         currentPos[index] = state_interfaces_[index * 2].get_value();
         // currentVel[index] = state_interfaces_[index * 3 + 2].get_value();
         currentVel[index] = (currentPos[index] - (double)(last_state_.motor_state[index].q)) / period_seconds;
-        calcTorque[index] = servo_command_.pos_stiffness * (servo_command_.pos - currentPos[index]) + servo_command_.vel_stiffness * (servo_command_.vel - currentVel[index]) + servo_command_.torque;
+        calcTorque[index] = servo_command_.pos_stiffness * (servo_command_.pos - currentPos[index]) + servo_command_.vel_stiffness * (servo_command_.vel - currentVel[index]);
         EffortLimit(calcTorque[index], index);
 
         command_interfaces_[index].set_value(calcTorque[index]);
