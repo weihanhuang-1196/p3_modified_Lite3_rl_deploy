@@ -60,6 +60,10 @@ public:
      * @return Model type ("torch" or "onnx")
      */
     virtual std::string get_model_type() const = 0;
+
+
+
+    virtual std::vector<float> forward_motor_policy(const std::vector<float>& inputs) = 0;
 };
 
 /**
@@ -85,6 +89,8 @@ public:
     bool is_loaded() const override { return loaded_; }
     std::vector<float> forward(const std::vector<std::vector<float>>& inputs) override;
     std::string get_model_type() const override { return "torch"; }
+
+    std::vector<float> forward_motor_policy(const std::vector<float>& inputs) override{ return std::vector<float>(); };
 
 private:
 #ifdef USE_TORCH
@@ -134,6 +140,8 @@ public:
     bool is_loaded() const override { return loaded_; }
     std::vector<float> forward(const std::vector<std::vector<float>>& inputs) override;
     std::string get_model_type() const override { return "onnx"; }
+
+    std::vector<float> forward_motor_policy(const std::vector<float>& inputs);
 
 private:
 #ifdef USE_ONNX

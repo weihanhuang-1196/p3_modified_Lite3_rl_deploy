@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef RL_SIM_HPP
-#define RL_SIM_HPP
+#ifndef RL_Test_HPP
+#define RL_Test_HPP
 
 // #define PLOT
 // #define CSV_LOGGER
@@ -50,11 +50,11 @@
 #include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 
-class RL_Sim : public RL
+class RL_Test : public RL
 {
 public:
-    RL_Sim(int argc, char **argv);
-    ~RL_Sim();
+    RL_Test(int argc, char **argv);
+    ~RL_Test();
 
 #if defined(USE_ROS2)
     std::shared_ptr<rclcpp::Node> ros2_node;
@@ -144,6 +144,27 @@ private:
     void StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names);
 
     tbb::concurrent_queue<std::vector<float>> output_actions_queue;
+
+
+    float percent_pre_getup = 0.0f;
+    float percent_getup = 0.0f;
+    std::vector<float> pre_running_pos = {
+        0.00, 1.36, -2.65,
+        0.00, 1.36, -2.65,
+        0.00, 1.36, -2.65,
+        0.00, 1.36, -2.65,
+        0.00, 0.00, 0.00, 0.00
+    };
+
+public:
+    bool Interpolate(float& percent,
+        const std::vector<float>& start_pos,
+        const std::vector<float>& target_pos,
+        float duration_seconds,
+        std::vector<float> &output_dof_pos,
+        bool use_fixed_gains = true
+    );
+
 };
 
-#endif // RL_SIM_HPP
+#endif // RL_Test_HPP

@@ -350,6 +350,50 @@ void ONNXModel::setup_input_output_info()
     }
 }
 
+
+std::vector<float> ONNXModel::forward_motor_policy(const std::vector<float>& inputs)
+{
+    int NUM_MOTORS = 12;
+    std::vector<int64_t> input_shape = {NUM_MOTORS, 6};
+
+    const char* input_name  = this->input_node_names_[0].c_str();
+    const char* output_name = this->output_node_names_[0].c_str();
+    Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+
+    Ort::Value input_tensor =
+        Ort::Value::CreateTensor<float>(
+            memory_info,
+            const_cast<float*>(inputs.data()),
+            inputs.size(),
+            input_shape.data(),
+            input_shape.size()
+        );
+
+    // 2. 推理
+    auto outputs = session_->Run(
+        Ort::RunOptions{nullptr},
+        &input_name,
+        &input_tensor,
+        1,
+        &output_name,
+        1
+    );
+
+
+    // 3. 读取输出
+    float* tau_est = outputs[0].GetTensorMutableData<float>();
+
+    // for (int i = 0; i < NUM_MOTORS; ++i) {
+    //     std::cout << "motor " << i
+    //               << " tau_est = "
+    //               << tau_est[i] << std::endl;
+    // }
+
+    return std::vector<float>(tau_est, tau_est + NUM_MOTORS);
+
+
+}
+
 std::vector<float> ONNXModel::extract_output_data(const std::vector<Ort::Value>& outputs)
 {
     if (outputs.empty())

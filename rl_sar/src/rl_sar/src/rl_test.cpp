@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "rl_sim.hpp"
+#include "rl_test.hpp"
 
-RL_Sim::RL_Sim(int argc, char **argv)
+RL_Test::RL_Test(int argc, char **argv)
 {
 #if defined(USE_ROS1)
     this->ang_vel_axis = "world";
@@ -13,7 +13,7 @@ RL_Sim::RL_Sim(int argc, char **argv)
     nh.param<std::string>("ros_namespace", this->ros_namespace, "");
     nh.param<std::string>("robot_name", this->robot_name, "");
 #elif defined(USE_ROS2)
-    ros2_node = std::make_shared<rclcpp::Node>("rl_sim_node");
+    ros2_node = std::make_shared<rclcpp::Node>("RL_Test_node");
     this->ang_vel_axis = "body";
     this->ros_namespace = ros2_node->get_namespace();
     // get params from param_node
@@ -93,9 +93,9 @@ RL_Sim::RL_Sim(int argc, char **argv)
     }
 
     // subscriber
-    this->cmd_vel_subscriber = nh.subscribe<geometry_msgs::Twist>("/cmd_vel", 10, &RL_Sim::CmdvelCallback, this);
-    this->joy_subscriber = nh.subscribe<sensor_msgs::Joy>("/joy", 10, &RL_Sim::JoyCallback, this);
-    this->model_state_subscriber = nh.subscribe<gazebo_msgs::ModelStates>("/gazebo/model_states", 10, &RL_Sim::ModelStatesCallback, this);
+    this->cmd_vel_subscriber = nh.subscribe<geometry_msgs::Twist>("/cmd_vel", 10, &RL_Test::CmdvelCallback, this);
+    this->joy_subscriber = nh.subscribe<sensor_msgs::Joy>("/joy", 10, &RL_Test::JoyCallback, this);
+    this->model_state_subscriber = nh.subscribe<gazebo_msgs::ModelStates>("/gazebo/model_states", 10, &RL_Test::ModelStatesCallback, this);
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {
         const std::string &joint_controller_name = joint_controller_names_vec[i];
@@ -154,13 +154,13 @@ RL_Sim::RL_Sim(int argc, char **argv)
 #endif
 
     // loop
-    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("dt"), std::bind(&RL_Sim::RobotControl, this));
-    this->loop_rl = std::make_shared<LoopFunc>("loop_rl", this->params.Get<float>("dt") * this->params.Get<int>("decimation"), std::bind(&RL_Sim::RunModel, this));
+    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("dt"), std::bind(&RL_Test::RobotControl, this));
+    this->loop_rl = std::make_shared<LoopFunc>("loop_rl", this->params.Get<float>("dt") * this->params.Get<int>("decimation"), std::bind(&RL_Test::RunModel, this));
     this->loop_control->start();
     this->loop_rl->start();
 
     // keyboard
-    this->loop_keyboard = std::make_shared<LoopFunc>("loop_keyboard", 0.05, std::bind(&RL_Sim::KeyboardInterface, this));
+    this->loop_keyboard = std::make_shared<LoopFunc>("loop_keyboard", 0.05, std::bind(&RL_Test::KeyboardInterface, this));
     this->loop_keyboard->start();
 
 #ifdef PLOT
@@ -169,7 +169,7 @@ RL_Sim::RL_Sim(int argc, char **argv)
     this->plot_target_joint_pos.resize(this->params.Get<int>("num_of_dofs"));
     for (auto &vector : this->plot_real_joint_pos) { vector = std::vector<float>(this->plot_size, 0); }
     for (auto &vector : this->plot_target_joint_pos) { vector = std::vector<float>(this->plot_size, 0); }
-    this->loop_plot = std::make_shared<LoopFunc>("loop_plot", 0.001, std::bind(&RL_Sim::Plot, this));
+    this->loop_plot = std::make_shared<LoopFunc>("loop_plot", 0.001, std::bind(&RL_Test::Plot, this));
     this->loop_plot->start();
 #endif
 #ifdef CSV_LOGGER
@@ -189,11 +189,11 @@ RL_Sim::RL_Sim(int argc, char **argv)
 #endif
 
 
-    std::cout << LOGGER::INFO << "RL_Sim start" << std::endl;
+    std::cout << LOGGER::INFO << "RL_Test start" << std::endl;
 }
 
 #ifdef MOTOR_POLICY
-void RL_Sim::InitMotorPolicy()
+void RL_Test::InitMotorPolicy()
 {
     std::string model_path = std::string(POLICY_DIR) + "/panda3/motor.onnx";
     loop_motor_policy = InferenceRuntime::ModelFactory::load_model(model_path);
@@ -208,7 +208,7 @@ void RL_Sim::InitMotorPolicy()
 
 
 
-RL_Sim::~RL_Sim()
+RL_Test::~RL_Test()
 {
     this->loop_keyboard->shutdown();
     this->loop_control->shutdown();
@@ -216,10 +216,10 @@ RL_Sim::~RL_Sim()
 #ifdef PLOT
     this->loop_plot->shutdown();
 #endif
-    std::cout << LOGGER::INFO << "RL_Sim exit" << std::endl;
+    std::cout << LOGGER::INFO << "RL_Test exit" << std::endl;
 }
 
-void RL_Sim::StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names)
+void RL_Test::StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names)
 {
 #if defined(USE_ROS1)
     pid_t pid0 = fork();
@@ -284,7 +284,7 @@ void RL_Sim::StartJointController(const std::string& ros_namespace, const std::v
 #endif
 }
 
-void RL_Sim::GetState(RobotState<float> *state)
+void RL_Test::GetState(RobotState<float> *state)
 {
 #if defined(USE_ROS1)
     const auto &orientation = this->pose.orientation;
@@ -317,7 +317,7 @@ void RL_Sim::GetState(RobotState<float> *state)
     }
 }
 
-void RL_Sim::SetCommand(const RobotCommand<float> *command)
+void RL_Test::SetCommand(const RobotCommand<float> *command)
 {
     int motor_enable = this->motor_enabled ? 1 : 0;
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
@@ -349,7 +349,7 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
 #endif
 }
 
-void RL_Sim::RobotControl()
+void RL_Test::RobotControl()
 {
     this->GetState(&this->robot_state);
 
@@ -414,19 +414,19 @@ void RL_Sim::RobotControl()
 }
 
 #if defined(USE_ROS1)
-void RL_Sim::ModelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
+void RL_Test::ModelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
 {
     this->vel = msg->twist[2];
     this->pose = msg->pose[2];
 }
 #elif defined(USE_ROS2)
-void RL_Sim::GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
+void RL_Test::GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
 {
     this->gazebo_imu = *msg;
 }
 #endif
 
-void RL_Sim::CmdvelCallback(
+void RL_Test::CmdvelCallback(
 #if defined(USE_ROS1)
     const geometry_msgs::Twist::ConstPtr &msg
 #elif defined(USE_ROS2)
@@ -437,7 +437,7 @@ void RL_Sim::CmdvelCallback(
     this->cmd_vel = *msg;
 }
 
-void RL_Sim::JoyCallback(
+void RL_Test::JoyCallback(
 #if defined(USE_ROS1)
     const sensor_msgs::Joy::ConstPtr &msg
 #elif defined(USE_ROS2)
@@ -512,20 +512,20 @@ void RL_Sim::JoyCallback(
 }
 
 #if defined(USE_ROS1)
-void RL_Sim::JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name)
+void RL_Test::JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name)
 {
     this->joint_positions[joint_controller_name] = msg->q;
     this->joint_velocities[joint_controller_name] = msg->dq;
     this->joint_efforts[joint_controller_name] = msg->tau_est;
 }
 #elif defined(USE_ROS2)
-void RL_Sim::RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg)
+void RL_Test::RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg)
 {
     this->robot_state_subscriber_msg = *msg;
 }
 #endif
 
-void RL_Sim::RunModel()
+void RL_Test::RunModel()
 {
     if (this->rl_init_done && simulation_running)
     {
@@ -561,7 +561,15 @@ void RL_Sim::RunModel()
         this->obs.dof_vel = this->robot_state.motor_state.dq;
 
         this->obs.actions = this->Forward();
-        this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
+        // this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
+
+
+        if(!Interpolate(percent_pre_getup, this->params.Get<std::vector<float>>("default_dof_pos"), pre_running_pos, 2.0f,this->output_dof_pos, true))
+            if(!Interpolate(percent_getup, pre_running_pos, this->params.Get<std::vector<float>>("default_dof_pos"), 2.0f,this->output_dof_pos, true))
+                {
+                    percent_pre_getup = 0.0f;
+                    percent_getup = 0.0f;
+                }
 
 
 
@@ -634,7 +642,64 @@ void RL_Sim::RunModel()
     }
 }
 
-std::vector<float> RL_Sim::Forward()
+
+
+
+bool RL_Test::Interpolate(
+        float& percent,
+        const std::vector<float>& start_pos,
+        const std::vector<float>& target_pos,
+        float duration_seconds,
+        std::vector<float> &output_dof_pos,
+        bool use_fixed_gains
+    )
+{
+    if (percent >= 1.0f)
+    {
+        return false;
+    }
+
+    if (percent == 0.0f)
+    {
+        float max_diff = 0.0f;
+        for (size_t i = 0; i < start_pos.size() && i < target_pos.size(); ++i)
+        {
+            max_diff = std::max(max_diff, std::abs(start_pos[i] - target_pos[i]));
+        }
+
+        if (max_diff < 0.1f)
+        {
+            percent = 1.0f;
+        }
+    }
+
+    int required_frames = std::max(1, static_cast<int>(std::ceil(duration_seconds / this->params.Get<float>("dt"))));
+    float step = 1.0f / required_frames;
+
+    percent += step;
+    percent = std::min(percent, 1.0f);
+
+    auto kp = use_fixed_gains ? this->params.Get<std::vector<float>>("fixed_kp") : this->params.Get<std::vector<float>>("rl_kp");
+    auto kd = use_fixed_gains ? this->params.Get<std::vector<float>>("fixed_kd") : this->params.Get<std::vector<float>>("rl_kd");
+
+    for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
+    {
+        output_dof_pos[i] = (1 - percent) * start_pos[i] + percent * target_pos[i];
+    }
+
+
+    if (percent >= 1.0f)
+    {
+        return false;
+    }
+
+    return true;
+
+}
+
+
+
+std::vector<float> RL_Test::Forward()
 {
     std::unique_lock<std::mutex> lock(this->model_mutex, std::try_to_lock);
 
@@ -681,7 +746,7 @@ std::vector<float> RL_Sim::Forward()
     }
 }
 
-void RL_Sim::Plot()
+void RL_Test::Plot()
 {
     this->plot_t.erase(this->plot_t.begin());
     this->plot_t.push_back(this->motiontime);
@@ -720,11 +785,11 @@ int main(int argc, char **argv)
 #if defined(USE_ROS1)
     signal(SIGINT, signalHandler);
     ros::init(argc, argv, "rl_sar");
-    RL_Sim rl_sar(argc, argv);
+    RL_Test rl_sar(argc, argv);
     ros::spin();
 #elif defined(USE_ROS2)
     rclcpp::init(argc, argv);
-    auto rl_sar = std::make_shared<RL_Sim>(argc, argv);
+    auto rl_sar = std::make_shared<RL_Test>(argc, argv);
     rclcpp::spin(rl_sar->ros2_node);
     rclcpp::shutdown();
 #endif

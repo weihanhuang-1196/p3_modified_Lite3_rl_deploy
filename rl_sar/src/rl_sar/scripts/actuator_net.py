@@ -12,22 +12,22 @@ from torch.utils.data import Dataset, DataLoader
 from torch.optim import Adam
 import pandas as pd
 
-BASE_PATH = os.path.join(os.path.dirname(__file__), "../")
+BASE_PATH = os.path.join(os.path.dirname(__file__), "../../../")
 
 class Config:
     def __init__(self):
-        self.lr = 8e-4
-        self.eps = 1e-8
-        self.weight_decay = 0.0
-        self.epochs = 200
-        self.batch_size = 128
-        self.device = "cpu"
-        self.in_dim = 6
-        self.units = 32
-        self.layers = 2
-        self.out_dim = 1
-        self.act = "softsign"
-        self.dt = 0.02
+        self.lr = 8e-4                  # 学习率
+        self.eps = 1e-8                 # Adam优化器的epsilon参数
+        self.weight_decay = 0.0         # 权重衰减（L2正则化）
+        self.epochs = 200               # 训练的总轮数
+        self.batch_size = 128           # 每个批次的样本数量
+        self.device = "cpu"             # 设备选择，"cpu"或"cuda"（如果有GPU可用）
+        self.in_dim = 6                 # 输入维度
+        self.units = 32                 # 每层隐藏层的单元数   
+        self.layers = 2                 # 隐藏层的数量
+        self.out_dim = 1                # 输出维度
+        self.act = "softsign"           # 激活函数类型
+        self.dt = 0.02                  # 数据采样时间间隔
 
 class ActuatorDataset(Dataset):
     def __init__(self, data):

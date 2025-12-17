@@ -90,6 +90,9 @@ private:
     std::map<std::string, float> joint_positions;
     std::map<std::string, float> joint_velocities;
     std::map<std::string, float> joint_efforts;
+
+    sensor_msgs::msg::Imu imu_;
+    rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
 };
 
 #endif // RL_REAL_HPP

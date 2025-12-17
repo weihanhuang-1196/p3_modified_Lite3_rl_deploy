@@ -7,7 +7,7 @@
 #define RL_SIM_HPP
 
 // #define PLOT
-// #define CSV_LOGGER
+#define CSV_LOGGER
 
 #include "rl_sdk.hpp"
 #include "observation_buffer.hpp"

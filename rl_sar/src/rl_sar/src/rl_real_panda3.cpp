@@ -74,7 +74,11 @@ RL_Real::RL_Real(int argc, char **argv)
     this->robot_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
         this->ros_namespace + "robot_joint_controller/command", rclcpp::SystemDefaultsQoS());
     this->robot_real_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
-        this->ros_namespace + "rl_sar/Robot_Commands", rclcpp::SystemDefaultsQoS());
+        this->ros_namespace + "rl_sar/Robot_Command", rclcpp::SystemDefaultsQoS());
+
+    this->imu_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::Imu>(
+        "/imu", rclcpp::SystemDefaultsQoS());
+    
 
     // subscriber
     this->cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
@@ -92,7 +96,7 @@ RL_Real::RL_Real(int argc, char **argv)
 
 
     // loop
-    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("dt"), std::bind(&RL_Real::RobotControl, this));
+    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("control_dt"), std::bind(&RL_Real::RobotControl, this));
     this->loop_rl = std::make_shared<LoopFunc>("loop_rl", this->params.Get<float>("dt") * this->params.Get<int>("decimation"), std::bind(&RL_Real::RunModel, this));
     this->loop_control->start();
     this->loop_rl->start();
@@ -135,6 +139,23 @@ void RL_Real::GetState(RobotState<float> *state)
     const auto orientation = this->robot_state_subscriber_msg.imu.quaternion;
     const auto angular_velocity = this->robot_state_subscriber_msg.imu.gyroscope;
 
+
+    this->imu_.orientation.x = orientation[1];
+    this->imu_.orientation.y = orientation[2];
+    this->imu_.orientation.z = orientation[3];
+    this->imu_.orientation.w = orientation[0];
+    
+    this->imu_.angular_velocity.x = angular_velocity[0];
+    this->imu_.angular_velocity.y = angular_velocity[1];
+    this->imu_.angular_velocity.z = angular_velocity[2];
+    
+    this->imu_.linear_acceleration.x = this->robot_state_subscriber_msg.imu.accelerometer[0];
+    this->imu_.linear_acceleration.y = this->robot_state_subscriber_msg.imu.accelerometer[1];
+    this->imu_.linear_acceleration.z = this->robot_state_subscriber_msg.imu.accelerometer[2];
+
+
+    this->imu_publisher_->publish(this->imu_);
+
     state->imu.quaternion[0] = orientation[0];
     state->imu.quaternion[1] = orientation[1];
     state->imu.quaternion[2] = orientation[2];
@@ -164,6 +185,7 @@ void RL_Real::SetCommand(const RobotCommand<float> *command)
         this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau = command->motor_command.tau[i];
         this->robot_command_publisher_msg.motor_command[this->params.Get<std::vector<int>>("joint_mapping")[i]].mode = motor_enable;
     }
+    this->robot_command_publisher_msg.t_id += 0.001f;
 
     this->robot_command_publisher->publish(this->robot_command_publisher_msg);
     this->robot_real_command_publisher->publish(this->robot_command_publisher_msg);
@@ -258,6 +280,7 @@ void RL_Real::JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg)
 void RL_Real::RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg)
 {
     this->robot_state_subscriber_msg = *msg;
+
 }
 
 void RL_Real::RunModel()

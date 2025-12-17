@@ -455,6 +455,35 @@ endif()
 
 
 
+# executable for rl_test
+if(NOT USE_CMAKE)
+    add_executable(rl_test src/rl_test.cpp)
+    target_link_libraries(rl_test
+        rl_sdk
+        observation_buffer
+        ${YAML_CPP_LIBRARIES}
+        Threads::Threads
+    )
+    if($ENV{ROS_DISTRO} MATCHES "noetic")
+        target_link_libraries(rl_test ${catkin_LIBRARIES})
+    elseif($ENV{ROS_DISTRO} MATCHES "foxy|humble")
+        ament_target_dependencies(rl_test
+            robot_state_publisher
+            rclcpp
+            std_msgs
+            robot_msgs
+            rclpy
+            std_srvs
+            geometry_msgs
+        )
+        install(TARGETS rl_test DESTINATION lib/${PROJECT_NAME})
+    endif()
+endif()
+
+
+
+
+
 
 
 # executable for rl real a1
