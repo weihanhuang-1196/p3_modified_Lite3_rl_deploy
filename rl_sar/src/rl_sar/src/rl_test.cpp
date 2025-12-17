@@ -564,8 +564,8 @@ void RL_Test::RunModel()
         // this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
 
 
-        if(!Interpolate(percent_pre_getup, this->params.Get<std::vector<float>>("default_dof_pos"), pre_running_pos, 2.0f,this->output_dof_pos, true))
-            if(!Interpolate(percent_getup, pre_running_pos, this->params.Get<std::vector<float>>("default_dof_pos"), 2.0f,this->output_dof_pos, true))
+        if(!Interpolate(percent_pre_getup, this->params.Get<std::vector<float>>("default_dof_pos"), pre_running_pos, 1.0f,this->output_dof_pos, true))
+            if(!Interpolate(percent_getup, pre_running_pos, this->params.Get<std::vector<float>>("default_dof_pos"), 1.0f,this->output_dof_pos, true))
                 {
                     percent_pre_getup = 0.0f;
                     percent_getup = 0.0f;
