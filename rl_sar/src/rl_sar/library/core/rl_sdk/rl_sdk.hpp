@@ -6,6 +6,9 @@
 #ifndef RL_SDK_HPP
 #define RL_SDK_HPP
 
+//延迟
+// #define DELAY 
+
 #include <iostream>
 #include <string>
 #include <exception>
@@ -25,6 +28,7 @@
 #include "inference_runtime.hpp"
 #include "logger.hpp"
 #include "motion_loader.hpp"
+#include "one_shot_async_timer.hpp"
 
 template <typename T>
 struct RobotCommand
@@ -280,9 +284,27 @@ public:
     RLFSMState(RL& rl, const std::string& name)
         : FSMState(name), rl(rl), fsm_state(nullptr), fsm_command(nullptr) {}
 
+
     RL& rl;
     const RobotState<float> *fsm_state;
     RobotCommand<float> *fsm_command;
+
+#ifdef DELAY
+
+    // 当前正在用的（老值）
+    std::vector<float> active_pos, active_vel, active_tau;
+
+    // 等待生效的新值
+    std::vector<float> pending_pos, pending_vel, pending_tau;
+
+    bool pending_valid = false;
+    std::chrono::steady_clock::time_point pending_start_time;
+
+    static constexpr double SWITCH_DELAY_SEC = 0.005; // 10 ms
+
+#endif
+
+
 
     bool Interpolate(
         float& percent,

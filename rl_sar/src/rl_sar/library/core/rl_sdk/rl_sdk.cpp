@@ -660,26 +660,91 @@ bool RLFSMState::Interpolate(
 
 void RLFSMState::RLControl()
 {
-    std::vector<float> _output_dof_pos, _output_dof_vel, _output_dof_tau;
-    if (rl.output_dof_pos_queue.try_pop(_output_dof_pos) && rl.output_dof_vel_queue.try_pop(_output_dof_vel) && rl.output_dof_tau_queue.try_pop(_output_dof_tau))
-    {
+
+#ifdef DELAY
+
+    std::vector<float> new_pos, new_vel, new_tau;
+
+        // 1️⃣ 检查是否收到新值
+        bool got_new =
+            rl.output_dof_pos_queue.try_pop(new_pos) &&
+            rl.output_dof_vel_queue.try_pop(new_vel) &&
+            rl.output_dof_tau_queue.try_pop(new_tau);
+
+        if (got_new)
+        {
+            // 缓存新值，但不立刻用
+            pending_pos = std::move(new_pos);
+            pending_vel = std::move(new_vel);
+            pending_tau = std::move(new_tau);
+
+            pending_start_time = std::chrono::steady_clock::now();
+            pending_valid = true;
+        }
+
+        // 2️⃣ 检查是否到了切换时间
+        if (pending_valid)
+        {
+            auto now = std::chrono::steady_clock::now();
+            double elapsed =
+                std::chrono::duration<double>(now - pending_start_time).count();
+
+            if (elapsed >= SWITCH_DELAY_SEC)
+            {
+                // ✅ 3ms 到了，正式切换
+                active_pos = std::move(pending_pos);
+                active_vel = std::move(pending_vel);
+                active_tau = std::move(pending_tau);
+
+                pending_valid = false;
+            }
+        }
+
+        // 3️⃣ 始终输出 active_*（老值 or 已切换的新值）
         for (int i = 0; i < rl.params.Get<int>("num_of_dofs"); ++i)
         {
-            if (!_output_dof_pos.empty())
-            {
-                fsm_command->motor_command.q[i] = _output_dof_pos[i];
-            }
-            if (!_output_dof_vel.empty())
-            {
-                fsm_command->motor_command.dq[i] = _output_dof_vel[i];
-            }
-            if (!_output_dof_tau.empty())
-            {
-                fsm_command->motor_command.tau[i] = _output_dof_tau[i];
-            }
-            fsm_command->motor_command.kp[i] = rl.params.Get<std::vector<float>>("rl_kp")[i];
-            fsm_command->motor_command.kd[i] = rl.params.Get<std::vector<float>>("rl_kd")[i];
-            // fsm_command->motor_command.tau[i] = 0.0f;
+            if (!active_pos.empty())
+                fsm_command->motor_command.q[i] = active_pos[i];
+
+            if (!active_vel.empty())
+                fsm_command->motor_command.dq[i] = active_vel[i];
+
+            if (!active_tau.empty())
+                fsm_command->motor_command.tau[i] = active_tau[i];
+
+            fsm_command->motor_command.kp[i] =
+                rl.params.Get<std::vector<float>>("rl_kp")[i];
+            fsm_command->motor_command.kd[i] =
+                rl.params.Get<std::vector<float>>("rl_kd")[i];
         }
-    }
+
+#else
+
+
+
+        std::vector<float> _output_dof_pos, _output_dof_vel, _output_dof_tau;
+        if (rl.output_dof_pos_queue.try_pop(_output_dof_pos) && rl.output_dof_vel_queue.try_pop(_output_dof_vel) && rl.output_dof_tau_queue.try_pop(_output_dof_tau))
+        {
+            for (int i = 0; i < rl.params.Get<int>("num_of_dofs"); ++i)
+            {
+                if (!_output_dof_pos.empty())
+                {
+                    fsm_command->motor_command.q[i] = _output_dof_pos[i];
+                }
+                if (!_output_dof_vel.empty())
+                {
+                    fsm_command->motor_command.dq[i] = _output_dof_vel[i];
+                }
+                if (!_output_dof_tau.empty())
+                {
+                    fsm_command->motor_command.tau[i] = _output_dof_tau[i];
+                }
+                fsm_command->motor_command.kp[i] = rl.params.Get<std::vector<float>>("rl_kp")[i];
+                fsm_command->motor_command.kd[i] = rl.params.Get<std::vector<float>>("rl_kd")[i];
+                // fsm_command->motor_command.tau[i] = 0.0f;
+            }
+        }
+
+#endif
+
 }

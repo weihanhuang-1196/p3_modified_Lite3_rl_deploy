@@ -341,6 +341,7 @@ include_directories(
     library/core/motion_loader
     library/core/inference_runtime
     library/core/logger
+    library/core/timer
     fsm_robot
 )
 
