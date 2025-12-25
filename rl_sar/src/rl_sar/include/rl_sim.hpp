@@ -45,6 +45,14 @@
 #include <std_srvs/srv/empty.hpp>
 #include <rcl_interfaces/srv/get_parameters.hpp>
 #include "robot_msgs/msg/actions.hpp"
+
+#define ROS_BAG_RECORDER
+
+#ifdef ROS_BAG_RECORDER
+#include "ros_bag_recorder.hpp"
+#endif
+
+
 #endif
 
 #include "matplotlibcpp.h"
@@ -134,6 +142,12 @@ private:
     void RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg);
     void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
     rclcpp::Publisher<robot_msgs::msg::Actions>::SharedPtr actions_publisher;
+
+#ifdef ROS_BAG_RECORDER
+    std::unique_ptr<RosbagRecorder> rosbag_recorder;
+#endif
+
+
 #endif
 
     // others

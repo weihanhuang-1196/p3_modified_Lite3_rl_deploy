@@ -37,6 +37,15 @@
 #include <rcl_interfaces/srv/get_parameters.hpp>
 
 #include "matplotlibcpp.h"
+
+#define ROS_BAG_RECORDER
+
+#ifdef ROS_BAG_RECORDER
+#include "ros_bag_recorder.hpp"
+#endif
+
+
+
 namespace plt = matplotlibcpp;
 
 class RL_Real : public RL
@@ -93,6 +102,13 @@ private:
 
     sensor_msgs::msg::Imu imu_;
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
+
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
+
+
+#ifdef ROS_BAG_RECORDER
+    std::unique_ptr<RosbagRecorder> rosbag_recorder;
+#endif
 };
 
 #endif // RL_REAL_HPP

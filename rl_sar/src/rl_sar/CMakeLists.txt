@@ -342,6 +342,7 @@ include_directories(
     library/core/inference_runtime
     library/core/logger
     library/core/timer
+    library/core/rosbagrecorder
     fsm_robot
 )
 

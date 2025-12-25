@@ -13,6 +13,9 @@ RL_Sim::RL_Sim(int argc, char **argv)
     nh.param<std::string>("ros_namespace", this->ros_namespace, "");
     nh.param<std::string>("robot_name", this->robot_name, "");
 #elif defined(USE_ROS2)
+
+
+
     ros2_node = std::make_shared<rclcpp::Node>("rl_sim_node");
     this->ang_vel_axis = "body";
     this->ros_namespace = ros2_node->get_namespace();
@@ -190,6 +193,13 @@ RL_Sim::RL_Sim(int argc, char **argv)
 
 
     std::cout << LOGGER::INFO << "RL_Sim start" << std::endl;
+
+#ifdef ROS_BAG_RECORDER
+    rosbag_recorder = std::make_unique<RosbagRecorder>(
+        this->params.Get<std::string>("rosbag_save_path"),   // 保存路径
+        this->params.Get<std::string>("rosbag_save_name")       // 包名前缀
+    );
+#endif
 }
 
 #ifdef MOTOR_POLICY

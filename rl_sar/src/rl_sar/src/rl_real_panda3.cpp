@@ -78,6 +78,9 @@ RL_Real::RL_Real(int argc, char **argv)
 
     this->imu_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::Imu>(
         "/imu", rclcpp::SystemDefaultsQoS());
+
+    this->joint_state_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::JointState>(
+        "/joint_states", rclcpp::SystemDefaultsQoS());
     
 
     // subscriber
@@ -119,6 +122,14 @@ RL_Real::RL_Real(int argc, char **argv)
 #endif
 
     std::cout << LOGGER::INFO << "RL_Real start" << std::endl;
+
+#ifdef ROS_BAG_RECORDER
+    rosbag_recorder = std::make_unique<RosbagRecorder>(
+        this->params.Get<std::string>("rosbag_save_path"),   // 保存路径
+        this->params.Get<std::string>("rosbag_save_name")       // 包名前缀
+    );
+#endif
+
 }
 
 RL_Real::~RL_Real()
@@ -164,13 +175,29 @@ void RL_Real::GetState(RobotState<float> *state)
     state->imu.gyroscope[0] = angular_velocity[0];
     state->imu.gyroscope[1] = angular_velocity[1];
     state->imu.gyroscope[2] = angular_velocity[2];
+    
+    sensor_msgs::msg::JointState joint_state_msg;
+    joint_state_msg.header.stamp = this->ros2_node->now();
+    joint_state_msg.name = std::vector<std::string>(this->params.Get<int>("num_of_dofs"),"");
+    joint_state_msg.position = std::vector<double>(this->params.Get<int>("num_of_dofs"),0.0f);
+    joint_state_msg.velocity  = std::vector<double>(this->params.Get<int>("num_of_dofs"),0.0f);
+    joint_state_msg.effort  = std::vector<double>(this->params.Get<int>("num_of_dofs"),0.0f);
 
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {
         state->motor_state.q[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].q;
         state->motor_state.dq[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].dq;
         state->motor_state.tau_est[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau_est;
+
+        joint_state_msg.name[this->params.Get<std::vector<int>>("joint_mapping")[i]] = this->params.Get<std::vector<std::string>>("joint_names")[i];
+        joint_state_msg.position[this->params.Get<std::vector<int>>("joint_mapping")[i]] = state->motor_state.q[i];
+        joint_state_msg.velocity[this->params.Get<std::vector<int>>("joint_mapping")[i]] = state->motor_state.dq[i];
+        joint_state_msg.effort[this->params.Get<std::vector<int>>("joint_mapping")[i]] = state->motor_state.tau_est[i];
     }
+
+
+    joint_state_publisher_->publish(joint_state_msg);
+
 }
 
 void RL_Real::SetCommand(const RobotCommand<float> *command)
@@ -255,7 +282,15 @@ void RL_Real::JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg)
     if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadLeft);
     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::LB_RB);
 
-    this->control.x = this->joy_msg.axes[1]; // LY
+    // this->control.x = this->joy_msg.axes[1]; // LY
+    if(this->joy_msg.axes[1] >= 0.7f)
+        this->control.x = 0.7f;
+    else if (this->joy_msg.axes[1] <= - 0.7f)
+        this->control.x = -0.7f;
+    else
+        this->control.x = this->joy_msg.axes[1];
+
+
     this->control.y = this->joy_msg.axes[0]; // LX
     this->control.yaw = this->joy_msg.axes[3]; // RX
     this->control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);

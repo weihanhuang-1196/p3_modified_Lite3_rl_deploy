@@ -1,8 +1,8 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-go2/robot_lab:
-  model_name: "policy2.onnx"
+panda3/himloco/walk:
+  model_name: "policy.onnx"
   num_observations: 45
   observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
   observations_history: []  # 0 is the latest observation
@@ -16,14 +16,14 @@ go2/robot_lab:
                        100.0, 100.0, 100.0,
                        100.0, 100.0, 100.0,
                        100.0, 100.0, 100.0]
-  rl_kp: [20.0, 20.0, 20.0,
-          20.0, 20.0, 20.0,
-          20.0, 20.0, 20.0,
-          20.0, 20.0, 20.0]
-  rl_kd: [0.5, 0.5, 0.5,
-          0.5, 0.5, 0.5,
-          0.5, 0.5, 0.5,
-          0.5, 0.5, 0.5]
+  rl_kp: [100.0, 120.0, 180.0,
+          100.0, 120.0, 180.0,
+          100.0, 120.0, 180.0,
+          100.0, 120.0, 180.0]
+  rl_kd: [2.0, 2.5, 3.5,
+          2.0, 2.5, 3.5,
+          2.0, 2.5, 3.5,
+          2.0, 2.5, 3.5]
   fixed_kp: [80.0, 80.0, 80.0,
              80.0, 80.0, 80.0,
              80.0, 80.0, 80.0,
@@ -43,12 +43,12 @@ go2/robot_lab:
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
   commands_scale: [1.0, 1.0, 1.0]
-  torque_limits: [23.5, 23.5, 23.5,
-                  23.5, 23.5, 23.5,
-                  23.5, 23.5, 23.5,
-                  23.5, 23.5, 23.5]
-  default_dof_pos: [ 0.00, 0.80, -1.50,
-                     0.00, 0.80, -1.50,
-                     0.00, 0.80, -1.50,
-                     0.00, 0.80, -1.50]
+  torque_limits: [60, 60, 90,
+                60, 60, 90,
+                60, 60, 90,
+                60, 60, 90]
+  default_dof_pos: [0.000, 0.71, -1.5,
+                    0.000, 0.71, -1.5,
+                    0.000, 0.71, -1.5,
+                    0.000, 0.71, -1.5]
   joint_mapping: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]

@@ -7,7 +7,7 @@
 #define RL_SDK_HPP
 
 //延迟
-// #define DELAY 
+#define DELAY 
 
 #include <iostream>
 #include <string>
@@ -192,8 +192,9 @@ struct Observations
 class RL
 {
 public:
-    RL():motor_enable_changed(false), motor_enabled(false){};
-    ~RL() {};
+    RL():motor_enable_changed(false), motor_enabled(false)
+    , limit_q_timer(2.0f, [this](){this->limit_q_flag.store(false, std::memory_order_release);}) {};
+    ~RL() {limit_q_timer.cancel();};
 
     YamlParams params;
     Observations<float> obs;
@@ -274,6 +275,12 @@ public:
     // thread safety
     std::mutex model_mutex;
 
+    OneShotAsyncTimer limit_q_timer;
+    std::atomic<bool> limit_q_flag;
+
+
+
+
 
     
 };
@@ -282,12 +289,14 @@ class RLFSMState : public FSMState
 {
 public:
     RLFSMState(RL& rl, const std::string& name)
-        : FSMState(name), rl(rl), fsm_state(nullptr), fsm_command(nullptr) {}
+        : FSMState(name), rl(rl), fsm_state(nullptr), fsm_command(nullptr){}
+
 
 
     RL& rl;
     const RobotState<float> *fsm_state;
     RobotCommand<float> *fsm_command;
+
 
 #ifdef DELAY
 
@@ -300,7 +309,7 @@ public:
     bool pending_valid = false;
     std::chrono::steady_clock::time_point pending_start_time;
 
-    static constexpr double SWITCH_DELAY_SEC = 0.005; // 10 ms
+    static constexpr double SWITCH_DELAY_SEC = 0.010; // 10 ms
 
 #endif
 
