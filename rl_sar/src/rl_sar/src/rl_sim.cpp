@@ -129,6 +129,10 @@ RL_Sim::RL_Sim(int argc, char **argv)
     this->actions_publisher = ros2_node->create_publisher<robot_msgs::msg::Actions>(
         this->ros_namespace + "actions", rclcpp::SystemDefaultsQoS());
 
+    this->grid_publisher = this->ros2_node->create_publisher<nav_msgs::msg::OccupancyGrid>("grid", 1);
+    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(ros2_node);
+    this->marker_publisher = this->ros2_node->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 10);
+
 
     // subscriber
     this->cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
@@ -213,6 +217,119 @@ void RL_Sim::InitMotorPolicy()
     }
 }
 #endif
+
+
+void RL_Sim::quatToRotMatrix(double qx, double qy, double qz, double qw, double R[3][3])
+{
+
+    R[0][0] = 1 - 2*qy*qy - 2*qz*qz;
+    R[0][1] = 2*qx*qy - 2*qz*qw;
+    R[0][2] = 2*qx*qz + 2*qy*qw;
+
+    R[1][0] = 2*qx*qy + 2*qz*qw;
+    R[1][1] = 1 - 2*qx*qx - 2*qz*qz;
+    R[1][2] = 2*qy*qz - 2*qx*qw;
+
+    R[2][0] = 2*qx*qz - 2*qy*qw;
+    R[2][1] = 2*qy*qz + 2*qx*qw;
+    R[2][2] = 1 - 2*qx*qx - 2*qy*qy;
+}
+
+void RL_Sim::updatePosition(RobotState<float> *state)
+{
+    rclcpp::Time now = ros2_node->now();
+    double dt = 0.0;
+     if (!first_call) {
+        dt = (now - last_time).seconds();
+    } else {
+        first_call = false; // 第一次调用，不积分
+    }
+    last_time = now;
+
+    double R[3][3];
+    quatToRotMatrix(state->imu.quaternion[1],state->imu.quaternion[2],state->imu.quaternion[3],state->imu.quaternion[1], R);
+
+    // 矩阵乘向量
+    std::array<double,3> delta = {0.0, 0.0, 0.0};
+    for(int i=0;i<3;i++){
+        for(int j=0;j<3;j++){
+            delta[i] += R[i][j] * state->imu.accelerometer[j] * dt;
+        }
+    }
+
+    // 更新世界坐标
+    for(int i=0;i<3;i++)
+        position_world[i] += delta[i];
+}
+
+
+
+void RL_Sim::publishMapToBase(double x, double y, double yaw, double qx, double qy, double qz, double qw)
+{
+    geometry_msgs::msg::TransformStamped tf;
+
+    tf.header.stamp = ros2_node->now();
+    tf.header.frame_id = "map";
+    tf.child_frame_id = "base";
+
+    tf.transform.translation.x = x;
+    tf.transform.translation.y = y;
+    tf.transform.translation.z = yaw;
+
+    // tf2::Quaternion q;
+    // q.setRPY(0.0, 0.0, yaw);
+    tf.transform.rotation.x = qx;
+    tf.transform.rotation.y = qy;
+    tf.transform.rotation.z = qz;
+    tf.transform.rotation.w = qw;
+
+    tf_broadcaster_->sendTransform(tf);
+}
+
+
+void RL_Sim::publishMarker()
+{
+    visualization_msgs::msg::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = this->ros2_node->now();
+    marker.ns = "ground";
+    marker.id = 0;
+    marker.type = visualization_msgs::msg::Marker::CUBE;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+    marker.pose.position.x = 0.0;
+    marker.pose.position.y = 0.0;
+    marker.pose.position.z = -0.01;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 10.0;
+    marker.scale.y = 10.0;
+    marker.scale.z = 0.02;
+    marker.color.r = 0.5;
+    marker.color.g = 0.5;
+    marker.color.b = 0.5;
+    marker.color.a = 1.0;  // 完全不透明
+
+    this->marker_publisher->publish(marker);
+}
+
+
+void RL_Sim::publishGrid()
+{
+    
+    nav_msgs::msg::OccupancyGrid grid;
+    grid.header.frame_id = "map";
+    grid.header.stamp = this->ros2_node->now();
+
+    grid.info.resolution = 0.5;   // 0.5 m per cell
+    grid.info.width = 20;         // 10 m
+    grid.info.height = 20;
+    grid.info.origin.position.x = -5.0;
+    grid.info.origin.position.y = -5.0;
+    grid.info.origin.orientation.w = 1.0;
+
+    grid.data.resize(grid.info.width * grid.info.height, 255); 
+
+    grid_publisher->publish(grid);
+}
 
 
 
@@ -302,6 +419,7 @@ void RL_Sim::GetState(RobotState<float> *state)
 #elif defined(USE_ROS2)
     const auto &orientation = this->gazebo_imu.orientation;
     const auto &angular_velocity = this->gazebo_imu.angular_velocity;
+    const auto &linear_acceleration = this->gazebo_imu.linear_acceleration;
 #endif
 
     state->imu.quaternion[0] = orientation.w;
@@ -312,6 +430,11 @@ void RL_Sim::GetState(RobotState<float> *state)
     state->imu.gyroscope[0] = angular_velocity.x;
     state->imu.gyroscope[1] = angular_velocity.y;
     state->imu.gyroscope[2] = angular_velocity.z;
+
+    state->imu.accelerometer[0] = linear_acceleration.x;
+    state->imu.accelerometer[1] = linear_acceleration.y;
+    state->imu.accelerometer[2] = linear_acceleration.z;
+
 
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {
@@ -361,7 +484,18 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
 
 void RL_Sim::RobotControl()
 {
+    
+
     this->GetState(&this->robot_state);
+    // this->updatePosition(&this->robot_state);
+
+    this->publishMapToBase(0,0,0, 
+                            this->robot_state.imu.quaternion[1], 
+                            this->robot_state.imu.quaternion[2], 
+                            this->robot_state.imu.quaternion[3], 
+                            this->robot_state.imu.quaternion[0]);
+    this->publishGrid(); //调试地图
+    // this->publishMarker();
 
     this->StateController(&this->robot_state, &this->robot_command);
 

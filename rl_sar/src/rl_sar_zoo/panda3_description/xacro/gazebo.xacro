@@ -56,7 +56,7 @@
                 <rpyOffset>0 0 0</rpyOffset>
                 <frameName>imu_link</frameName>
             </plugin>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0.1 0.05 0 0 0 0</pose>
         </sensor>
     </gazebo>
 

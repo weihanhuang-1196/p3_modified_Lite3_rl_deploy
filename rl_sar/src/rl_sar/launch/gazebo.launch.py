@@ -5,10 +5,11 @@ import os
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, TextSubstitution, Command
+from launch.substitutions import LaunchConfiguration, TextSubstitution, Command, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
@@ -27,6 +28,16 @@ def generate_launch_description():
         ]),
         value_type=str
     )
+    
+    # robot_description_pkg = "panda3_description"
+    # robot_description_share = get_package_share_directory(robot_description_pkg)
+
+    # robot_description = Command([
+    #     "bash",
+    #     "-c",
+    #     f"xacro $(ros2 pkg prefix {robot_description_pkg})/share/{robot_description_pkg}/xacro/robot.xacro | "
+    #     f"sed 's#package://{robot_description_pkg}#file://$(ros2 pkg prefix {robot_description_pkg})/share/{robot_description_pkg}#g'"
+    # ])
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
@@ -34,6 +45,17 @@ def generate_launch_description():
         name="robot_state_publisher",
         output="screen",
         parameters=[{"robot_description": robot_description}],
+    )
+
+    tf_world_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='world_to_base',
+        arguments=[
+            '0', '0', '0',
+            '0', '0', '0',
+            'world', 'base'
+        ]
     )
 
     gazebo = IncludeLaunchDescription(
@@ -100,6 +122,7 @@ def generate_launch_description():
             default_value=TextSubstitution(text=""),
         ),
         robot_state_publisher_node,
+        # tf_world_node,
         gazebo,
         spawn_entity,
         joint_state_broadcaster_node,

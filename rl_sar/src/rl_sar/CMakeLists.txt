@@ -80,6 +80,8 @@ if(NOT USE_CMAKE)
         find_package(gazebo_msgs REQUIRED)
         find_package(std_srvs REQUIRED)
         find_package(geometry_msgs REQUIRED)
+        find_package(nav_msgs REQUIRED)
+        find_package(visualization_msgs REQUIRED)
         ament_package()
     endif()
     add_compile_options(${GAZEBO_CXX_FLAGS})
@@ -422,6 +424,8 @@ if(NOT USE_CMAKE)
             gazebo_msgs
             std_srvs
             geometry_msgs
+            visualization_msgs
+            nav_msgs
         )
         install(TARGETS rl_sim DESTINATION lib/${PROJECT_NAME})
     endif()
@@ -449,6 +453,7 @@ if(NOT USE_CMAKE)
             rclpy
             std_srvs
             geometry_msgs
+            nav_msgs
         )
         install(TARGETS rl_real_panda3 DESTINATION lib/${PROJECT_NAME})
     endif()

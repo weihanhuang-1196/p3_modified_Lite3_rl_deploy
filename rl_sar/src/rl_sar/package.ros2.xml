@@ -11,6 +11,8 @@
     <buildtool_depend>ament_cmake</buildtool_depend>
     <depend>rclcpp</depend>
     <depend>std_msgs</depend>
+    
+    <depend>nav_msgs</depend>
     <depend>gazebo_ros</depend>
     <depend>yaml-cpp</depend>
     <depend>robot_msgs</depend>
@@ -19,6 +21,7 @@
     <depend>controller_manager</depend>
     <depend>joint_state_controller</depend>
     <depend>robot_state_publisher</depend>
+    <depend>visualization_msgs</depend>
     <depend>rospy</depend>
 
     <export>

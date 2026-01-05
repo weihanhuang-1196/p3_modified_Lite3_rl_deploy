@@ -40,4 +40,4 @@ panda3:
   damping_kd: 8.0
 
   rosbag_save_path: "/home/yong/Desktop/仿真数据"
-  rosbag_save_name: "Dec22_23-13-39_test_barlowtwinsmodel_14000_10msdelay"
+  rosbag_save_name: "Dec31_14-46-03_test_barlowtwinsmodel_89800"

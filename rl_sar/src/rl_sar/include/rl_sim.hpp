@@ -52,6 +52,11 @@
 #include "ros_bag_recorder.hpp"
 #endif
 
+#include <nav_msgs/msg/occupancy_grid.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2_ros/transform_broadcaster.h>
+#include "visualization_msgs/msg/marker.hpp"
+
 
 #endif
 
@@ -143,9 +148,25 @@ private:
     void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
     rclcpp::Publisher<robot_msgs::msg::Actions>::SharedPtr actions_publisher;
 
+    rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr grid_publisher;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher;
+    std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+
+    void publishGrid();
+    void publishMarker();
+    void publishMapToBase(double x, double y, double yaw, double qx, double qy, double qz, double qw);
+    void quatToRotMatrix(double qx, double qy, double qz, double qw, double R[3][3]);
+    void updatePosition(RobotState<float> *state);
+
+
 #ifdef ROS_BAG_RECORDER
     std::unique_ptr<RosbagRecorder> rosbag_recorder;
 #endif
+
+    rclcpp::Time last_time;
+    bool first_call = true;
+
+    std::array<double,3> position_world = {0.0, 0.0, 0.0};
 
 
 #endif
