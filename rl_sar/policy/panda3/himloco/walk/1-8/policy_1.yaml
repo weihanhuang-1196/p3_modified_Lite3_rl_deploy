@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # 新pd 这个能站。
 panda3/himloco/walk:
-  model_name: "Dec28_01-39-38_test_barlowtwinsmodel_20300.onnx"
+  model_name: "policy_1.pt"
   num_observations: 51
   observations: [ "ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
   observations_history: [9,8,7,6,5,4,3,2,1,0]  # 0 is the latest observation
@@ -16,27 +16,27 @@ panda3/himloco/walk:
                        100, 100, 100,
                        100, 100, 100,
                        100, 100, 100]
-  rl_kp:  [115, 115, 132,
-            115, 115, 132,
-            115, 115, 132,
-            115, 115, 132]
-  rl_kd: [3.0, 3.0, 1.95,
-             3.0, 3.0, 1.95,
-             3.0, 3.0, 1.95,
-             3.0, 3.0, 1.95]
-  fixed_kp: [200, 200, 200,
-             200, 200, 200,
-             200, 200, 200,
-             200, 200, 200]
-  fixed_kd: [1, 1, 1,
-             1, 1, 1,
-             1, 1, 1,
-             1, 1, 1]
+  rl_kp:  [80, 80, 80,
+            80, 80, 80,
+            80, 80, 80,
+            80, 80, 80]
+  rl_kd: [2.0, 2.0, 2.0,
+             2.0, 2.0, 2.0,
+             2.0, 2.0, 2.0,
+             2.0, 2.0, 2.0]
+  fixed_kp: [115, 115, 132,
+             115, 115, 132,
+             115, 115, 132,
+             115, 115, 132]
+  fixed_kd: [3.0, 3.3, 1.95,
+             3.0, 3.3, 1.95,
+             3.0, 3.3, 1.95,
+             3.0, 3.3, 1.95]
   num_of_dofs: 12
-  action_scale: [0.125, 0.25, 0.25,
-                 0.125, 0.25, 0.25,
-                 0.125, 0.25, 0.25,
-                 0.125, 0.25, 0.25]
+  action_scale: [0.25, 0.25, 0.25,
+                 0.25, 0.25, 0.25,
+                 0.25, 0.25, 0.25,
+                 0.25, 0.25, 0.25]
   wheel_indices: []
   lin_vel_scale: 2.0
   ang_vel_scale: 0.25

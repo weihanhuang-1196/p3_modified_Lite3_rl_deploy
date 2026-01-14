@@ -68,6 +68,7 @@ public:
 
     void Enter() override
     {
+        rl.ReadYaml(rl.robot_name, "base.yaml");
         percent_pre_getup = 0.0f;
         percent_getup = 0.0f;
         if (rl.fsm.previous_state_->GetStateName() == "RLFSMStatePassive")
@@ -118,6 +119,10 @@ public:
             {
                 return "RLFSMStateRLCrouch";
             }
+            else if (rl.control.current_keyboard == Input::Keyboard::Num5)
+            {
+                return "RLFSMStateGetDown";
+            }
         }
         return state_name_;
     }
@@ -128,30 +133,49 @@ class RLFSMStateGetDown : public RLFSMState
 public:
     RLFSMStateGetDown(RL *rl) : RLFSMState(*rl, "RLFSMStateGetDown") {}
 
+    std::vector<float> down_pos = {
+        0.00, 2.34, -2.42,
+        0.00, 2.34, -2.42,
+        0.00, 2.34, -2.42,
+        0.00, 2.34, -2.42,
+        0.00, 0.00, 0.00, 0.00
+    };
+
+    std::vector<float> pre_running_pos = {
+        0.00, 1.36, -2.65,
+        0.00, 1.36, -2.65,
+        0.00, 1.36, -2.65,
+        0.00, 1.36, -2.65,
+        0.00, 0.00, 0.00, 0.00
+    };
+
+
     float percent_getdown = 0.0f;
+    float percent_pre_getdown = 0.0f;
 
     void Enter() override
     {
         percent_getdown = 0.0f;
+        percent_pre_getdown = 0.0f;
         rl.now_state = *fsm_state;
+        rl.ReadYaml(rl.robot_name, "base.yaml");
+
     }
 
     void Run() override
     {
-        Interpolate(percent_getdown, rl.now_state.motor_state.q, rl.start_state.motor_state.q, 2.0f, "Getting down", true);
+
+        if (Interpolate(percent_pre_getdown, rl.now_state.motor_state.q, pre_running_pos, 3.0f, "Pre Getting down", true)) return;
+        if (Interpolate(percent_getdown, pre_running_pos, down_pos, 2.0f, "Getting down", true)) return;
     }
 
     void Exit() override {}
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X || percent_getdown >= 1.0f)
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X || percent_getdown >= 1.0)
         {
             return "RLFSMStatePassive";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
-        {
-            return "RLFSMStateRLStand";
         }
         return state_name_;
     }
@@ -192,7 +216,7 @@ public:
 
         if (!rl.rl_init_done) rl.rl_init_done = true;
 
-        std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] stand:" << rl.control.stand << std::flush;
+        // std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] stand:" << rl.control.stand << std::flush;
         RLControl();
     }
 
@@ -209,7 +233,7 @@ public:
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
         {
-            return "RLFSMStateGetUp";
+            return "RLFSMStateGetDown";
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
         {
@@ -265,7 +289,7 @@ public:
 
         if (!rl.rl_init_done) rl.rl_init_done = true;
 
-        std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] x:" << rl.control.x << " y:" << rl.control.y << " yaw:" << rl.control.yaw << std::flush;
+        // std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] x:" << rl.control.x << " y:" << rl.control.y << " yaw:" << rl.control.yaw << std::flush;
         RLControl();
     }
 
@@ -282,7 +306,7 @@ public:
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
         {
-            return "RLFSMStateGetUp";
+            return "RLFSMStateGetDown";
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
         {
@@ -337,7 +361,7 @@ public:
 
         if (!rl.rl_init_done) rl.rl_init_done = true;
 
-        std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] x:" << rl.control.x << " y:" << rl.control.y << " yaw:" << rl.control.yaw << " height:" << rl.control.height << std::flush;
+        // std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] x:" << rl.control.x << " y:" << rl.control.y << " yaw:" << rl.control.yaw << " height:" << rl.control.height << std::flush;
         RLControl();
     }
 
@@ -354,7 +378,7 @@ public:
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
         {
-            return "RLFSMStateGetUp";
+            return "RLFSMStateGetDown";
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
         {

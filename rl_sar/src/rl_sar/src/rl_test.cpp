@@ -126,6 +126,9 @@ RL_Test::RL_Test(int argc, char **argv)
     this->actions_publisher = ros2_node->create_publisher<robot_msgs::msg::Actions>(
         this->ros_namespace + "actions", rclcpp::SystemDefaultsQoS());
 
+    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(ros2_node);
+
+
 
     // subscriber
     this->cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
@@ -190,6 +193,15 @@ RL_Test::RL_Test(int argc, char **argv)
 
 
     std::cout << LOGGER::INFO << "RL_Test start" << std::endl;
+
+#ifdef ROS_BAG_RECORDER
+    rosbag_recorder = std::make_unique<RosbagRecorder>(
+        this->params.Get<std::string>("rosbag_save_path"),   // 保存路径
+        this->params.Get<std::string>("rosbag_save_name")       // 包名前缀
+    );
+#endif
+
+
 }
 
 #ifdef MOTOR_POLICY
@@ -511,6 +523,33 @@ void RL_Test::JoyCallback(
 
 }
 
+
+
+#if defined(USE_ROS2)
+void RL_Test::publishMapToBase(double x, double y, double yaw, double qx, double qy, double qz, double qw)
+{
+    geometry_msgs::msg::TransformStamped tf;
+
+    tf.header.stamp = ros2_node->now();
+    tf.header.frame_id = "map";
+    tf.child_frame_id = "base";
+
+    tf.transform.translation.x = x;
+    tf.transform.translation.y = y;
+    tf.transform.translation.z = yaw;
+
+    // tf2::Quaternion q;
+    // q.setRPY(0.0, 0.0, yaw);
+    tf.transform.rotation.x = qx;
+    tf.transform.rotation.y = qy;
+    tf.transform.rotation.z = qz;
+    tf.transform.rotation.w = qw;
+
+    tf_broadcaster_->sendTransform(tf);
+}
+#endif
+
+
 #if defined(USE_ROS1)
 void RL_Test::JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name)
 {
@@ -564,11 +603,23 @@ void RL_Test::RunModel()
         // this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
 
 
-        if(!Interpolate(percent_pre_getup, this->params.Get<std::vector<float>>("default_dof_pos"), pre_running_pos, 0.5f,this->output_dof_pos, true))
-            if(!Interpolate(percent_getup, pre_running_pos, this->params.Get<std::vector<float>>("default_dof_pos"), 0.5f,this->output_dof_pos, true))
+        if(!Interpolate(percent_pre_getup, this->params.Get<std::vector<float>>("default_dof_pos"), pre_running_pos, current_duration,this->output_dof_pos, true))
+            if(!Interpolate(percent_getup, pre_running_pos, this->params.Get<std::vector<float>>("default_dof_pos"), current_duration,this->output_dof_pos, true))
                 {
                     percent_pre_getup = 0.0f;
                     percent_getup = 0.0f;
+                    if(current_duration > max_duration)
+                    {
+                        current_duration = max_duration;
+                        gain *= -1.0;
+                    }
+                    else if(current_duration < min_duration)
+                    {
+                        current_duration = min_duration;
+                        gain *= -1.0;
+                    }
+                    current_duration += gain;
+                    std::cout<< current_duration << std::endl;
                 }
 
 

@@ -1,8 +1,8 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
-# 新pd 这个能站。
-panda3/himloco/walk:
-  model_name: "Dec28_01-39-38_test_barlowtwinsmodel_20300.onnx"
+
+panda3/himloco/crouch:
+  model_name: "Jan08_21-39-44_test_barlowtwinsmodel_37200.onnx"
   num_observations: 51
   observations: [ "ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
   observations_history: [9,8,7,6,5,4,3,2,1,0]  # 0 is the latest observation
@@ -24,14 +24,14 @@ panda3/himloco/walk:
              3.0, 3.0, 1.95,
              3.0, 3.0, 1.95,
              3.0, 3.0, 1.95]
-  fixed_kp: [200, 200, 200,
-             200, 200, 200,
-             200, 200, 200,
-             200, 200, 200]
-  fixed_kd: [1, 1, 1,
-             1, 1, 1,
-             1, 1, 1,
-             1, 1, 1]
+  fixed_kp: [60, 60, 60,
+             60, 60, 60,
+             60, 60, 60,
+             60, 60, 60]
+  fixed_kd: [5, 5, 5,
+             5, 5, 5,
+             5, 5, 5,
+             5, 5, 5]
   num_of_dofs: 12
   action_scale: [0.125, 0.25, 0.25,
                  0.125, 0.25, 0.25,
@@ -43,7 +43,7 @@ panda3/himloco/walk:
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
   commands_scale: [0.5, 0.5, 0.5, 
-                1.00, 1.00, 1.00,
+                0.4, 1.00, 1.00,
                 1.00, 1.00, 1.00]
 
   torque_limits: [60, 60, 90,

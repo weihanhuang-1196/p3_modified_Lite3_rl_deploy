@@ -102,5 +102,6 @@
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
     ],
     "ros.distro": "noetic",
-    "github.copilot.chat.codeGeneration.useInstructionFiles": true
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "ROS2.distro": "humble"
 }

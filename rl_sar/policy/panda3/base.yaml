@@ -15,10 +15,10 @@ panda3:
   num_of_dofs: 12
   wheel_indices: []
 
-  default_dof_pos: [0.000, 0.7580, -1.414,
-                    0.000, 0.7580, -1.414,
-                     0.000, 0.7580, -1.414,
-                    0.000, 0.7580, -1.414]
+  default_dof_pos: [0.000, 0.68, -1.3,
+                    0.000, 0.68, -1.3,
+                    0.000, 0.68, -1.3,
+                    0.000, 0.68, -1.3]
   joint_names: ["FL_hip_joint", "FL_thigh_joint", "FL_calf_joint",
                 "FR_hip_joint", "FR_thigh_joint", "FR_calf_joint",
                 "RL_hip_joint", "RL_thigh_joint", "RL_calf_joint",
@@ -39,5 +39,5 @@ panda3:
 
   damping_kd: 8.0
 
-  rosbag_save_path: "/home/yong/Desktop/仿真数据"
-  rosbag_save_name: "Dec31_14-46-03_test_barlowtwinsmodel_89800"
+  rosbag_save_path: "/home/yong/Desktop/仿真数据/01-09"
+  rosbag_save_name: "Jan08_21-39-44_test_barlowtwinsmodel_5000"

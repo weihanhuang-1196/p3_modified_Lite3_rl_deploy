@@ -26,7 +26,7 @@ public:
     {
         for (int i = 0; i < rl.params.Get<int>("num_of_dofs"); ++i)
         {
-            // fsm_command->motor_command.q[i] = fsm_state->motor_state.q[i];
+            fsm_command->motor_command.q[i] = fsm_state->motor_state.q[i];
             fsm_command->motor_command.dq[i] = 0;
             fsm_command->motor_command.kp[i] = 0;
             fsm_command->motor_command.kd[i] = 8;

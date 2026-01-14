@@ -269,13 +269,13 @@ void RL::InitRL(std::string robot_config_path)
 
 void RL::InitRL(std::string robot_config_path, std::string fsm_name)
 {
-    this->limit_q_flag.store(true, std::memory_order_release);
-    this->limit_q_timer.start();
-    if(!this->limit_q_flag.load(std::memory_order_acquire))
-    {
-        this->limit_q_flag.store(true, std::memory_order_release);
-        this->limit_q_timer.start();
-    }
+    // this->limit_q_flag.store(true, std::memory_order_release);
+    // this->limit_q_timer.start();
+    // if(!this->limit_q_flag.load(std::memory_order_acquire))
+    // {
+    //     this->limit_q_flag.store(true, std::memory_order_release);
+    //     this->limit_q_timer.start();
+    // }
     
     
     try
@@ -283,14 +283,12 @@ void RL::InitRL(std::string robot_config_path, std::string fsm_name)
         if(this->models.count(fsm_name))
         {
             std::lock_guard<std::mutex> lock(this->model_mutex);
-
+            this->ReadYaml(robot_config_path, "config.yaml");
             if (this->current_rl_fsm_name.compare(fsm_name) == 0)
             {
                 return;
             }
             
-
-            this->ReadYaml(robot_config_path, "config.yaml");
             // init joint num first
             this->InitJointNum(this->params.Get<int>("num_of_dofs"));
             // init rl
@@ -345,24 +343,27 @@ void RL::ComputeOutput(const std::vector<float> &actions, std::vector<float> &ou
         vel_actions_scaled[i] = actions_scaled[i];
     }
     std::vector<float> all_actions_scaled = pos_actions_scaled + vel_actions_scaled;
-    output_dof_pos = pos_actions_scaled + this->params.Get<std::vector<float>>("default_dof_pos");
-    if(this->limit_q_flag.load(std::memory_order_acquire))
-    {
-        for (size_t i = 0; i < output_dof_pos.size(); i++)
-        {
-            if((abs(output_dof_pos[i]) - abs(this->obs.dof_pos[i])) > 0.3f)
-            {
-                if(output_dof_pos[i] > 0.0)
-                    output_dof_pos[i] = this->obs.dof_pos[i] + 0.3f;
-                else
-                    output_dof_pos[i] = this->obs.dof_pos[i] - 0.3f;
-            }else
-                output_dof_pos[i] = output_dof_pos[i];
-            
-        }
-        
 
-    }
+    output_dof_pos = pos_actions_scaled + this->params.Get<std::vector<float>>("default_dof_pos");
+    // if(this->limit_q_flag.load(std::memory_order_acquire))
+    // {
+    //     for (size_t i = 0; i < output_pos.size(); i++)
+    //     {
+    //         if((abs(output_pos[i]) - abs(this->obs.dof_pos[i])) > 0.04f)
+    //         {
+    //             if(output_pos[i] > 0.0)
+    //                 output_dof_pos[i] = this->obs.dof_pos[i] + 0.04f;
+    //             else
+    //                 output_dof_pos[i] = this->obs.dof_pos[i] - 0.04f;
+    //         }else
+    //             output_dof_pos[i] = output_pos[i];
+            
+    //     }
+        
+    // }else
+    // {
+    //     output_dof_pos = output_pos;
+    // }
     output_dof_vel = vel_actions_scaled;
     output_dof_tau = this->params.Get<std::vector<float>>("rl_kp") * (all_actions_scaled + this->params.Get<std::vector<float>>("default_dof_pos") - this->obs.dof_pos) - this->params.Get<std::vector<float>>("rl_kd") * this->obs.dof_vel;
     output_dof_tau = clamp(output_dof_tau, -this->params.Get<std::vector<float>>("torque_limits"), this->params.Get<std::vector<float>>("torque_limits"));

@@ -7,7 +7,7 @@
 #define RL_SDK_HPP
 
 //延迟
-#define DELAY 
+// #define DELAY 
 
 #include <iostream>
 #include <string>
@@ -193,7 +193,7 @@ class RL
 {
 public:
     RL():motor_enable_changed(false), motor_enabled(false)
-    , limit_q_timer(2.0f, [this](){this->limit_q_flag.store(false, std::memory_order_release);}) {};
+    , limit_q_timer(0.5f, [this](){this->limit_q_flag.store(false, std::memory_order_release);}) {};
     ~RL() {limit_q_timer.cancel();};
 
     YamlParams params;

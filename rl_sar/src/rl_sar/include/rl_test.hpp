@@ -45,7 +45,18 @@
 #include <std_srvs/srv/empty.hpp>
 #include <rcl_interfaces/srv/get_parameters.hpp>
 #include "robot_msgs/msg/actions.hpp"
+
+
+#define ROS_BAG_RECORDER
+
+#ifdef ROS_BAG_RECORDER
+#include "ros_bag_recorder.hpp"
 #endif
+#include <tf2_ros/transform_broadcaster.h>
+
+
+#endif
+
 
 #include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
@@ -134,6 +145,15 @@ private:
     void RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg);
     void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
     rclcpp::Publisher<robot_msgs::msg::Actions>::SharedPtr actions_publisher;
+
+    std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+    void publishMapToBase(double x, double y, double yaw, double qx, double qy, double qz, double qw);
+
+#ifdef ROS_BAG_RECORDER
+    std::unique_ptr<RosbagRecorder> rosbag_recorder;
+#endif
+
+
 #endif
 
     // others
@@ -149,12 +169,16 @@ private:
     float percent_pre_getup = 0.0f;
     float percent_getup = 0.0f;
     std::vector<float> pre_running_pos = {
-        0.00, 1.36, -2.65,
-        0.00, 1.36, -2.65,
-        0.00, 1.36, -2.65,
-        0.00, 1.36, -2.65,
+        0.87, 1.36, -2.65,
+        -0.87, 1.36, -2.65,
+        0.87, 1.36, -2.65,
+        -0.87, 1.36, -2.65,
         0.00, 0.00, 0.00, 0.00
     };
+    float max_duration = 0.20;
+    float min_duration = 0.03;
+    float current_duration = 0.20;
+    float gain = 0.005;
 
 public:
     bool Interpolate(float& percent,

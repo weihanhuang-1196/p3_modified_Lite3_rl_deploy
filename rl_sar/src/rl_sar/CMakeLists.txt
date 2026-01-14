@@ -482,6 +482,7 @@ if(NOT USE_CMAKE)
             rclpy
             std_srvs
             geometry_msgs
+            robot_joint_controller
         )
         install(TARGETS rl_test DESTINATION lib/${PROJECT_NAME})
     endif()
