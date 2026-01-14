@@ -346,6 +346,8 @@ include_directories(
     library/core/timer
     library/core/rosbagrecorder
     fsm_robot
+    joystick_implement
+    library/core/joystick
 )
 
 # library for inference runtime

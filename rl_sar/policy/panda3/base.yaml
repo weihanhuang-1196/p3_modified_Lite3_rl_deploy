@@ -41,3 +41,5 @@ panda3:
 
   rosbag_save_path: "/home/yong/Desktop/仿真数据/01-09"
   rosbag_save_name: "Jan08_21-39-44_test_barlowtwinsmodel_5000"
+
+  joystick_type: "sony" # xbox sony onexplayer

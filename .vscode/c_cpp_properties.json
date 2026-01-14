@@ -8,6 +8,8 @@
                 "${workspaceFolder}/src/**/include/**",
                 "${workspaceFolder}/install/rl_sar/include/**",
                 "${workspaceFolder}/install/rl_sar/robot_hw_interface/include/**",
+                "${workspaceFolder}/rl_sar/src/rl_sar/library/core/joystick/**",
+                "${workspaceFolder}/rl_sar/src/rl_sar/joystick_implement/**",
                 
                 // ROS 2 路径
                 "/opt/ros/humble/include/**",

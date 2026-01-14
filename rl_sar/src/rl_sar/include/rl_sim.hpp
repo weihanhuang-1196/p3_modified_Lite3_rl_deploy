@@ -61,6 +61,8 @@
 #endif
 
 #include "matplotlibcpp.h"
+#include "joystick_base.hpp"
+#include "joystick_all.hpp"
 namespace plt = matplotlibcpp;
 
 class RL_Sim : public RL
@@ -125,7 +127,7 @@ private:
     void ModelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg);
     void JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name);
     void CmdvelCallback(const geometry_msgs::Twist::ConstPtr &msg);
-    void JoyCallback(const sensor_msgs::Joy::ConstPtr &msg);
+    // void JoyCallback(const sensor_msgs::Joy::ConstPtr &msg);
 #elif defined(USE_ROS2)
     sensor_msgs::msg::Imu gazebo_imu;
     geometry_msgs::msg::Twist cmd_vel;
@@ -145,7 +147,7 @@ private:
     void GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
     void CmdvelCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
     void RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg);
-    void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
+    // void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
     rclcpp::Publisher<robot_msgs::msg::Actions>::SharedPtr actions_publisher;
 
     rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr grid_publisher;
@@ -179,6 +181,10 @@ private:
     void StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names);
 
     tbb::concurrent_queue<std::vector<float>> output_actions_queue;
+
+
+
+    std::shared_ptr<joystick_base> joystick; // joystick pointer
 };
 
 #endif // RL_SIM_HPP

@@ -58,6 +58,19 @@ RL_Sim::RL_Sim(int argc, char **argv)
     // read params from yaml
     this->ReadYaml(this->robot_name, "base.yaml");
 
+    // init joystick
+    this->joystick = JoystickManager::GetInstance().CreateJoystick(
+        this->params.Get<std::string>("joystick_type"),
+        *this
+    );
+    if(!this->joystick)
+    {
+        std::cout << LOGGER::ERROR << "[Joystick] No joystick registered for type: " 
+                  << this->params.Get<std::string>("joystick_type") << std::endl;
+        return;
+    }
+    
+
     // auto load FSM by robot_name
     if (FSMManager::GetInstance().IsTypeSupported(this->robot_name))
     {
@@ -97,7 +110,7 @@ RL_Sim::RL_Sim(int argc, char **argv)
 
     // subscriber
     this->cmd_vel_subscriber = nh.subscribe<geometry_msgs::Twist>("/cmd_vel", 10, &RL_Sim::CmdvelCallback, this);
-    this->joy_subscriber = nh.subscribe<sensor_msgs::Joy>("/joy", 10, &RL_Sim::JoyCallback, this);
+    // this->joy_subscriber = nh.subscribe<sensor_msgs::Joy>("/joy", 10, &RL_Sim::JoyCallback, this);
     this->model_state_subscriber = nh.subscribe<gazebo_msgs::ModelStates>("/gazebo/model_states", 10, &RL_Sim::ModelStatesCallback, this);
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {
@@ -139,9 +152,13 @@ RL_Sim::RL_Sim(int argc, char **argv)
         "/cmd_vel", rclcpp::SystemDefaultsQoS(),
         [this] (const geometry_msgs::msg::Twist::SharedPtr msg) {this->CmdvelCallback(msg);}
     );
+    // this->joy_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Joy>(
+    //     "/joy", rclcpp::SystemDefaultsQoS(),
+    //     [this] (const sensor_msgs::msg::Joy::SharedPtr msg) {this->JoyCallback(msg);}
+    // );
     this->joy_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Joy>(
         "/joy", rclcpp::SystemDefaultsQoS(),
-        [this] (const sensor_msgs::msg::Joy::SharedPtr msg) {this->JoyCallback(msg);}
+        [this] (const sensor_msgs::msg::Joy::SharedPtr msg) {this->joystick->JoyCallback(msg);}
     );
     this->gazebo_imu_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Imu>(
         "/imu", rclcpp::SystemDefaultsQoS(), [this] (const sensor_msgs::msg::Imu::SharedPtr msg) {this->GazeboImuCallback(msg);}
@@ -204,6 +221,8 @@ RL_Sim::RL_Sim(int argc, char **argv)
         this->params.Get<std::string>("rosbag_save_name")       // 包名前缀
     );
 #endif
+    
+    
 }
 
 #ifdef MOTOR_POLICY
@@ -581,79 +600,79 @@ void RL_Sim::CmdvelCallback(
     this->cmd_vel = *msg;
 }
 
-void RL_Sim::JoyCallback(
-#if defined(USE_ROS1)
-    const sensor_msgs::Joy::ConstPtr &msg
-#elif defined(USE_ROS2)
-    const sensor_msgs::msg::Joy::SharedPtr msg
-#endif
-)
-{
-    this->joy_msg = *msg;
+// void RL_Sim::JoyCallback(
+// #if defined(USE_ROS1)
+//     const sensor_msgs::Joy::ConstPtr &msg
+// #elif defined(USE_ROS2)
+//     const sensor_msgs::msg::Joy::SharedPtr msg
+// #endif
+// )
+// {
+//     this->joy_msg = *msg;
 
-    // joystick control
-    // Description of buttons and axes(F710):
-    // |__ buttons[]: A=0, B=1, X=2, Y=3, LB=4, RB=5, back=6, start=7, power=8, stickL=9, stickR=10
-    // |__ axes[]: Lx=0, Ly=1, Rx=3, Ry=4, LT=2, RT=5, DPadX=6, DPadY=7
+//     // joystick control
+//     // Description of buttons and axes(F710):
+//     // |__ buttons[]: A=0, B=1, X=2, Y=3, LB=4, RB=5, back=6, start=7, power=8, stickL=9, stickR=10
+//     // |__ axes[]: Lx=0, Ly=1, Rx=3, Ry=4, LT=2, RT=5, DPadX=6, DPadY=7
 
-    if (this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::A);
-    if (this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::B);
-    if (this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
-    if (this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
-    if (this->joy_msg.buttons[4]) this->control.SetGamepad(Input::Gamepad::LB);
-    if (this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::RB);
-    if (this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LStick);
-    if (this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RStick);
-    if (this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::DPadUp);
-    if (this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::DPadDown);
-    if (this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::DPadLeft);
-    if (this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::DPadRight);
-    if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
-    if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
-    if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
-    if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::LB_A);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::LB_B);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::LB_X);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::LB_Y);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LB_LStick);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::LB_RStick);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadUp);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadDown);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadRight);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadLeft);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::RB_A);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::RB_B);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::RB_X);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::RB_Y);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::RB_LStick);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RB_RStick);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadUp);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadDown);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadRight);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadLeft);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::LB_RB);
+//     if (this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::A);
+//     if (this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::B);
+//     if (this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
+//     if (this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
+//     if (this->joy_msg.buttons[4]) this->control.SetGamepad(Input::Gamepad::LB);
+//     if (this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::RB);
+//     if (this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LStick);
+//     if (this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RStick);
+//     if (this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::DPadUp);
+//     if (this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::DPadDown);
+//     if (this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::DPadLeft);
+//     if (this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::DPadRight);
+//     if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
+//     if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
+//     if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
+//     if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::LB_A);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::LB_B);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::LB_X);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::LB_Y);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LB_LStick);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::LB_RStick);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadUp);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadDown);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadRight);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadLeft);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::RB_A);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::RB_B);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::RB_X);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::RB_Y);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::RB_LStick);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RB_RStick);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadUp);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadDown);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadRight);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadLeft);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::LB_RB);
 
-    this->control.x = this->joy_msg.axes[1]; // LY
-    this->control.y = this->joy_msg.axes[0]; // LX
-    this->control.yaw = this->joy_msg.axes[3]; // RX
-    this->control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
-    this->control.height = this->joy_msg.axes[4];
+//     this->control.x = this->joy_msg.axes[1]; // LY
+//     this->control.y = this->joy_msg.axes[0]; // LX
+//     this->control.yaw = this->joy_msg.axes[3]; // RX
+//     this->control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
+//     this->control.height = this->joy_msg.axes[4];
 
-    if(this->joy_msg.buttons[7] == 1)
-    {
-        motor_enable_changed = true;
-    }
+//     if(this->joy_msg.buttons[7] == 1)
+//     {
+//         motor_enable_changed = true;
+//     }
 
-    if (this->joy_msg.buttons[7] == 0 && motor_enable_changed)
-    {
-        motor_enable_changed = false;
-        this->motor_enabled = !this->motor_enabled;
-    }
+//     if (this->joy_msg.buttons[7] == 0 && motor_enable_changed)
+//     {
+//         motor_enable_changed = false;
+//         this->motor_enabled = !this->motor_enabled;
+//     }
 
 
 
-}
+// }
 
 #if defined(USE_ROS1)
 void RL_Sim::JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name)
