@@ -40,6 +40,6 @@ panda3:
   damping_kd: 8.0
 
   rosbag_save_path: "/home/yong/Desktop/仿真数据/01-09"
-  rosbag_save_name: "Jan08_21-39-44_test_barlowtwinsmodel_5000"
+  rosbag_save_name: "Jan14_22-27-50_test_barlowtwinsmodel_23800"
 
-  joystick_type: "sony" # xbox sony onexplayer
+  joystick_type: "beitong" # xbox sony onexplayer beitong

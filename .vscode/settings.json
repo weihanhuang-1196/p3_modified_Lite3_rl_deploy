@@ -103,5 +103,6 @@
     ],
     "ros.distro": "noetic",
     "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-    "ROS2.distro": "humble"
+    "ROS2.distro": "humble",
+    "cmake.sourceDirectory": "/home/yong/yang/p3_modified_Lite3_rl_deploy/rl_sar/src/rl_sar_zoo/g1_description"
 }

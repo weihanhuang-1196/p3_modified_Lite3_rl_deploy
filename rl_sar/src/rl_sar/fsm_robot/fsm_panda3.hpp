@@ -119,7 +119,7 @@ public:
             {
                 return "RLFSMStateRLCrouch";
             }
-            else if (rl.control.current_keyboard == Input::Keyboard::Num5)
+            else if (rl.control.current_keyboard == Input::Keyboard::Num5 || rl.control.current_gamepad == Input::Gamepad::RB)
             {
                 return "RLFSMStateGetDown";
             }
@@ -231,7 +231,7 @@ public:
         {
             return "RLFSMStatePassive";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num5 || rl.control.current_gamepad == Input::Gamepad::RB)
         {
             return "RLFSMStateGetDown";
         }
@@ -304,7 +304,7 @@ public:
         {
             return "RLFSMStatePassive";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num5 || rl.control.current_gamepad == Input::Gamepad::RB)
         {
             return "RLFSMStateGetDown";
         }
@@ -376,7 +376,7 @@ public:
         {
             return "RLFSMStatePassive";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num5 || rl.control.current_gamepad == Input::Gamepad::RB)
         {
             return "RLFSMStateGetDown";
         }

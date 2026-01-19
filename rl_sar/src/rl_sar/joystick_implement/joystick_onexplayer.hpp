@@ -27,61 +27,33 @@ public:
         #endif
     ) override
     {
+        // this->joy_msg.buttons[0] 上使能
+        // this->joy_msg.buttons[13] 下使能
+        // this->joy_msg.buttons[3] B 力控站立
+        // this->joy_msg.buttons[7] LB 力控站立
+        // this->joy_msg.buttons[2] A  行走模型
+        // this->joy_msg.buttons[8] RB 力控蹲下
+
+
+
         this->joy_msg = *msg;
-        if (this->joy_msg.buttons[0]) this->user.control.SetGamepad(Input::Gamepad::A);
-        if (this->joy_msg.buttons[1]) this->user.control.SetGamepad(Input::Gamepad::B);
+        if ( (this->joy_msg.buttons[3]) || (this->joy_msg.buttons[7]) ) this->user.control.SetGamepad(Input::Gamepad::B);
         if (this->joy_msg.buttons[2]) this->user.control.SetGamepad(Input::Gamepad::X);
-        if (this->joy_msg.buttons[3]) this->user.control.SetGamepad(Input::Gamepad::Y);
-        if (this->joy_msg.buttons[4]) this->user.control.SetGamepad(Input::Gamepad::LB);
-        if (this->joy_msg.buttons[5]) this->user.control.SetGamepad(Input::Gamepad::RB);
-        if (this->joy_msg.buttons[9]) this->user.control.SetGamepad(Input::Gamepad::LStick);
-        if (this->joy_msg.buttons[10]) this->user.control.SetGamepad(Input::Gamepad::RStick);
-        if (this->joy_msg.axes[7] > 0) this->user.control.SetGamepad(Input::Gamepad::DPadUp);
-        if (this->joy_msg.axes[7] < 0) this->user.control.SetGamepad(Input::Gamepad::DPadDown);
-        if (this->joy_msg.axes[6] < 0) this->user.control.SetGamepad(Input::Gamepad::DPadLeft);
-        if (this->joy_msg.axes[6] > 0) this->user.control.SetGamepad(Input::Gamepad::DPadRight);
-        if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[2]) this->user.control.SetGamepad(Input::Gamepad::X);
-        if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[2]) this->user.control.SetGamepad(Input::Gamepad::X);
-        if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[3]) this->user.control.SetGamepad(Input::Gamepad::Y);
-        if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[3]) this->user.control.SetGamepad(Input::Gamepad::Y);
-        if (this->joy_msg.buttons[4] && this->joy_msg.buttons[0]) this->user.control.SetGamepad(Input::Gamepad::LB_A);
-        if (this->joy_msg.buttons[4] && this->joy_msg.buttons[1]) this->user.control.SetGamepad(Input::Gamepad::LB_B);
-        if (this->joy_msg.buttons[4] && this->joy_msg.buttons[2]) this->user.control.SetGamepad(Input::Gamepad::LB_X);
-        if (this->joy_msg.buttons[4] && this->joy_msg.buttons[3]) this->user.control.SetGamepad(Input::Gamepad::LB_Y);
-        if (this->joy_msg.buttons[4] && this->joy_msg.buttons[9]) this->user.control.SetGamepad(Input::Gamepad::LB_LStick);
-        if (this->joy_msg.buttons[4] && this->joy_msg.buttons[10]) this->user.control.SetGamepad(Input::Gamepad::LB_RStick);
-        if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] > 0) this->user.control.SetGamepad(Input::Gamepad::LB_DPadUp);
-        if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] < 0) this->user.control.SetGamepad(Input::Gamepad::LB_DPadDown);
-        if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] < 0) this->user.control.SetGamepad(Input::Gamepad::LB_DPadRight);
-        if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] > 0) this->user.control.SetGamepad(Input::Gamepad::LB_DPadLeft);
-        if (this->joy_msg.buttons[5] && this->joy_msg.buttons[0]) this->user.control.SetGamepad(Input::Gamepad::RB_A);
-        if (this->joy_msg.buttons[5] && this->joy_msg.buttons[1]) this->user.control.SetGamepad(Input::Gamepad::RB_B);
-        if (this->joy_msg.buttons[5] && this->joy_msg.buttons[2]) this->user.control.SetGamepad(Input::Gamepad::RB_X);
-        if (this->joy_msg.buttons[5] && this->joy_msg.buttons[3]) this->user.control.SetGamepad(Input::Gamepad::RB_Y);
-        if (this->joy_msg.buttons[5] && this->joy_msg.buttons[9]) this->user.control.SetGamepad(Input::Gamepad::RB_LStick);
-        if (this->joy_msg.buttons[5] && this->joy_msg.buttons[10]) this->user.control.SetGamepad(Input::Gamepad::RB_RStick);
-        if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] > 0) this->user.control.SetGamepad(Input::Gamepad::RB_DPadUp);
-        if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] < 0) this->user.control.SetGamepad(Input::Gamepad::RB_DPadDown);
-        if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] < 0) this->user.control.SetGamepad(Input::Gamepad::RB_DPadRight);
-        if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] > 0) this->user.control.SetGamepad(Input::Gamepad::RB_DPadLeft);
-        if (this->joy_msg.buttons[4] && this->joy_msg.buttons[5]) this->user.control.SetGamepad(Input::Gamepad::LB_RB);
+        if (this->joy_msg.buttons[8]) this->user.control.SetGamepad(Input::Gamepad::RB);
+
+        if(this->joy_msg.buttons[0] == 1) 
+        {
+            this->user.control.SetGamepad(Input::Gamepad::LB_X);
+            this->user.motor_enabled = true;
+        }
+
+        if (this->joy_msg.buttons[13] == 1) this->user.motor_enabled = false;
 
         this->user.control.x = this->joy_msg.axes[1]; // LY
         this->user.control.y = this->joy_msg.axes[0]; // LX
         this->user.control.yaw = this->joy_msg.axes[3]; // RX
-        this->user.control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
-        this->user.control.height = this->joy_msg.axes[4];
 
-        if(this->joy_msg.buttons[7] == 1)
-        {
-            this->user.motor_enable_changed = true;  
-        }
 
-        if (this->joy_msg.buttons[7] == 0 && this->user.motor_enable_changed)
-        {
-            this->user.motor_enable_changed = false;
-            this->user.motor_enabled = !this->user.motor_enabled;
-        }
     
 
     };
