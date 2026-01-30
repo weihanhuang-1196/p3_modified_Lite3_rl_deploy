@@ -39,6 +39,19 @@
         </plugin>
     </gazebo>
 
+    <gazebo>
+      <plugin name="gazebo_ros_p3d" filename="libgazebo_ros_p3d.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>odom:=base_odom</remapping>
+        </ros>
+        <body_name>base</body_name>
+        <update_rate>100</update_rate>
+        <gaussian_noise>0.0</gaussian_noise>
+      </plugin>
+    </gazebo>
+
+
 
     <gazebo reference="base">
         <gravity>true</gravity>
@@ -66,6 +79,18 @@
     </xacro:if>
 
     <xacro:if value="${int(ros_version) == 2}">
+    <gazebo>
+      <plugin name="gazebo_ros_p3d" filename="libgazebo_ros_p3d.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>odom:=base_odom</remapping>
+        </ros>
+        <body_name>base</body_name>
+        <update_rate>100</update_rate>
+        <gaussian_noise>0.0</gaussian_noise>
+      </plugin>
+    </gazebo>
+
 
     <gazebo reference="base">
       <sensor name="imu_sensor" type="imu">

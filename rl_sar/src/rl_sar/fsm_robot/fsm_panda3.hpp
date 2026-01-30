@@ -101,7 +101,7 @@ public:
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X)
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
         }
@@ -173,7 +173,7 @@ public:
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X || percent_getdown >= 1.0)
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || percent_getdown >= 1.0 || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
         }
@@ -227,7 +227,7 @@ public:
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X)
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
         }
@@ -300,7 +300,7 @@ public:
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X)
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
         }
@@ -372,7 +372,7 @@ public:
 
     std::string CheckChange() override
     {
-        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB_X)
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
         }

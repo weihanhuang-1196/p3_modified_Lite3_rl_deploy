@@ -348,6 +348,7 @@ include_directories(
     fsm_robot
     joystick_implement
     library/core/joystick
+    # library/core/odom
 )
 
 # library for inference runtime

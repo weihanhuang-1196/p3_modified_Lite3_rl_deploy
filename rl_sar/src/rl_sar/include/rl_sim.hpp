@@ -45,6 +45,9 @@
 #include <std_srvs/srv/empty.hpp>
 #include <rcl_interfaces/srv/get_parameters.hpp>
 #include "robot_msgs/msg/actions.hpp"
+#include <std_msgs/msg/string.hpp>
+
+#include "robot_msgs/msg/controller_state.hpp"
 
 #define ROS_BAG_RECORDER
 
@@ -56,6 +59,9 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include "visualization_msgs/msg/marker.hpp"
+
+
+// #include "legged_odom.hpp"
 
 
 #endif
@@ -149,10 +155,12 @@ private:
     void RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg);
     // void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
     rclcpp::Publisher<robot_msgs::msg::Actions>::SharedPtr actions_publisher;
+    rclcpp::Publisher<robot_msgs::msg::ControllerState>::SharedPtr controller_state_publisher;
 
     rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr grid_publisher;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher;
     std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr fsm_state_publisher;
 
     void publishGrid();
     void publishMarker();
@@ -185,6 +193,8 @@ private:
 
 
     std::shared_ptr<joystick_base> joystick; // joystick pointer
+
+    // std::unique_ptr<odom_utils::legged_odom> legged_odom_ptr;
 };
 
 #endif // RL_SIM_HPP

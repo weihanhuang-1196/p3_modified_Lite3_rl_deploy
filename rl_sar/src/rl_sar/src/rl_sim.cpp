@@ -145,7 +145,11 @@ RL_Sim::RL_Sim(int argc, char **argv)
     this->grid_publisher = this->ros2_node->create_publisher<nav_msgs::msg::OccupancyGrid>("grid", 1);
     this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(ros2_node);
     this->marker_publisher = this->ros2_node->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 10);
+    this->fsm_state_publisher = this->ros2_node->create_publisher<std_msgs::msg::String>(
+        this->ros_namespace + "fsm_state", rclcpp::SystemDefaultsQoS());
 
+    this->controller_state_publisher = this->ros2_node->create_publisher<robot_msgs::msg::ControllerState>(
+        this->ros_namespace + "controller_state", rclcpp::SystemDefaultsQoS());
 
     // subscriber
     this->cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
@@ -221,6 +225,8 @@ RL_Sim::RL_Sim(int argc, char **argv)
         this->params.Get<std::string>("rosbag_save_name")       // 包名前缀
     );
 #endif
+
+    // legged_odom_ptr = std::make_unique<odom_utils::legged_odom>(this->ros2_node);
     
     
 }
@@ -518,6 +524,16 @@ void RL_Sim::RobotControl()
 
     this->StateController(&this->robot_state, &this->robot_command);
 
+    // std_msgs::msg::String fsm_state_msg;
+    // fsm_state_msg.data = this->fsm.current_state_->GetStateName();
+    // this->fsm_state_publisher->publish(fsm_state_msg);
+
+    robot_msgs::msg::ControllerState controller_state_msg;
+    controller_state_msg.fsm_state = this->fsm.current_state_->GetStateName();
+    controller_state_msg.control_mode = this->control.navigation_mode;
+    controller_state_msg.enable = this->motor_enabled;
+    this->controller_state_publisher->publish(controller_state_msg);
+
     if (this->control.current_keyboard == Input::Keyboard::R || this->control.current_gamepad == Input::Gamepad::RB_Y)
     {
 #if defined(USE_ROS1)
@@ -586,6 +602,7 @@ void RL_Sim::ModelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
 void RL_Sim::GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
 {
     this->gazebo_imu = *msg;
+    // legged_odom_ptr->imu_wz_ = this->gazebo_imu.angular_velocity.z;
 }
 #endif
 

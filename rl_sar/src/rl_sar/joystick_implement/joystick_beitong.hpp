@@ -32,7 +32,7 @@ public:
         if (this->joy_msg.buttons[1]) this->user.control.SetGamepad(Input::Gamepad::B);
         if (this->joy_msg.buttons[3]) this->user.control.SetGamepad(Input::Gamepad::Y);
         if (this->joy_msg.buttons[4]) this->user.control.SetGamepad(Input::Gamepad::X);
-        if (this->joy_msg.buttons[6]) this->user.control.SetGamepad(Input::Gamepad::LB_X);
+        if (this->joy_msg.buttons[6]) this->user.control.SetGamepad(Input::Gamepad::LB);
         if (this->joy_msg.buttons[7]) this->user.control.SetGamepad(Input::Gamepad::RB);
         // if (this->joy_msg.buttons[9]) this->user.control.SetGamepad(Input::Gamepad::LStick);
         // if (this->joy_msg.buttons[10]) this->user.control.SetGamepad(Input::Gamepad::RStick);
