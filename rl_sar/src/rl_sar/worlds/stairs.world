@@ -1,332 +1,8203 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
-    <world name="default">
+  
+  
+  <world name="stairs_world">
+    
 
-        <physics type="ode">
-            <max_step_size>0.0005</max_step_size>
-            <real_time_factor>1</real_time_factor>
-            <real_time_update_rate>2000</real_time_update_rate>
-            <gravity>0 0 -9.81</gravity>
-            <ode>
-                <solver>
-                    <type>quick</type>
-                    <iters>50</iters>
-                    <sor>1.3</sor>
-                </solver>
-                <constraints>
-                    <cfm>0.0</cfm>
-                    <erp>0.2</erp>
-                    <contact_max_correcting_vel>10.0</contact_max_correcting_vel>
-                    <contact_surface_layer>0.001</contact_surface_layer>
-                </constraints>
-            </ode>
-        </physics>
+    
+    
+    <physics type="ode">
+      
+      
+      <max_step_size>0.001</max_step_size>
+      
+      
+      <real_time_factor>1</real_time_factor>
+      
+      
+      <real_time_update_rate>1000</real_time_update_rate>
+      
+      
+      <gravity>0 0 -9.81</gravity>
+      
+    
+    </physics>
+    
 
-        <scene>
-        <sky>
-            <clouds>
-                <speed>12</speed>
-            </clouds>
-        </sky>
-        </scene>
-        <!-- A global light source -->
-        <include>
-            <uri>model://sun</uri>
-        </include>
-        <!-- A ground plane -->
-        <include>
-            <uri>model://ground_plane</uri>
-        </include>
-        <!-- environment blocks, obstacles or stairs -->
-        <model name="static_environment">
-        <static>true</static>
-            <link name="static_box">
-                <pose>-2 2 0.5 0 0 0</pose>
-                <collision name="static_box_collision">
-                    <geometry>
-                        <box>
-                            <size>1 1 1</size>
-                        </box>
-                    </geometry>
-                </collision>
-                <visual name="static_box_visual">
-                    <geometry>
-                        <box>
-                            <size>1 1 1</size>
-                        </box>
-                    </geometry>
-                    <material>
-                        <ambient>0.2 0.2 0.2 1.0</ambient>
-                        <diffuse>.421 0.225 0.0 1.0</diffuse>
-                    </material>
-                </visual>
-            </link>
+    
+    
+    <scene>
+      
+      
+      <ambient>0.4 0.4 0.4 1</ambient>
+      
+      
+      <background>0.7 0.7 0.7 1</background>
+      
+    
+    </scene>
+    
 
-            <link name='Stairs'>
-                <pose>3 0 0 0 0 0</pose>
-                <scale>1 1 1</scale>
-                <visual name='Stairs_Visual_0'>
-                    <pose>-1.26 -0 0.075 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_0'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>-1.26 -0 0.075 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_1'>
-                    <pose>-0.98 -0 0.225 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_1'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>-0.98 -0 0.225 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_2'>
-                    <pose>-0.7 -0 0.375 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_2'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>-0.7 -0 0.375 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_3'>
-                    <pose>-0.42 -0 0.525 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_3'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>-0.42 -0 0.525 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_4'>
-                    <pose>-0.14 -0 0.675 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_4'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>-0.14 -0 0.675 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_5'>
-                    <pose>0.14 0 0.825 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_5'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>0.14 0 0.825 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_6'>
-                    <pose>0.42 0 0.975 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_6'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>0.42 0 0.975 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_7'>
-                    <pose>0.7 0 1.125 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_7'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>0.7 0 1.125 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_8'>
-                    <pose>0.98 0 1.275 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_8'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>0.98 0 1.275 0 -0 1.5708</pose>
-                </collision>
-                <visual name='Stairs_Visual_9'>
-                    <pose>1.26 0 1.425 0 -0 1.5708</pose>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <material>
-                    <script>
-                        <uri>file://media/materials/scripts/gazebo.material</uri>
-                        <name>Gazebo/Grey</name>
-                    </script>
-                    <ambient>1 1 1 1</ambient>
-                    </material>
-                    <meta>
-                    <layer>0</layer>
-                    </meta>
-                </visual>
-                <collision name='Stairs_Collision_9'>
-                    <geometry>
-                    <box>
-                        <size>10 0.28 0.15</size>
-                    </box>
-                    </geometry>
-                    <pose>1.26 0 1.425 0 -0 1.5708</pose>
-                </collision>
-            </link>
-        </model>
+    
+    
+    <include>
+      
+      
+      <uri>model://sun</uri>
+      
+    
+    </include>
+    
 
-    </world>
+    
+    <include>
+      
+      
+      <uri>model://ground_plane</uri>
+      
+    
+    </include>
+    
+
+    
+    
+    
+
+    <model name="stairs_20x15">
+      
+    
+      <pose>0 7 0 0 0 0</pose>
+      
+    
+      <link name="Stairs_2">
+        <pose>0 -0.15 0 0 -0 0</pose>
+      
+        <visual name="Stairs_2_Visual_0">
+          
+        
+          <pose>-0.312063 2.64146 0.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_0">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 2.64146 0.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_1">
+          
+        
+          <pose>-0.312063 2.49146 0.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_1">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 2.49146 0.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_2">
+          
+        
+          <pose>-0.312063 2.34146 0.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_2">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 2.34146 0.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_3">
+          
+        
+          <pose>-0.312063 2.19146 0.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_3">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 2.19146 0.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_4">
+          
+        
+          <pose>-0.312063 2.04146 0.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_4">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 2.04146 0.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_5">
+          
+        
+          <pose>-0.312063 1.89146 1.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_5">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 1.89146 1.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_6">
+          
+        
+          <pose>-0.312063 1.74146 1.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_6">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 1.74146 1.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_7">
+          
+        
+          <pose>-0.312063 1.59146 1.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_7">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 1.59146 1.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_8">
+          
+        
+          <pose>-0.312063 1.44146 1.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_8">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 1.44146 1.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_9">
+          
+        
+          <pose>-0.312063 1.29146 1.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_9">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 1.29146 1.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_10">
+          
+        
+          <pose>-0.312063 1.14146 2.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_10">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 1.14146 2.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_11">
+          
+        
+          <pose>-0.312063 0.99146 2.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_11">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 0.99146 2.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_12">
+          
+        
+          <pose>-0.312063 0.84146 2.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_12">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 0.84146 2.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_13">
+          
+        
+          <pose>-0.312063 0.69146 2.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_13">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 0.69146 2.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_14">
+          
+        
+          <pose>-0.312063 0.54146 2.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_14">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 0.54146 2.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_15">
+          
+        
+          <pose>-0.312063 0.391459 3.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_15">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 0.391459 3.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_16">
+          
+        
+          <pose>-0.312063 0.24146 3.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_16">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 0.24146 3.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_17">
+          
+        
+          <pose>-0.312063 0.09146 3.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_17">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 0.09146 3.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_18">
+          
+        
+          <pose>-0.312063 -0.05854 3.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_18">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 -0.05854 3.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_19">
+          
+        
+          <pose>-0.312063 -0.20854 3.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_19">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.312063 -0.20854 3.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+    
+      </link>
+      
+    
+      <link name="Stairs_4">
+        <pose>0 0.15 0 0 -0 0</pose>
+      
+        <visual name="Stairs_4_Visual_0">
+          
+        
+          <pose>-0.367728 -6.44772 0.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_0">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -6.44772 0.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_1">
+          
+        
+          <pose>-0.367728 -6.29772 0.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_1">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -6.29772 0.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_2">
+          
+        
+          <pose>-0.367728 -6.14772 0.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_2">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -6.14772 0.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_3">
+          
+        
+          <pose>-0.367728 -5.99772 0.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_3">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -5.99772 0.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_4">
+          
+        
+          <pose>-0.367728 -5.84772 0.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_4">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -5.84772 0.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_5">
+          
+        
+          <pose>-0.367728 -5.69772 1.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_5">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -5.69772 1.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_6">
+          
+        
+          <pose>-0.367728 -5.54772 1.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_6">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -5.54772 1.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_7">
+          
+        
+          <pose>-0.367728 -5.39772 1.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_7">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -5.39772 1.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_8">
+          
+        
+          <pose>-0.367728 -5.24772 1.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_8">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -5.24772 1.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_9">
+          
+        
+          <pose>-0.367728 -5.09772 1.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_9">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -5.09772 1.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_10">
+          
+        
+          <pose>-0.367728 -4.94772 2.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_10">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -4.94772 2.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_11">
+          
+        
+          <pose>-0.367728 -4.79772 2.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_11">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -4.79772 2.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_12">
+          
+        
+          <pose>-0.367728 -4.64772 2.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_12">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -4.64772 2.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_13">
+          
+        
+          <pose>-0.367728 -4.49772 2.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_13">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -4.49772 2.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_14">
+          
+        
+          <pose>-0.367728 -4.34772 2.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_14">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -4.34772 2.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_15">
+          
+        
+          <pose>-0.367728 -4.19772 3.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_15">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -4.19772 3.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_16">
+          
+        
+          <pose>-0.367728 -4.04772 3.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_16">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -4.04772 3.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_17">
+          
+        
+          <pose>-0.367728 -3.89772 3.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_17">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -3.89772 3.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_18">
+          
+        
+          <pose>-0.367728 -3.74772 3.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_18">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -3.74772 3.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_19">
+          
+        
+          <pose>-0.367728 -3.59772 3.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_19">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.15 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.367728 -3.59772 3.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+    
+      </link>
+      
+    
+      <link name="Wall_0">
+        
+      
+        <collision name="Wall_0_Collision">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.25 3 4</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0 0 2 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Wall_0_Visual">
+          
+        
+          <pose>0 0 2 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.25 3 4</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.760784 0.662745 0.627451 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <pose>-0.327481 -1.88249 0 0 -0 0</pose>
+        
+    
+      </link>
+      
+    
+      <static>1</static>
+      
+  
+    </model>
+    
+    
+    <model name="stairs_20x20">
+      
+    
+      <pose>0 19 0 0 0 0</pose>
+      
+    
+      <link name="Stairs_2">
+        <pose>0 -0.06 0 0 -0 0</pose>
+      
+        <visual name="Stairs_2_Visual_0">
+          
+        
+          <pose>-0.322187 4.0542 0.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_0">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 4.0542 0.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_1">
+          
+        
+          <pose>-0.322187 3.8542 0.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_1">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 3.8542 0.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_2">
+          
+        
+          <pose>-0.322187 3.6542 0.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_2">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 3.6542 0.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_3">
+          
+        
+          <pose>-0.322187 3.4542 0.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_3">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 3.4542 0.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_4">
+          
+        
+          <pose>-0.322187 3.2542 0.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_4">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 3.2542 0.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_5">
+          
+        
+          <pose>-0.322187 3.0542 1.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_5">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 3.0542 1.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_6">
+          
+        
+          <pose>-0.322187 2.8542 1.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_6">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 2.8542 1.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_7">
+          
+        
+          <pose>-0.322187 2.6542 1.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_7">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 2.6542 1.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_8">
+          
+        
+          <pose>-0.322187 2.4542 1.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_8">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 2.4542 1.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_9">
+          
+        
+          <pose>-0.322187 2.2542 1.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_9">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 2.2542 1.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_10">
+          
+        
+          <pose>-0.322187 2.0542 2.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_10">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 2.0542 2.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_11">
+          
+        
+          <pose>-0.322187 1.8542 2.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_11">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 1.8542 2.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_12">
+          
+        
+          <pose>-0.322187 1.6542 2.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_12">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 1.6542 2.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_13">
+          
+        
+          <pose>-0.322187 1.4542 2.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_13">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 1.4542 2.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_14">
+          
+        
+          <pose>-0.322187 1.2542 2.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_14">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 1.2542 2.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_15">
+          
+        
+          <pose>-0.322187 1.0542 3.1 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_15">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 1.0542 3.1 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_16">
+          
+        
+          <pose>-0.322187 0.854205 3.3 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_16">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 0.854205 3.3 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_17">
+          
+        
+          <pose>-0.322187 0.654204 3.5 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_17">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 0.654204 3.5 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_18">
+          
+        
+          <pose>-0.322187 0.454204 3.7 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_18">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 0.454204 3.7 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_2_Visual_19">
+          
+        
+          <pose>-0.322187 0.254204 3.9 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_2_Collision_19">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.09 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.322187 0.254204 3.9 0 -0 0</pose>
+          
+      
+        </collision>
+        
+    
+      </link>
+      
+    
+      <link name="Stairs_4">
+        <pose>0 0.03 0 0 -0 0</pose>
+      
+        <visual name="Stairs_4_Visual_0">
+          
+        
+          <pose>-0.216029 -6.875 0.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_0">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -6.875 0.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_1">
+          
+        
+          <pose>-0.216029 -6.675 0.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_1">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -6.675 0.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_2">
+          
+        
+          <pose>-0.216029 -6.475 0.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_2">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -6.475 0.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_3">
+          
+        
+          <pose>-0.216029 -6.275 0.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_3">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -6.275 0.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_4">
+          
+        
+          <pose>-0.216029 -6.075 0.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_4">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -6.075 0.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_5">
+          
+        
+          <pose>-0.216029 -5.875 1.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_5">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -5.875 1.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_6">
+          
+        
+          <pose>-0.216029 -5.675 1.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_6">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -5.675 1.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_7">
+          
+        
+          <pose>-0.216029 -5.475 1.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_7">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -5.475 1.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_8">
+          
+        
+          <pose>-0.216029 -5.275 1.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_8">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -5.275 1.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_9">
+          
+        
+          <pose>-0.216029 -5.075 1.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_9">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -5.075 1.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_10">
+          
+        
+          <pose>-0.216029 -4.875 2.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_10">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -4.875 2.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_11">
+          
+        
+          <pose>-0.216029 -4.675 2.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_11">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -4.675 2.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_12">
+          
+        
+          <pose>-0.216029 -4.475 2.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_12">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -4.475 2.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_13">
+          
+        
+          <pose>-0.216029 -4.275 2.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_13">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -4.275 2.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_14">
+          
+        
+          <pose>-0.216029 -4.075 2.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_14">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -4.075 2.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_15">
+          
+        
+          <pose>-0.216029 -3.875 3.1 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_15">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -3.875 3.1 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_16">
+          
+        
+          <pose>-0.216029 -3.675 3.3 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_16">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -3.675 3.3 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_17">
+          
+        
+          <pose>-0.216029 -3.475 3.5 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_17">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -3.475 3.5 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_18">
+          
+        
+          <pose>-0.216029 -3.275 3.7 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_18">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -3.275 3.7 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_4_Visual_19">
+          
+        
+          <pose>-0.216029 -3.075 3.9 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.996078 0.47451 0.0196078 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_4_Collision_19">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.21 0.2 0.2</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.216029 -3.075 3.9 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+    
+      </link>
+      
+    
+      <link name="Wall_0">
+        
+      
+        <collision name="Wall_0_Collision">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.25 3 4</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0 0 2 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Wall_0_Visual">
+          
+        
+          <pose>0 0 2 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>5.25 3 4</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/CeilingTiled</name>
+              
+          
+            </script>
+            
+          
+            <ambient>0.760784 0.662745 0.627451 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <pose>-0.337604 -1.43021 0 0 -0 0</pose>
+        
+    
+      </link>
+      
+    
+      <static>1</static>
+      
+  
+    </model>
+    
+
+    
+
+    <model name="stairs_25x22">
+        <pose>0 30 0 0 0 0</pose>
+      
+    
+      <link name="Stairs_1">
+        
+      
+        <visual name="Stairs_1_Visual_0">
+          
+        
+          <pose>-0.0125 1.175 0.125 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_0">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 1.175 0.125 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_1">
+          
+        
+          <pose>-0.0125 0.955 0.375 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_1">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 0.955 0.375 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_2">
+          
+        
+          <pose>-0.0125 0.735 0.625 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_2">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 0.735 0.625 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_3">
+          
+        
+          <pose>-0.0125 0.515 0.875 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_3">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 0.515 0.875 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_4">
+          
+        
+          <pose>-0.0125 0.295 1.125 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_4">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 0.295 1.125 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_5">
+          
+        
+          <pose>-0.0125 0.075 1.375 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_5">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 0.075 1.375 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_6">
+          
+        
+          <pose>-0.0125 -0.145 1.625 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_6">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 -0.145 1.625 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_7">
+          
+        
+          <pose>-0.0125 -0.365 1.875 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_7">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 -0.365 1.875 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_8">
+          
+        
+          <pose>-0.0125 -0.585 2.125 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_8">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 -0.585 2.125 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_1_Visual_9">
+          
+        
+          <pose>-0.0125 -0.805 2.375 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_1_Collision_9">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>-0.0125 -0.805 2.375 0 -0 0</pose>
+          
+      
+        </collision>
+        
+    
+      </link>
+      
+    
+      <link name="Stairs_3">
+        
+      
+        <visual name="Stairs_3_Visual_0">
+          
+        
+          <pose>0.0125 -5.235 0.125 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_0">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -5.235 0.125 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_1">
+          
+        
+          <pose>0.0125 -5.015 0.375 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_1">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -5.015 0.375 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_2">
+          
+        
+          <pose>0.0125 -4.795 0.625 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_2">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -4.795 0.625 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_3">
+          
+        
+          <pose>0.0125 -4.575 0.875 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_3">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -4.575 0.875 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_4">
+          
+        
+          <pose>0.0125 -4.355 1.125 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_4">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -4.355 1.125 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_5">
+          
+        
+          <pose>0.0125 -4.135 1.375 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_5">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -4.135 1.375 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_6">
+          
+        
+          <pose>0.0125 -3.915 1.625 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_6">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -3.915 1.625 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_7">
+          
+        
+          <pose>0.0125 -3.695 1.875 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_7">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -3.695 1.875 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_8">
+          
+        
+          <pose>0.0125 -3.475 2.125 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_8">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -3.475 2.125 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Stairs_3_Visual_9">
+          
+        
+          <pose>0.0125 -3.255 2.375 0 -0 -3.14159</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <collision name="Stairs_3_Collision_9">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.27 0.22 0.25</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0.0125 -3.255 2.375 0 -0 -3.14159</pose>
+          
+      
+        </collision>
+        
+    
+      </link>
+      
+    
+      <link name="Wall_1">
+        
+      
+        <collision name="Wall_1_Collision">
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.28 2.27 2.5</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <pose>0 0 1.25 0 -0 0</pose>
+          
+      
+        </collision>
+        
+      
+        <visual name="Wall_1_Visual">
+          
+        
+          <pose>0 0 1.25 0 -0 0</pose>
+          
+        
+          <geometry>
+            
+          
+            <box>
+              
+            
+              <size>2.28 2.27 2.5</size>
+              
+          
+            </box>
+            
+        
+          </geometry>
+          
+        
+          <material>
+            
+          
+            <script>
+              
+            
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              
+            
+              <name>Gazebo/Grey</name>
+              
+          
+            </script>
+            
+          
+            <ambient>1 1 1 1</ambient>
+            
+        
+          </material>
+          
+        
+          <meta>
+            
+          
+            <layer>0</layer>
+            
+        
+          </meta>
+          
+      
+        </visual>
+        
+      
+        <pose>-0.0025 -1.99 0 0 -0 -1.5708</pose>
+        
+    
+      </link>
+      
+    
+      <static>1</static>
+      
+  
+    </model>
+    
+
+  </world>
+  
+
 </sdf>

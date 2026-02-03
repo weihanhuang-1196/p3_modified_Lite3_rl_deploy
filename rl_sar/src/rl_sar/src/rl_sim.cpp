@@ -58,6 +58,8 @@ RL_Sim::RL_Sim(int argc, char **argv)
     // read params from yaml
     this->ReadYaml(this->robot_name, "base.yaml");
 
+    this->config_name = this->params.Get<std::string>("algorithm");
+
     // init joystick
     this->joystick = JoystickManager::GetInstance().CreateJoystick(
         this->params.Get<std::string>("joystick_type"),
@@ -711,7 +713,7 @@ void RL_Sim::RunModel()
     {
         this->episode_length_buf += 1;
         this->obs.ang_vel = this->robot_state.imu.gyroscope;
-        if(this->robot_name == "panda7" || this->robot_name == "panda3")
+        if(this->config_name == "np3o")
         {
             if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
                 this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
@@ -724,7 +726,7 @@ void RL_Sim::RunModel()
             this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
         if (this->control.navigation_mode)
         {
-            if(this->robot_name == "panda7" || this->robot_name == "panda3")
+            if(this->config_name == "np3o")
             {
                 if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
                     this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
@@ -830,7 +832,7 @@ std::vector<float> RL_Sim::Forward()
     std::vector<float> actions;
     if (this->params.Get<std::vector<int>>("observations_history").size() != 0)
     {
-        if(this->robot_name == "panda7" || this->robot_name == "panda3")
+        if(this->config_name == "np3o")
         {
             
             this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));

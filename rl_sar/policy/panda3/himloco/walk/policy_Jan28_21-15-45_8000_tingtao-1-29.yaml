@@ -1,8 +1,8 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-panda3/himloco/walk:
-  model_name: "policy_Feb01_01-18-03_10000-tingtao-2-2.pt"
+panda3/himloco:
+  model_name: "policy_Jan28_21-15-45_8000_tingtao-1-29.pt"
   num_observations: 45
   observations: ["commands", "ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
   observations_history: [0, 1, 2, 3, 4, 5]  # 0 is the latest observation
@@ -44,7 +44,7 @@ panda3/himloco/walk:
   ang_vel_scale: 0.25
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
-  commands_scale: [2.5, 2.0, 0.5]
+  commands_scale: [1.5, 1.5, 0.25]
 
   torque_limits: [60, 60, 90,
                 60, 60, 90,

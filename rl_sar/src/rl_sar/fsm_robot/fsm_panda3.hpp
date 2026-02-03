@@ -192,7 +192,7 @@ public:
         rl.episode_length_buf = 0;
 
         // read params from yaml
-        rl.config_name = "himloco";
+        // rl.config_name = "himloco";
         std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/stand";
         try
         {
@@ -267,7 +267,7 @@ public:
         rl.episode_length_buf = 0;
 
         // read params from yaml
-        rl.config_name = "himloco";
+        // rl.config_name = "himloco";
         std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/walk";
         try
         {
@@ -339,7 +339,7 @@ public:
         rl.episode_length_buf = 0;
 
         // read params from yaml
-        rl.config_name = "himloco";
+        // rl.config_name = "himloco";
         std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/crouch";
         try
         {

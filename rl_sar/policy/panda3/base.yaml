@@ -39,7 +39,9 @@ panda3:
 
   damping_kd: 8.0
 
-  rosbag_save_path: "/home/yong/Desktop/仿真数据/01-09"
-  rosbag_save_name: "Jan14_22-27-50_test_barlowtwinsmodel_23800"
+  rosbag_save_path: "/home/yong/Desktop/仿真数据/02-03"
+  rosbag_save_name: "policy_Feb01_01-18-03_10000-tingtao-2-2"
 
   joystick_type: "beitong" # xbox sony onexplayer beitong
+
+  algorithm: "himloco" # np3o himloco

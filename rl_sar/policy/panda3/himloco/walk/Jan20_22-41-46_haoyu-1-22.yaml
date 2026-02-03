@@ -1,11 +1,11 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-panda3/himloco/walk:
-  model_name: "policy_Feb01_01-18-03_10000-tingtao-2-2.pt"
+panda3/himloco:
+  model_name: "Jan20_22-41-46_haoyu-1-22.pt"
   num_observations: 45
-  observations: ["commands", "ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
-  observations_history: [0, 1, 2, 3, 4, 5]  # 0 is the latest observation
+  observations: ["commands", "ang_vel", "gravity_vec",  "sin", "cos", "actions"]
+  observations_history: [0,1,2,3,4,5]  # 0 is the latest observation
   observations_history_priority: "time"  # "time" or "term" priority
   clip_obs: 100.0
   clip_actions_lower: [-100, -100, -100,
@@ -16,15 +16,15 @@ panda3/himloco/walk:
                        100, 100, 100,
                        100, 100, 100,
                        100, 100, 100]
-  rl_kp:  [50, 50, 50,
-            50, 50, 50,
-            50, 50, 50,
-            50, 50, 50]
+  rl_kp:  [40.0, 40.0, 40.0,
+            40.0, 40.0, 40.0,
+            40.0, 40.0, 40.0,
+            40.0, 40.0, 40.0]
 
-  rl_kd: [2, 2, 2,
-           2, 2, 2,
-           2, 2, 2,
-           2, 2, 2]
+  rl_kd: [1.0, 1.0, 1.0,
+           1.0, 1.0, 1.0,
+           1.0, 1.0, 1.0,
+           1.0, 1.0, 1.0]
 
   fixed_kp: [80, 120, 130,
              80, 120, 130,
@@ -44,17 +44,17 @@ panda3/himloco/walk:
   ang_vel_scale: 0.25
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
-  commands_scale: [2.5, 2.0, 0.5]
+  commands_scale: [1.0, 1.0, 0.25]
 
   torque_limits: [60, 60, 90,
                 60, 60, 90,
                 60, 60, 90,
                 60, 60, 90]
 
-  default_dof_pos: [0.000, 0.65, -1.25,
-                    0.000, 0.65, -1.25,
-                    0.000, 0.65, -1.25,
-                    0.000, 0.65, -1.25]
-#   joint_mapping: [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+  default_dof_pos: [0.000, 0.758, -1.414,
+                    0.000, 0.758, -1.414,
+                    0.000, 0.758, -1.414,
+                    0.000, 0.758, -1.414]
+  # joint_mapping: [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
   joint_mapping: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   
