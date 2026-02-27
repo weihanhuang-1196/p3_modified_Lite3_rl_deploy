@@ -54,6 +54,10 @@ struct RobotCommand
     } motor_command;
 };
 
+
+
+
+
 template <typename T>
 struct RobotState
 {
@@ -71,6 +75,7 @@ struct RobotState
         std::vector<T> ddq;
         std::vector<T> tau_est;
         std::vector<T> cur;
+        std::vector<T> status_word;
 
         void resize(size_t num_joints)
         {
@@ -79,8 +84,27 @@ struct RobotState
             ddq.resize(num_joints, 0.0f);
             tau_est.resize(num_joints, 0.0f);
             cur.resize(num_joints, 0.0f);
+            status_word.resize(num_joints, 0.0f);
+            
         }
     } motor_state;
+
+
+    struct MotorCode
+    {
+        enum class CODE
+        {
+            CODE_NONE = 0,   //没信号
+            CODE_0231 = 561, //初始化
+            CODE_0233 = 563, //使能
+            CODE_ERROR_0298 = 664,
+            CODE_ERROR_0218 = 536,
+            CODE_ERROR_0250 = 592,
+            CODE_ERROR_02B1 = 689,
+            CODE_ORDER = 10000 //其他
+        };
+    } RobotCode;
+
 };
 
 namespace Input
@@ -192,9 +216,8 @@ struct Observations
 class RL
 {
 public:
-    RL():motor_enable_changed(false), motor_enabled(false)
-    , limit_q_timer(0.5f, [this](){this->limit_q_flag.store(false, std::memory_order_release);}) {};
-    ~RL() {limit_q_timer.cancel();};
+    RL():motor_enable_changed(false), motor_enabled(false){};
+    ~RL() {};
 
     YamlParams params;
     Observations<float> obs;
@@ -275,7 +298,6 @@ public:
     // thread safety
     std::mutex model_mutex;
 
-    OneShotAsyncTimer limit_q_timer;
     std::atomic<bool> limit_q_flag;
 
 
@@ -313,6 +335,9 @@ public:
 
 #endif
 
+    bool CheckCode(const std::vector<float>& status_word, const RobotState<float>::MotorCode::CODE expected_codes);
+
+    bool CheckErrorCode(const std::vector<float>& status_word);
 
 
     bool Interpolate(

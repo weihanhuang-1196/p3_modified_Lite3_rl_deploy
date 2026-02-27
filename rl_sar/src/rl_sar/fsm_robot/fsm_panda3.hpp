@@ -38,14 +38,18 @@ public:
 
     std::string CheckChange() override
     {
+
+
         if (rl.motor_enabled && (rl.control.current_keyboard == Input::Keyboard::Num9 || rl.control.current_gamepad == Input::Gamepad::B))
         {
+            // if(!CheckCode(fsm_state->motor_state.status_word, RobotState<float>::MotorCode::CODE::CODE_0233)) return state_name_;
+            
             return "RLFSMStateGetUp";
         }
-        else if (rl.motor_enabled && (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A))
-        {
-            return "RLFSMStateRLStand";
-        }
+        // else if (rl.motor_enabled && (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A))
+        // {
+        //     return "RLFSMStateRLStand";
+        // }
         return state_name_;
     }
 };
@@ -101,6 +105,7 @@ public:
 
     std::string CheckChange() override
     {
+        // if(CheckErrorCode(fsm_state->motor_state.status_word)) return "RLFSMStatePassive";
         if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
@@ -173,6 +178,7 @@ public:
 
     std::string CheckChange() override
     {
+        // if(CheckErrorCode(fsm_state->motor_state.status_word)) return "RLFSMStatePassive";
         if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || percent_getdown >= 1.0 || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
@@ -227,6 +233,7 @@ public:
 
     std::string CheckChange() override
     {
+        // if(CheckErrorCode(fsm_state->motor_state.status_word)) return "RLFSMStatePassive";
         if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
@@ -300,6 +307,7 @@ public:
 
     std::string CheckChange() override
     {
+        // if(CheckErrorCode(fsm_state->motor_state.status_word)) return "RLFSMStatePassive";
         if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";
@@ -372,6 +380,7 @@ public:
 
     std::string CheckChange() override
     {
+        // if(CheckErrorCode(fsm_state->motor_state.status_word)) return "RLFSMStatePassive";
         if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
         {
             return "RLFSMStatePassive";

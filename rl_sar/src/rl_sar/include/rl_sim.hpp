@@ -25,6 +25,11 @@
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
+#include <atomic>
+#include <functional>
+#include <chrono>
+#include <memory>
+#include <unordered_map>
 
 #if defined(USE_ROS1)
 #include <ros/ros.h>
@@ -70,6 +75,23 @@
 #include "joystick_base.hpp"
 #include "joystick_all.hpp"
 namespace plt = matplotlibcpp;
+
+
+// 话题信息基类，包含超时机制和回调扩展
+struct TopicInfoBase {
+    double timeout_sec; // 超时时间
+    std::atomic<std::chrono::steady_clock::time_point> last_time;
+    std::function<void()> extra_callback; // 回调扩展
+    virtual ~TopicInfoBase() = default;
+};
+
+template<typename MsgT>
+struct TopicInfo : public TopicInfoBase {
+    std::shared_ptr<MsgT> latest_msg{nullptr};
+};
+
+
+
 
 class RL_Sim : public RL
 {
@@ -139,7 +161,7 @@ private:
     geometry_msgs::msg::Twist cmd_vel;
     sensor_msgs::msg::Joy joy_msg;
     robot_msgs::msg::RobotCommand robot_command_publisher_msg;
-    robot_msgs::msg::RobotState robot_state_subscriber_msg;
+    std::shared_ptr<robot_msgs::msg::RobotState> robot_state_subscriber_msg;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr gazebo_imu_subscriber;
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscriber;
@@ -179,6 +201,33 @@ private:
     std::array<double,3> position_world = {0.0, 0.0, 0.0};
 
 
+    template<typename MsgT>
+    void GenericCallback(const std::string& topic_name, const std::shared_ptr<MsgT>& msg) {
+        auto info = std::static_pointer_cast<TopicInfo<MsgT>>(topics[topic_name]);
+
+        // 1️⃣ 更新最新消息（线程安全）
+        std::atomic_store(&info->latest_msg, msg);
+
+        // 2️⃣ 更新时间戳
+        info->last_time.store(std::chrono::steady_clock::now());
+
+        // 3️⃣ 执行扩展操作（额外逻辑）
+        if (info->extra_callback) {
+            info->extra_callback();
+        }
+    };
+
+    void CheckTimeouts();
+    void InitTopics();
+    std::unordered_map<std::string, std::shared_ptr<TopicInfoBase>> topics;
+
+    std::string cmd_topic_name;
+    std::string joy_topic_name;
+    std::string imu_topic_name;
+    std::string robot_state_topic_name;
+
+
+
 #endif
 
     // others
@@ -195,6 +244,8 @@ private:
     std::shared_ptr<joystick_base> joystick; // joystick pointer
 
     // std::unique_ptr<odom_utils::legged_odom> legged_odom_ptr;
+
+    
 };
 
 #endif // RL_SIM_HPP

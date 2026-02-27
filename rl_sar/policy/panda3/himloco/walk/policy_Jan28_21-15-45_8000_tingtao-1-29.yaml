@@ -1,7 +1,7 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-panda3/himloco:
+panda3/himloco/walk:
   model_name: "policy_Jan28_21-15-45_8000_tingtao-1-29.pt"
   num_observations: 45
   observations: ["commands", "ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]

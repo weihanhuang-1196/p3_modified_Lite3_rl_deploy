@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <vector>
 
 class RosbagRecorder
 {
@@ -39,8 +40,11 @@ private:
         bag_name_ = oss.str();
 
         std::ostringstream cmd;
-        cmd << "ros2 bag record --storage mcap -a "
-            << "-o " << output_dir_ << "/" << bag_name_;
+        cmd << "ros2 bag record --storage mcap "
+            << "--max-bag-size 1024 ";
+        for (const auto& topic : topics_)
+            cmd << topic << " ";
+        cmd << "-o " << output_dir_ << "/" << bag_name_;
 
         command_ = cmd.str();
 
@@ -68,4 +72,17 @@ private:
     std::string bag_name_;
     std::string command_;
     pid_t pid_{-1};
+    std::vector<std::string> topics_ = {
+            "--all"
+            // "/cmd_vel",
+            // "/Devices/joy",
+            // "/controller_state",
+            // "/rl_sar/Robot_State",
+            // "/rl_sar/Robot_Command",
+            // "/joint_states",
+            // "/tf",
+            // "/tf_static",
+            // "/robot_description",
+            // "/parameter_events"
+        };
 };

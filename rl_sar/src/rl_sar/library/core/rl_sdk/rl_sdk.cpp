@@ -685,6 +685,44 @@ bool RLFSMState::Interpolate(
     return true;
 }
 
+
+bool RLFSMState::CheckCode(const std::vector<float>& status_word, const RobotState<float>::MotorCode::CODE expected_codes)
+{
+    for (size_t i = 0; i < status_word.size(); ++i)
+    {
+        int code = static_cast<int>(status_word[i]);
+        int expected = static_cast<int>(expected_codes);
+        if ((code & expected) == 0)
+        {
+            std::cout << LOGGER::ERROR << "Motor " << i << " status code " << code << " does not match expected codes " << expected << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+bool RLFSMState::CheckErrorCode(const std::vector<float>& status_word)
+{
+    for (size_t i = 0; i < status_word.size(); ++i)
+    {
+        RobotState<float>::MotorCode::CODE code = static_cast<RobotState<float>::MotorCode::CODE>(status_word[i]);
+        switch (code)
+        {
+            case RobotState<float>::MotorCode::CODE::CODE_NONE: ;
+            case RobotState<float>::MotorCode::CODE::CODE_ERROR_0298: ;
+            case RobotState<float>::MotorCode::CODE::CODE_ERROR_0218: ;
+            case RobotState<float>::MotorCode::CODE::CODE_ERROR_0250: ;
+            case RobotState<float>::MotorCode::CODE::CODE_ERROR_02B1:
+                std::cout << LOGGER::ERROR << "Motor " << i << " status code " << static_cast<int>(code) << std::endl;
+                return true;
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
+
 void RLFSMState::RLControl()
 {
 

@@ -159,6 +159,48 @@
           </linear_acceleration>
         </imu>
       </sensor>
+
+
+
+      <!-- ========== 深度相机 ========== -->
+      <sensor name="depth_camera" type="depth">
+        <always_on>true</always_on>
+
+        <!-- 建议 20Hz，1024 env 不然会爆 -->
+        <update_rate>20</update_rate>
+
+        <visualize>false</visualize>
+
+        <!-- position = [0.37, 0, 0.03]
+             y_angle = pitch 下俯，单位弧度 -->
+        <pose>0.37 0 0.03 0 0.122 0</pose>
+        <!-- 0.122 rad ≈ 7° -->
+        <camera>
+          <!-- 58° → 弧度 -->
+          <horizontal_fov>1.012</horizontal_fov>
+          <image>
+            <width>64</width>
+            <height>64</height>
+            <format>R32F</format>
+          </image>
+
+          <clip>
+            <near>0.05</near>
+            <far>2.0</far>
+          </clip>
+        </camera>
+
+        <plugin name="depth_camera_plugin" filename="libgazebo_ros_camera.so">
+          <ros>
+            <namespace>/depth</namespace>
+          </ros>
+          <frame_name>base</frame_name>
+        </plugin>
+
+      </sensor>
+
+
+
     </gazebo>
 
     <ros2_control name="GazeboSystem" type="system">
