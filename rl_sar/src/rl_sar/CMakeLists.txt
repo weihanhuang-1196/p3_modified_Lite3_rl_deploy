@@ -435,6 +435,38 @@ if(NOT USE_CMAKE)
 endif()
 
 
+# executable for rl sim_wmp
+if(NOT USE_CMAKE)
+    add_executable(rl_sim_wmp src/rl_sim_wmp.cpp)
+    target_link_libraries(rl_sim_wmp
+        rl_sdk
+        observation_buffer
+        ${YAML_CPP_LIBRARIES}
+        Threads::Threads
+    )
+    if($ENV{ROS_DISTRO} MATCHES "noetic")
+        target_link_libraries(rl_sim_wmp ${catkin_LIBRARIES})
+    elseif($ENV{ROS_DISTRO} MATCHES "foxy|humble")
+        ament_target_dependencies(rl_sim_wmp
+            joint_state_broadcaster
+            robot_state_publisher
+            rclcpp
+            gazebo_ros
+            std_msgs
+            robot_msgs
+            robot_joint_controller
+            rclpy
+            gazebo_msgs
+            std_srvs
+            geometry_msgs
+            visualization_msgs
+            nav_msgs
+        )
+        install(TARGETS rl_sim_wmp DESTINATION lib/${PROJECT_NAME})
+    endif()
+endif()
+
+
 
 # executable for rl_real panda3
 if(NOT USE_CMAKE)

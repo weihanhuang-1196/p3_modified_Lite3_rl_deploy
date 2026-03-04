@@ -229,6 +229,10 @@ void RL::InitControl()
 void RL::InitJointNum(size_t num_joints)
 {
     this->robot_state.motor_state.resize(num_joints);
+    this->robot_state.imu.quaternion.resize(4);
+    this->robot_state.imu.gyroscope.resize(3);
+    this->robot_state.imu.accelerometer.resize(3);
+    
     this->start_state.motor_state.resize(num_joints);
     this->now_state.motor_state.resize(num_joints);
     this->robot_command.motor_command.resize(num_joints);
@@ -715,8 +719,6 @@ bool RLFSMState::CheckErrorCode(const std::vector<float>& status_word)
             case RobotState<float>::MotorCode::CODE::CODE_ERROR_02B1:
                 std::cout << LOGGER::ERROR << "Motor " << i << " status code " << static_cast<int>(code) << std::endl;
                 return true;
-            default:
-                return false;
         }
     }
     return true;

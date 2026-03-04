@@ -44,4 +44,4 @@ panda3:
 
   joystick_type: "beitong" # xbox sony onexplayer beitong
 
-  algorithm: "himloco" # np3o himloco
+  algorithm: "wmp" # np3o himloco wmp

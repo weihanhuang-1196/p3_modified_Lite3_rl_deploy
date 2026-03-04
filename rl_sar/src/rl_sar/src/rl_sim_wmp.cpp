@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "rl_sim.hpp"
+#include "rl_sim_wmp.hpp"
 
-RL_Sim::RL_Sim(int argc, char **argv)
+RL_Sim_WMP::RL_Sim_WMP(int argc, char **argv)
 {
 #if defined(USE_ROS1)
     this->ang_vel_axis = "world";
@@ -137,23 +137,6 @@ RL_Sim::RL_Sim(int argc, char **argv)
     this->gazebo_reset_world_client = nh.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
 #elif defined(USE_ROS2)
     this->StartJointController(this->ros_namespace, this->params.Get<std::vector<std::string>>("joint_names"));
-    // publisher
-    this->robot_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
-        this->ros_namespace + "robot_joint_controller/command", rclcpp::SystemDefaultsQoS());
-
-    this->actions_publisher = ros2_node->create_publisher<robot_msgs::msg::Actions>(
-        this->ros_namespace + "actions", rclcpp::SystemDefaultsQoS());
-
-    this->grid_publisher = this->ros2_node->create_publisher<nav_msgs::msg::OccupancyGrid>("grid", 1);
-    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(ros2_node);
-    this->marker_publisher = this->ros2_node->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 10);
-    this->fsm_state_publisher = this->ros2_node->create_publisher<std_msgs::msg::String>(
-        this->ros_namespace + "fsm_state", rclcpp::SystemDefaultsQoS());
-
-    this->controller_state_publisher = this->ros2_node->create_publisher<robot_msgs::msg::ControllerState>(
-        this->ros_namespace + "controller_state", rclcpp::SystemDefaultsQoS());
-
-
     InitTopics();
 
     // service
@@ -166,13 +149,13 @@ RL_Sim::RL_Sim(int argc, char **argv)
 #endif
 
     // loop
-    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("dt"), std::bind(&RL_Sim::RobotControl, this));
-    this->loop_rl = std::make_shared<LoopFunc>("loop_rl", this->params.Get<float>("dt") * this->params.Get<int>("decimation"), std::bind(&RL_Sim::RunModel, this));
+    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("dt"), std::bind(&RL_Sim_WMP::RobotControl, this));
+    // this->loop_rl = std::make_shared<LoopFunc>("loop_rl", this->params.Get<float>("dt") * this->params.Get<int>("decimation"), std::bind(&RL_Sim_WMP::RunModel, this));
     this->loop_control->start();
-    this->loop_rl->start();
+    // this->loop_rl->start();
 
     // keyboard
-    this->loop_keyboard = std::make_shared<LoopFunc>("loop_keyboard", 0.05, std::bind(&RL_Sim::KeyboardInterface, this));
+    this->loop_keyboard = std::make_shared<LoopFunc>("loop_keyboard", 0.05, std::bind(&RL_Sim_WMP::KeyboardInterface, this));
     this->loop_keyboard->start();
 
 #ifdef PLOT
@@ -216,7 +199,7 @@ RL_Sim::RL_Sim(int argc, char **argv)
 }
 
 #ifdef MOTOR_POLICY
-void RL_Sim::InitMotorPolicy()
+void RL_Sim_WMP::InitMotorPolicy()
 {
     std::string model_path = std::string(POLICY_DIR) + "/panda3/motor.onnx";
     loop_motor_policy = InferenceRuntime::ModelFactory::load_model(model_path);
@@ -228,7 +211,7 @@ void RL_Sim::InitMotorPolicy()
 #endif
 
 
-void RL_Sim::quatToRotMatrix(double qx, double qy, double qz, double qw, double R[3][3])
+void RL_Sim_WMP::quatToRotMatrix(double qx, double qy, double qz, double qw, double R[3][3])
 {
 
     R[0][0] = 1 - 2*qy*qy - 2*qz*qz;
@@ -244,7 +227,7 @@ void RL_Sim::quatToRotMatrix(double qx, double qy, double qz, double qw, double 
     R[2][2] = 1 - 2*qx*qx - 2*qy*qy;
 }
 
-void RL_Sim::updatePosition(RobotState<float> *state)
+void RL_Sim_WMP::updatePosition(RobotState<float> *state)
 {
     rclcpp::Time now = ros2_node->now();
     double dt = 0.0;
@@ -273,7 +256,7 @@ void RL_Sim::updatePosition(RobotState<float> *state)
 
 
 
-void RL_Sim::publishMapToBase(double x, double y, double yaw, double qx, double qy, double qz, double qw)
+void RL_Sim_WMP::publishMapToBase(double x, double y, double yaw, double qx, double qy, double qz, double qw)
 {
     geometry_msgs::msg::TransformStamped tf;
 
@@ -296,7 +279,7 @@ void RL_Sim::publishMapToBase(double x, double y, double yaw, double qx, double 
 }
 
 
-void RL_Sim::publishMarker()
+void RL_Sim_WMP::publishMarker()
 {
     visualization_msgs::msg::Marker marker;
     marker.header.frame_id = "map";
@@ -321,7 +304,7 @@ void RL_Sim::publishMarker()
 }
 
 
-void RL_Sim::publishGrid()
+void RL_Sim_WMP::publishGrid()
 {
     
     nav_msgs::msg::OccupancyGrid grid;
@@ -344,7 +327,7 @@ void RL_Sim::publishGrid()
 
 
 
-RL_Sim::~RL_Sim()
+RL_Sim_WMP::~RL_Sim_WMP()
 {
     this->loop_keyboard->shutdown();
     this->loop_control->shutdown();
@@ -355,7 +338,7 @@ RL_Sim::~RL_Sim()
     std::cout << LOGGER::INFO << "RL_Sim exit" << std::endl;
 }
 
-void RL_Sim::StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names)
+void RL_Sim_WMP::StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names)
 {
 #if defined(USE_ROS1)
     pid_t pid0 = fork();
@@ -420,7 +403,7 @@ void RL_Sim::StartJointController(const std::string& ros_namespace, const std::v
 #endif
 }
 
-void RL_Sim::GetState(RobotState<float> *state)
+void RL_Sim_WMP::GetState(RobotState<float> *state)
 {
 #if defined(USE_ROS1)
     const auto &orientation = this->pose.orientation;
@@ -469,7 +452,7 @@ void RL_Sim::GetState(RobotState<float> *state)
     }
 }
 
-void RL_Sim::SetCommand(const RobotCommand<float> *command)
+void RL_Sim_WMP::SetCommand(const RobotCommand<float> *command)
 {
     int motor_enable = this->motor_enabled ? 1 : 0;
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
@@ -501,7 +484,7 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
 #endif
 }
 
-void RL_Sim::RobotControl()
+void RL_Sim_WMP::RobotControl()
 {
 
     CheckTimeouts();
@@ -514,6 +497,9 @@ void RL_Sim::RobotControl()
     
     this->GetState(&this->robot_state);
     // this->updatePosition(&this->robot_state);
+
+
+    this->publishProprio();
 
     this->publishMapToBase(0,0,0, 
                             this->robot_state.imu.quaternion[1], 
@@ -578,36 +564,36 @@ void RL_Sim::RobotControl()
 
     this->SetCommand(&this->robot_command);
 
-    std::vector<float> actions;
-    if (this->output_actions_queue.try_pop(actions))
-    {
-        if(actions.empty())return;
-        robot_msgs::msg::Actions actions_msg;
-        actions_msg.actions.resize(actions.size());
-        for (size_t i = 0; i < 12; i++)
-        {
-            actions_msg.actions[i] = actions[i];
-        }
-        this->actions_publisher->publish(actions_msg);
-    }
+    // std::vector<float> actions;
+    // if (this->output_actions_queue.try_pop(actions))
+    // {
+    //     if(actions.empty())return;
+    //     robot_msgs::msg::Actions actions_msg;
+    //     actions_msg.actions.resize(actions.size());
+    //     for (size_t i = 0; i < 12; i++)
+    //     {
+    //         actions_msg.actions[i] = actions[i];
+    //     }
+    //     this->actions_publisher->publish(actions_msg);
+    // }
 
 }
 
 #if defined(USE_ROS1)
-void RL_Sim::ModelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
+void RL_Sim_WMP::ModelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg)
 {
     this->vel = msg->twist[2];
     this->pose = msg->pose[2];
 }
 #elif defined(USE_ROS2)
-void RL_Sim::GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
+void RL_Sim_WMP::GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
 {
     this->gazebo_imu = *msg;
     // legged_odom_ptr->imu_wz_ = this->gazebo_imu.angular_velocity.z;
 }
 #endif
 
-void RL_Sim::CmdvelCallback(
+void RL_Sim_WMP::CmdvelCallback(
 #if defined(USE_ROS1)
     const geometry_msgs::Twist::ConstPtr &msg
 #elif defined(USE_ROS2)
@@ -620,7 +606,30 @@ void RL_Sim::CmdvelCallback(
 
 
 #if defined(USE_ROS2)
-void RL_Sim::InitTopics() {
+void RL_Sim_WMP::InitTopics() {
+
+
+    
+    // publisher
+    this->robot_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
+        this->ros_namespace + "robot_joint_controller/command", rclcpp::SystemDefaultsQoS());
+
+    this->actions_publisher = ros2_node->create_publisher<robot_msgs::msg::Actions>(
+        this->ros_namespace + "actions", rclcpp::SystemDefaultsQoS());
+
+    this->grid_publisher = this->ros2_node->create_publisher<nav_msgs::msg::OccupancyGrid>("grid", 1);
+    this->tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(ros2_node);
+    this->marker_publisher = this->ros2_node->create_publisher<visualization_msgs::msg::Marker>("visualization_marker", 10);
+    this->fsm_state_publisher = this->ros2_node->create_publisher<std_msgs::msg::String>(
+        this->ros_namespace + "fsm_state", rclcpp::SystemDefaultsQoS());
+
+    this->controller_state_publisher = this->ros2_node->create_publisher<robot_msgs::msg::ControllerState>(
+        this->ros_namespace + "controller_state", rclcpp::SystemDefaultsQoS());
+
+    this->proprio_publisher = this->ros2_node->create_publisher<std_msgs::msg::Float32MultiArray>(
+        "proprio", rclcpp::SystemDefaultsQoS());
+
+
 
     
     // 初始化 /cmd_vel 话题信息
@@ -677,9 +686,31 @@ void RL_Sim::InitTopics() {
     );
 
 
+    // 初始化 /policy/output_dof_pos 话题信息
+    this->robot_output_dof_pos_topic_name = "/policy/output_dof_pos";
+    auto robot_output_dof_pos_info = std::make_shared<TopicInfo<std_msgs::msg::Float32MultiArray>>();
+    robot_output_dof_pos_info->timeout_sec = 100;
+    robot_output_dof_pos_info->last_time.store(std::chrono::steady_clock::now());
+    topics[this->robot_output_dof_pos_topic_name] = robot_output_dof_pos_info;
+    robot_output_dof_pos_subscriber = ros2_node->create_subscription<std_msgs::msg::Float32MultiArray>(
+        this->robot_output_dof_pos_topic_name, rclcpp::SystemDefaultsQoS(),
+        [this](const std_msgs::msg::Float32MultiArray::SharedPtr msg){ GenericCallback(this->robot_output_dof_pos_topic_name, msg); }
+    );
+    robot_output_dof_pos_info->extra_callback = [this, robot_output_dof_pos_info] () {
+        auto msg = std::atomic_load(&robot_output_dof_pos_info->latest_msg);
+        this->output_dof_pos = msg->data;
+        if (!this->output_dof_pos.empty())
+        {
+            output_dof_pos_queue.push(this->output_dof_pos);
+        }
+        output_dof_vel_queue.push(std::vector<float>(this->output_dof_pos.size(), 0.0f)); // 目前没有速度输出，填0
+        output_dof_tau_queue.push(std::vector<float>(this->output_dof_pos.size(), 0.0f)); // 目前没有力矩输出，填0
+    };
+
+
 }
 
-void RL_Sim::CheckTimeouts() {
+void RL_Sim_WMP::CheckTimeouts() {
     auto now = std::chrono::steady_clock::now();
 
     for (auto& kv : topics) {
@@ -731,21 +762,21 @@ void RL_Sim::CheckTimeouts() {
 
 
 #if defined(USE_ROS1)
-void RL_Sim::JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name)
+void RL_Sim_WMP::JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name)
 {
     this->joint_positions[joint_controller_name] = msg->q;
     this->joint_velocities[joint_controller_name] = msg->dq;
     this->joint_efforts[joint_controller_name] = msg->tau_est;
 }
 #elif defined(USE_ROS2)
-void RL_Sim::RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg)
+void RL_Sim_WMP::RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg)
 {
     std::atomic_store(&this->robot_state_subscriber_msg, msg);
     // this->robot_state_subscriber_msg = *msg;
 }
 #endif
 
-void RL_Sim::RunModel()
+void RL_Sim_WMP::RunModel()
 {
     if (this->rl_init_done && simulation_running)
     {
@@ -824,7 +855,7 @@ void RL_Sim::RunModel()
 
 
 
-        // output_actions_queue.push(this->obs.actions); // for logging
+        output_actions_queue.push(this->obs.actions); // for logging
 
         if (!this->output_dof_pos.empty())
         {
@@ -861,7 +892,7 @@ void RL_Sim::RunModel()
     }
 }
 
-std::vector<float> RL_Sim::Forward()
+std::vector<float> RL_Sim_WMP::Forward()
 {
     std::unique_lock<std::mutex> lock(this->model_mutex, std::try_to_lock);
 
@@ -908,7 +939,31 @@ std::vector<float> RL_Sim::Forward()
     }
 }
 
-void RL_Sim::Plot()
+
+void RL_Sim_WMP::publishProprio()
+{
+    if (this->rl_init_done && simulation_running)
+    {
+        this->obs.ang_vel = this->robot_state.imu.gyroscope;
+        this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
+        if (this->control.navigation_mode)
+        {
+            auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
+            auto cmd = std::atomic_load(&info->latest_msg);
+            this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
+        }
+        this->obs.base_quat = this->robot_state.imu.quaternion;
+        this->obs.dof_pos = this->robot_state.motor_state.q;
+        this->obs.dof_vel = this->robot_state.motor_state.dq;
+        std::vector<float> clamped_obs = this->ComputeObservation();
+        std_msgs::msg::Float32MultiArray proprio_msg;
+        proprio_msg.data = clamped_obs;
+        proprio_publisher->publish(proprio_msg);
+    }
+}
+
+
+void RL_Sim_WMP::Plot()
 {
     this->plot_t.erase(this->plot_t.begin());
     this->plot_t.push_back(this->motiontime);
@@ -951,11 +1006,11 @@ int main(int argc, char **argv)
 #if defined(USE_ROS1)
     signal(SIGINT, signalHandler);
     ros::init(argc, argv, "rl_sar");
-    RL_Sim rl_sar(argc, argv);
+    RL_Sim_WMP rl_sar(argc, argv);
     ros::spin();
 #elif defined(USE_ROS2)
     rclcpp::init(argc, argv);
-    auto rl_sar = std::make_shared<RL_Sim>(argc, argv);
+    auto rl_sar = std::make_shared<RL_Sim_WMP>(argc, argv);
     rclcpp::spin(rl_sar->ros2_node);
     rclcpp::shutdown();
 #endif

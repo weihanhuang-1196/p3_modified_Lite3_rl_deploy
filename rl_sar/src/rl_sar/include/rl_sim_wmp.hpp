@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef RL_Test_HPP
-#define RL_Test_HPP
+#ifndef RL_SIM_WMP_HPP
+#define RL_SIM_WMP_HPP
 
 // #define PLOT
 // #define CSV_LOGGER
@@ -25,6 +25,11 @@
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
+#include <atomic>
+#include <functional>
+#include <chrono>
+#include <memory>
+#include <unordered_map>
 
 #if defined(USE_ROS1)
 #include <ros/ros.h>
@@ -45,28 +50,55 @@
 #include <std_srvs/srv/empty.hpp>
 #include <rcl_interfaces/srv/get_parameters.hpp>
 #include "robot_msgs/msg/actions.hpp"
+#include <std_msgs/msg/string.hpp>
+#include <std_msgs/msg/float32_multi_array.hpp>
 
+#include "robot_msgs/msg/controller_state.hpp"
 
 // #define ROS_BAG_RECORDER
 
 #ifdef ROS_BAG_RECORDER
 #include "ros_bag_recorder.hpp"
 #endif
+
+#include <nav_msgs/msg/occupancy_grid.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2_ros/transform_broadcaster.h>
+#include "visualization_msgs/msg/marker.hpp"
+
+
+// #include "legged_odom.hpp"
 
 
 #endif
 
-
 #include "matplotlibcpp.h"
+#include "joystick_base.hpp"
+#include "joystick_all.hpp"
 namespace plt = matplotlibcpp;
 
-class RL_Test : public RL
+
+// 话题信息基类，包含超时机制和回调扩展
+struct TopicInfoBase {
+    double timeout_sec; // 超时时间
+    std::atomic<std::chrono::steady_clock::time_point> last_time;
+    std::function<void()> extra_callback; // 回调扩展
+    virtual ~TopicInfoBase() = default;
+};
+
+template<typename MsgT>
+struct TopicInfo : public TopicInfoBase {
+    std::shared_ptr<MsgT> latest_msg{nullptr};
+};
+
+
+
+
+class RL_Sim_WMP : public RL
 {
 public:
-    RL_Test(int argc, char **argv);
-    ~RL_Test();
-
+    RL_Sim_WMP(int argc, char **argv);
+    ~RL_Sim_WMP();
 #if defined(USE_ROS2)
     std::shared_ptr<rclcpp::Node> ros2_node;
 #endif
@@ -123,13 +155,13 @@ private:
     void ModelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &msg);
     void JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, const std::string &joint_controller_name);
     void CmdvelCallback(const geometry_msgs::Twist::ConstPtr &msg);
-    void JoyCallback(const sensor_msgs::Joy::ConstPtr &msg);
+    // void JoyCallback(const sensor_msgs::Joy::ConstPtr &msg);
 #elif defined(USE_ROS2)
     sensor_msgs::msg::Imu gazebo_imu;
     geometry_msgs::msg::Twist cmd_vel;
     sensor_msgs::msg::Joy joy_msg;
     robot_msgs::msg::RobotCommand robot_command_publisher_msg;
-    robot_msgs::msg::RobotState robot_state_subscriber_msg;
+    std::shared_ptr<robot_msgs::msg::RobotState> robot_state_subscriber_msg;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr gazebo_imu_subscriber;
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscriber;
@@ -143,15 +175,61 @@ private:
     void GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
     void CmdvelCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
     void RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg);
-    void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
+    // void JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
     rclcpp::Publisher<robot_msgs::msg::Actions>::SharedPtr actions_publisher;
+    rclcpp::Publisher<robot_msgs::msg::ControllerState>::SharedPtr controller_state_publisher;
 
+    rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr grid_publisher;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher;
     std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr fsm_state_publisher;
+
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr proprio_publisher;
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr robot_output_dof_pos_subscriber;
+
+    void publishGrid();
+    void publishMarker();
     void publishMapToBase(double x, double y, double yaw, double qx, double qy, double qz, double qw);
+    void quatToRotMatrix(double qx, double qy, double qz, double qw, double R[3][3]);
+    void updatePosition(RobotState<float> *state);
+
 
 #ifdef ROS_BAG_RECORDER
     std::unique_ptr<RosbagRecorder> rosbag_recorder;
 #endif
+
+    rclcpp::Time last_time;
+    bool first_call = true;
+
+    std::array<double,3> position_world = {0.0, 0.0, 0.0};
+
+
+    template<typename MsgT>
+    void GenericCallback(const std::string& topic_name, const std::shared_ptr<MsgT>& msg) {
+        auto info = std::static_pointer_cast<TopicInfo<MsgT>>(topics[topic_name]);
+
+        // 1️⃣ 更新最新消息（线程安全）
+        std::atomic_store(&info->latest_msg, msg);
+
+        // 2️⃣ 更新时间戳
+        info->last_time.store(std::chrono::steady_clock::now());
+
+        // 3️⃣ 执行扩展操作（额外逻辑）
+        if (info->extra_callback) {
+            info->extra_callback();
+        }
+    };
+
+    void CheckTimeouts();
+    void InitTopics();
+    std::unordered_map<std::string, std::shared_ptr<TopicInfoBase>> topics;
+
+    std::string cmd_topic_name;
+    std::string joy_topic_name;
+    std::string imu_topic_name;
+    std::string robot_state_topic_name;
+    std::string robot_output_dof_pos_topic_name;
+
 
 
 #endif
@@ -166,29 +244,15 @@ private:
     tbb::concurrent_queue<std::vector<float>> output_actions_queue;
 
 
-    float percent_pre_getup = 0.0f;
-    float percent_getup = 0.0f;
-    std::vector<float> pre_running_pos = {
-        0.87, 1.36, -2.65,
-        -0.87, 1.36, -2.65,
-        0.87, 1.36, -2.65,
-        -0.87, 1.36, -2.65,
-        0.00, 0.00, 0.00, 0.00
-    };
-    float max_duration = 0.20;
-    float min_duration = 0.03;
-    float current_duration = 0.20;
-    float gain = 0.005;
 
-public:
-    bool Interpolate(float& percent,
-        const std::vector<float>& start_pos,
-        const std::vector<float>& target_pos,
-        float duration_seconds,
-        std::vector<float> &output_dof_pos,
-        bool use_fixed_gains = true
-    );
+    std::shared_ptr<joystick_base> joystick; // joystick pointer
 
+    // std::unique_ptr<odom_utils::legged_odom> legged_odom_ptr;
+
+
+    void publishProprio();
+
+    
 };
 
-#endif // RL_Test_HPP
+#endif // RL_SIM_WMP_HPP

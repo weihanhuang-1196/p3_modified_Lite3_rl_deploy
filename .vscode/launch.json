@@ -2,11 +2,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "wmp_policy_ros2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/wmp_policy_ros2/src/wmp_policy/wmp_policy/policy.py",
+            "env": {
+                "ROS_DISTRO": "humble",
+                "PYTHONPATH": "/opt/ros/humble/lib/python3.10/site-packages:${workspaceFolder}/wmp_policy_ros2/install/wmp_policy/lib/python3.10/site-packages:${env:PYTHONPATH}",
+                "LD_LIBRARY_PATH": "/opt/ros/humble/lib:${env:LD_LIBRARY_PATH}",
+                "AMENT_PREFIX_PATH": "/opt/ros/humble:${env:AMENT_PREFIX_PATH}"
+            },
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Run rl_sim_mujoco",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/rl_sar/cmake_build/bin/rl_sim_mujoco",
-            "args": ["panda7","scene_terrain"],
+            "args": [
+                "panda7",
+                "scene_terrain"
+            ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
@@ -36,7 +52,7 @@
             "args": [
                 "launch",
                 "rl_sar",
-                "gazebo.launch.py", 
+                "gazebo.launch.py",
                 "rname:=panda3"
             ],
             "console": "integratedTerminal",
@@ -55,7 +71,7 @@
             "args": [
                 "launch",
                 "rl_sar",
-                "gazebo.launch.py", 
+                "gazebo.launch.py",
                 "rname:=panda7"
             ],
             "console": "integratedTerminal",
@@ -74,7 +90,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/rl_sar/install/lib/rl_sar/rl_sim",
             "args": [],
-            "stopAtEntry": true,  // 添加：在入口处暂停
+            "stopAtEntry": true, // 添加：在入口处暂停
             "cwd": "${workspaceFolder}",
             "environment": [
                 {
@@ -82,7 +98,7 @@
                     "value": "humble"
                 },
                 {
-                    "name": "LD_LIBRARY_PATH", 
+                    "name": "LD_LIBRARY_PATH",
                     "value": "/opt/ros/humble/lib:${workspaceFolder}/rl_sar/install/lib:${env:LD_LIBRARY_PATH}"
                 }
             ],
@@ -94,8 +110,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "postDebugTask": "kill-ros"  // 添加调试后清理任务
-
+            "postDebugTask": "kill-ros" // 添加调试后清理任务
         },
         {
             "name": "ROS 2: Both Gazebo and rl_sim",
