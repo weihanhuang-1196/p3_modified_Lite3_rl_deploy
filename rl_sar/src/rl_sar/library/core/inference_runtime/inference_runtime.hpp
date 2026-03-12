@@ -54,6 +54,13 @@ public:
      */
     virtual std::vector<float> forward(const std::vector<std::vector<float>>& inputs) = 0;
 
+    /**
+     * @brief Forward inference with world information (for models that require it)
+     * @param inputs Vector of input data vectors
+     * @return Inference result vector
+     */
+    virtual std::vector<std::vector<float>> forward_world(const std::vector<std::vector<float>>& inputs) = 0;
+
 
     /**
      * @brief Get model type string
@@ -88,6 +95,7 @@ public:
     bool load(const std::string& model_path) override;
     bool is_loaded() const override { return loaded_; }
     std::vector<float> forward(const std::vector<std::vector<float>>& inputs) override;
+    std::vector<std::vector<float>> forward_world(const std::vector<std::vector<float>>& inputs) override;
     std::string get_model_type() const override { return "torch"; }
 
     std::vector<float> forward_motor_policy(const std::vector<float>& inputs) override{ return std::vector<float>(); };
@@ -142,6 +150,7 @@ public:
     std::string get_model_type() const override { return "onnx"; }
 
     std::vector<float> forward_motor_policy(const std::vector<float>& inputs);
+    std::vector<std::vector<float>> forward_world(const std::vector<std::vector<float>>& inputs) override { return std::vector<std::vector<float>>(); };
 
 private:
 #ifdef USE_ONNX

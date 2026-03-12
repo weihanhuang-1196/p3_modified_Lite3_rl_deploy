@@ -10,6 +10,20 @@ import numpy as np
 
 import threading
 
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
+
+
+import time
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        end = time.perf_counter()
+        print(f"{func.__name__} 耗时: {(end-start)*1000:.3f} ms")
+        return result
+    return wrapper
+
 
 class PolicyNode(Node):
 
@@ -84,6 +98,12 @@ class PolicyNode(Node):
         self.policy_prop = np.zeros(self.num_obs, dtype=np.float32)
         self.wm_prop = np.zeros(33, dtype=np.float32)
         self.obs_history = np.zeros((5, self.num_obs), dtype=np.float32)
+        self.prev_wm_image = None
+        self.action_tensor = torch.zeros(1, 1, self.num_actions, device=self.device)
+
+        self.input_wm_prop_tensor = torch.zeros(1,33,device=self.device)
+        self.history_tensor = torch.zeros(1,5,self.num_obs,device=self.device)
+        self.cmd_tensor = torch.zeros(1,3,device=self.device)
 
         self.cmd = np.zeros(3, dtype=np.float32) 
 
@@ -91,7 +111,7 @@ class PolicyNode(Node):
             size=(1, 5, self.num_actions),
             device=self.device
         )
-        self.actions = torch.zeros(1, self.num_actions, device=self.device)
+        self.actions = torch.zeros(self.num_actions, device=self.device)
         self.action = np.zeros(self.num_actions, dtype=np.float32)
 
         self.wm_logit = torch.zeros(1, 32, 32, device=self.device)
@@ -116,12 +136,12 @@ class PolicyNode(Node):
 
 
     def init_rostopic(self):
-        # self.depth_sub = self.create_subscription(
-        #     Image,
-        #     '/depth/depth_camera/depth/image_raw',  # 你的深度图话题名
-        #     self.depth_callback,
-        #     10
-        # )
+        self.depth_sub = self.create_subscription(
+            Image,
+            '/depth/depth_camera/depth/image_raw',  # 你的深度图话题名
+            self.depth_callback,
+            10
+        )
 
         # 订阅本体感知信息
         self.proprio_sub = self.create_subscription(
@@ -165,12 +185,12 @@ class PolicyNode(Node):
         gravity = latest_proprio.data[3:6]
 
         # 使用手柄输入修改 self.cmd
-        # self.cmd[0] = self.latest_proprio.data[6]      # 第一个元素
-        # self.cmd[1] = self.latest_proprio.data[7]      # 第二个元素  
-        # self.cmd[2] = self.latest_proprio.data[8]    # 第三个元素
-        self.cmd[0] = 0.0     # 第一个元素
-        self.cmd[1] = 0.0      # 第二个 元素 
-        self.cmd[2] = 0.0    # 第三个
+        self.cmd[0] = self.latest_proprio.data[6]      # 第一个元素
+        self.cmd[1] = self.latest_proprio.data[7]      # 第二个元素  
+        self.cmd[2] = self.latest_proprio.data[8]    # 第三个元素
+        # self.cmd[0] = 0.0     # 第一个元素
+        # self.cmd[1] = 0.0      # 第二个 元素 
+        # self.cmd[2] = 0.0    # 第三个
 
         self.policy_prop[:3] = omega
         self.policy_prop[3:6] = gravity
@@ -184,6 +204,14 @@ class PolicyNode(Node):
         self.wm_prop[9:21] = qj
         self.wm_prop[21:33] = dqj
 
+        self.wm_action_history = torch.cat((self.wm_action_history[:, 1:], self.action_tensor), dim=1)
+        # self.wm_action_history = torch.roll(self.wm_action_history,-1,dim=1)
+        # self.wm_action_history[:,-1] = self.action_tensor
+        self.wm_action = self.wm_action_history.flatten(1)
+        self.obs_history[:-1] = self.obs_history[1:]
+        self.obs_history[-1] = self.policy_prop
+
+    # @timer
     def main_loop(self):
         start_time = time.monotonic()
         with self.proprio_lock:
@@ -193,42 +221,51 @@ class PolicyNode(Node):
         get_pro_time = time.monotonic()
         get_hist_pro_time = time.monotonic()
 
-        input_wm_prop = torch.tensor(self.wm_prop, dtype=torch.float32, device=self.device).unsqueeze(0)
-        history_tensor = torch.tensor(self.obs_history, dtype=torch.float32, device=self.device).unsqueeze(0)
-        cmd_tensor = torch.tensor(self.cmd[:3], dtype=torch.float32, device=self.device).unsqueeze(0)
-
+        self.input_wm_prop_tensor[0] = torch.from_numpy(self.wm_prop)
+        self.history_tensor[0] = torch.from_numpy(self.obs_history)
+        self.cmd_tensor[0] = torch.from_numpy(self.cmd[:3])
+        wm_input_image = self.latest_depth_tensor if self.prev_wm_image is None else self.prev_wm_image
         if self.global_counter % self.visual_update_interval == 0:
-            self.wm_logit, self.wm_stoch, self.wm_deter, self.wm_feature = self.world_model(
-                input_wm_prop,
-                self.latest_depth_tensor,
-                self.wm_logit,
-                self.wm_stoch,
-                self.wm_deter,
-                self.wm_action,
-                self.wm_is_first,
-            )
+            start_world_model_time = time.monotonic()
+            with torch.no_grad():
+                self.wm_logit, self.wm_stoch, self.wm_deter, self.wm_feature = self.world_model(
+                    self.input_wm_prop_tensor,
+                    wm_input_image,
+                    self.wm_logit,
+                    self.wm_stoch,
+                    self.wm_deter,
+                    self.wm_action,
+                    self.wm_is_first,
+                )
+            end_world_model_time = time.monotonic()
+            print(f"World Model Inference Time: {(end_world_model_time - start_world_model_time)*1000*1000:.3f} us")
             self.wm_is_first[:] = 0
+            self.prev_wm_image = self.latest_depth_tensor
         get_obs_time = time.monotonic()
 
         turn_obs_time = time.monotonic()
 
         # ===== Policy 推理 =====
-        history_flat = history_tensor.flatten(1)
-        action = self.policy_model(cmd_tensor.detach(),history_flat.detach(),self.wm_feature.detach())
+        history_flat = self.history_tensor.flatten(1)
+        start_prolicy_time = time.monotonic()
+        with torch.no_grad():
+            action = self.policy_model(self.cmd_tensor.detach(),history_flat.detach(),self.wm_feature.detach())
+        end_policy_time = time.monotonic()
+        print(f"Policy Inference Time: {(end_policy_time - start_prolicy_time)*1000*1000:.3f} us")
         action = action.squeeze(0)
 
         # ===== 更新 WM action history =====
-        action_tensor = action.unsqueeze(0).unsqueeze(0)
-        self.wm_action_history = torch.cat((self.wm_action_history[:, 1:], action_tensor), dim=1)
-        self.wm_action = self.wm_action_history.flatten(1)
+        self.action_tensor = action.unsqueeze(0).unsqueeze(0)
 
 
-        self.obs_history[:-1] = self.obs_history[1:]
-        self.obs_history[-1] = self.policy_prop
 
         policy_time = time.monotonic()
-        self.actions = action.to(self.device)
-        actions_scaled = self.actions * self.action_scale
+        self.actions = action
+
+        self.action =  np.clip(action.detach().cpu().numpy(), -self.clip_actions, self.clip_actions)
+        # print(self.action)
+        # action_clip = np.clip(self.action, -hard_clip, hard_clip)
+        actions_scaled = self.action * self.action_scale
         self.output_dof_pos = self.default_dof_pos + actions_scaled
 
         self.send_output_dof_pos(self.output_dof_pos)
@@ -265,20 +302,21 @@ class PolicyNode(Node):
         # 加 batch + channel
         depth = depth.unsqueeze(0).unsqueeze(0)  # (1,1,H,W)
 
-        depth = torch.nn.functional.interpolate(
-            depth,
-            size=(64,64),
-            mode='bilinear',
-            align_corners=False
-        )
+        # depth = torch.nn.functional.interpolate(
+        #     depth,
+        #     size=(64,64),
+        #     mode='bilinear',
+        #     align_corners=False
+        # )
 
         # ===== 归一化部分 =====
-        min_depth = 0.0
+        min_depth = 0.05
         max_depth = 2.0
 
+        depth = torch.nan_to_num(depth, posinf=max_depth, neginf=min_depth)
+
         depth = torch.clamp(depth, min_depth, max_depth)
-        depth = (depth - min_depth) / (max_depth - min_depth)
-        depth = depth - 0.5
+        depth = (depth - min_depth) / (max_depth - min_depth) - 0.5
         # ======================
 
 
@@ -287,22 +325,30 @@ class PolicyNode(Node):
         with self.depth_lock:
             self.latest_depth_tensor = depth.to(self.device)
 
-        depth_show = depth.squeeze().cpu().numpy()  # (64,64)
+        # depth_show = depth.squeeze().cpu().numpy()  # (64,64)
 
-        # 从 [-0.5,0.5] → [0,1]
-        depth_vis = depth_show + 0.5
+        # # 从 [-0.5,0.5] → [0,1]
+        # depth_vis = depth_show + 0.5
 
-        # clamp 防止数值溢出
-        depth_vis = np.clip(depth_vis, 0.0, 1.0)
+        # # clamp 防止数值溢出
+        # depth_vis = np.clip(depth_vis, 0.0, 1.0)
 
-        # 转成 0~255 uint8
-        depth_vis = (depth_vis * 255).astype(np.uint8)
 
-        # 伪彩色
-        depth_color = cv2.applyColorMap(depth_vis, cv2.COLORMAP_JET)
+        # depth_vis_big = np.repeat(
+        #     np.repeat(depth_vis, 6, axis=0),
+        #     6,
+        #     axis=1
+        # )
 
-        cv2.imshow("Depth", depth_color)
-        cv2.waitKey(1)
+
+        # # # 转成 0~255 uint8
+        # depth_vis = (depth_vis_big * 255).astype(np.uint8)
+
+        # # # 伪彩色
+        # depth_color = cv2.applyColorMap(depth_vis, cv2.COLORMAP_JET)
+
+        # cv2.imshow("Depth", depth_color)
+        # cv2.waitKey(1)
 
 
 
@@ -334,7 +380,7 @@ def main(args=None):
     rclpy.init(args=args)
 
 
-    device = "cuda:0"
+    device = "cpu"
     duration = 0.02
     policy_node = PolicyNode(device=device)
 

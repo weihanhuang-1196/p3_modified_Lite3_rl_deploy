@@ -59,7 +59,6 @@ RL_Sim::RL_Sim(int argc, char **argv)
     this->ReadYaml(this->robot_name, "base.yaml");
 
     this->config_name = this->params.Get<std::string>("algorithm");
-
     // init joystick
     this->joystick = JoystickManager::GetInstance().CreateJoystick(
         this->params.Get<std::string>("joystick_type"),
@@ -676,6 +675,20 @@ void RL_Sim::InitTopics() {
         [this](const robot_msgs::msg::RobotState::SharedPtr msg){ GenericCallback(this->robot_state_topic_name, msg); }
     );
 
+    this->image_topic_name = "/depth/depth_camera/depth/image_raw";
+    auto image_info = std::make_shared<TopicInfo<sensor_msgs::msg::Image>>();
+    image_info->timeout_sec = 1.0;
+    image_info->last_time.store(std::chrono::steady_clock::now());
+    image_info->extra_callback = [this, image_info] () {
+        auto msg = std::atomic_load(&image_info->latest_msg);
+        auto depth_image = depth_image_to_vector(msg->data, this->image_width, this->image_height);
+        std::atomic_store(&this->depth_image_ptr, std::make_shared<std::vector<float>>(std::move(depth_image)));
+    };
+    topics[this->image_topic_name] = image_info;
+    image_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Image>(
+        this->image_topic_name, rclcpp::SystemDefaultsQoS(),
+        [this](const sensor_msgs::msg::Image::SharedPtr msg){ GenericCallback(this->image_topic_name, msg); }
+    );
 
 }
 
@@ -692,9 +705,9 @@ void RL_Sim::CheckTimeouts() {
 
             // 超时处理，例如停机
             if (kv.first == "/cmd_vel") {
-                geometry_msgs::msg::Twist stop_cmd{};
-                auto twist_info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(info);
-                std::atomic_store(&twist_info->latest_msg, std::make_shared<geometry_msgs::msg::Twist>(stop_cmd));
+                // geometry_msgs::msg::Twist stop_cmd{};
+                // auto twist_info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(info);
+                // std::atomic_store(&twist_info->latest_msg, std::make_shared<geometry_msgs::msg::Twist>(stop_cmd));
             }
             if (kv.first == "/joy") {
                 // 处理 joystick 超时，例如清除输入状态
@@ -728,6 +741,39 @@ void RL_Sim::CheckTimeouts() {
 
 
 #endif
+
+
+std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<uint8_t>& data, int width, int height)
+{
+    const float min_depth = 0.05f;
+    const float max_depth = 2.0f;
+
+    std::vector<float> depth_vec;
+    depth_vec.reserve(width * height);
+
+    // reinterpret_cast 指向原始 float 数据
+    const float* data_ptr = reinterpret_cast<const float*>(data.data());
+
+    for (size_t i = 0; i < width * height; ++i)
+    {
+        float d = data_ptr[i];
+
+        // nan / inf -> clamp
+        if (std::isnan(d)) d = 0.0f;
+        else if (std::isinf(d)) d = (d > 0 ? max_depth : min_depth);
+
+        // clamp
+        d = std::clamp(d, min_depth, max_depth);
+
+        // normalize [-0.5, 0.5]
+        d = (d - min_depth) / (max_depth - min_depth) - 0.5f;
+
+        depth_vec.push_back(d);
+    }
+
+    return depth_vec; // 扁平化 vector
+}
+
 
 
 #if defined(USE_ROS1)
@@ -766,17 +812,22 @@ void RL_Sim::RunModel()
         {
             auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
             auto cmd = std::atomic_load(&info->latest_msg);
-            if(this->config_name == "np3o")
+            if(cmd)
             {
-                if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-                    this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
-                else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-                    this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z, 0.0f,0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
+                if(this->config_name == "np3o")
+                {
+                    if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+                        this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+                    else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
+                        this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z, 0.0f,0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
+                    else
+                        this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+                }
                 else
-                    this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-            }
-            else
-                this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
+                    this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
+            }else
+                this->obs.commands = {0.0f, 0.0f, 0.0f};
+
         }
         this->obs.base_quat = this->robot_state.imu.quaternion;
         this->obs.dof_pos = this->robot_state.motor_state.q;
@@ -873,6 +924,12 @@ std::vector<float> RL_Sim::Forward()
     }
 
     std::vector<float> clamped_obs = this->ComputeObservation();
+    std::vector<float> world_obs;
+
+    if(this->config_name == "wmp")
+    {
+        world_obs = this->ComputeWorldObservation();
+    }
 
     std::vector<float> actions;
     if (this->params.Get<std::vector<int>>("observations_history").size() != 0)
@@ -885,11 +942,59 @@ std::vector<float> RL_Sim::Forward()
             this->history_obs_buf.insert(clamped_obs);
             
         }
-        else
+        else if(this->config_name == "himloco")
         {
             this->history_obs_buf.insert(clamped_obs);
             this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
             actions = this->model->forward({this->history_obs});
+        }
+        else if(this->config_name == "wmp")
+        {
+
+            this->wm_action_history.erase(this->wm_action_history.begin(), this->wm_action_history.begin() + this->wm_action.size());
+            this->wm_action_history.insert(this->wm_action_history.end(), this->wm_action.begin(), this->wm_action.end());
+            this->wm_action = this->wm_action_history;
+
+            std::vector<float> input_image(this->image_width * this->image_height, 0.0f);
+            auto depth_image = std::atomic_load(&this->depth_image_ptr);
+            if(depth_image)
+            {
+                this->wm_input_image = *depth_image;
+            }else
+            {
+                this->wm_input_image = std::vector<float>(this->image_width * this->image_height, 0.0f); // 如果没有图像数据，使用全零输入
+            }
+            if(global_counter % visual_update_interval == 0)
+            {
+                
+                if(this->pre_wm_image.empty())
+                    input_image = this->wm_input_image; // 初始化前一帧图像
+                else
+                    input_image = this->pre_wm_image; // 使用上一帧图像作为输入
+                auto start = std::chrono::steady_clock::now();
+                auto world_model_output = this->world_model->forward_world({world_obs, input_image, this->wm_logit, this->wm_stoch, this->wm_deter, this->wm_action, this->wm_is_first});
+                auto end = std::chrono::steady_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << LOGGER::DEBUG << "World model forward time: " << duration.count() << " us" << std::endl;
+                this->wm_logit = std::move(world_model_output[0]);
+                this->wm_stoch = std::move(world_model_output[1]);
+                this->wm_deter = std::move(world_model_output[2]);
+                this->wm_feature = std::move(world_model_output[3]);
+            }
+            this->wm_is_first[0] = 0;
+
+            this->history_obs_buf.insert(clamped_obs);
+            this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
+            auto start = std::chrono::steady_clock::now();
+            actions = this->model->forward({this->obs.commands, this->history_obs, this->wm_feature});
+            auto end = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+            std::cout << LOGGER::DEBUG << "Policy model forward time: " << duration.count() << " us" << std::endl;
+            this->wm_action = actions;
+
+
+
+            this->pre_wm_image = std::move(this->wm_input_image);
         }
         
     }
@@ -897,6 +1002,8 @@ std::vector<float> RL_Sim::Forward()
     {
         actions = this->model->forward({clamped_obs});
     }
+
+    global_counter += 1;
 
     if (!this->params.Get<std::vector<float>>("clip_actions_upper").empty() && !this->params.Get<std::vector<float>>("clip_actions_lower").empty())
     {

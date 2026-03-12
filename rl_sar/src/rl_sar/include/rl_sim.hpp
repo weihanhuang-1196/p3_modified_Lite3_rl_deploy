@@ -31,6 +31,7 @@
 #include <memory>
 #include <unordered_map>
 
+
 #if defined(USE_ROS1)
 #include <ros/ros.h>
 #include "std_srvs/Empty.h"
@@ -45,6 +46,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <std_srvs/srv/empty.hpp>
@@ -171,6 +173,7 @@ private:
     rclcpp::Client<std_srvs::srv::Empty>::SharedPtr gazebo_reset_world_client;
     rclcpp::Publisher<robot_msgs::msg::RobotCommand>::SharedPtr robot_command_publisher;
     rclcpp::Subscription<robot_msgs::msg::RobotState>::SharedPtr robot_state_subscriber;
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscriber;
     rclcpp::Client<rcl_interfaces::srv::GetParameters>::SharedPtr param_client;
     void GazeboImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
     void CmdvelCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
@@ -225,6 +228,7 @@ private:
     std::string joy_topic_name;
     std::string imu_topic_name;
     std::string robot_state_topic_name;
+    std::string image_topic_name;
 
 
 
@@ -245,7 +249,10 @@ private:
 
     // std::unique_ptr<odom_utils::legged_odom> legged_odom_ptr;
 
-    
+
+    std::vector<float> depth_image_to_vector(const std::vector<uint8_t>& data, int width, int height);
+
+
 };
 
 #endif // RL_SIM_HPP

@@ -245,6 +245,7 @@ public:
     // rl functions
     virtual std::vector<float> Forward() = 0;
     std::vector<float> ComputeObservation();
+    std::vector<float> ComputeWorldObservation();
     virtual void GetState(RobotState<float> *state) = 0;
     virtual void SetCommand(const RobotCommand<float> *command) = 0;
     void StateController(const RobotState<float> *state, RobotCommand<float> *command);
@@ -287,6 +288,7 @@ public:
 
     // rl module
     std::unique_ptr<InferenceRuntime::Model> model;
+    std::unique_ptr<InferenceRuntime::Model> world_model;
     std::unordered_map<std::string, std::unique_ptr<InferenceRuntime::Model>> models;
     std::string current_rl_fsm_name = "";
 
@@ -299,6 +301,25 @@ public:
     std::mutex model_mutex;
 
     std::atomic<bool> limit_q_flag;
+
+
+    // depth image for world model
+    std::shared_ptr<std::vector<float>> depth_image_ptr;
+    std::vector<float> pre_wm_image;
+    std::vector<float> wm_logit;
+    std::vector<float> wm_stoch;
+    std::vector<float> wm_deter;
+    std::vector<float> wm_feature;
+    std::vector<float> wm_action;
+    std::vector<float> wm_is_first;
+    std::vector<float> wm_prop;
+    std::vector<float> wm_action_history; 
+    std::vector<float> wm_input_image;
+
+    int image_width;
+    int image_height;
+    int global_counter = 0;
+    int visual_update_interval = 5;
 
 
 

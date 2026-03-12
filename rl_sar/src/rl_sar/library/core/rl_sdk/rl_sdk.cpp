@@ -188,6 +188,123 @@ std::vector<float> RL::ComputeObservation()
     return clamped_obs;
 }
 
+
+std::vector<float> RL::ComputeWorldObservation()
+{
+    std::vector<std::vector<float>> obs_list;
+
+    for (const std::string &observation : this->params.Get<std::vector<std::string>>("world_observations"))
+    {
+        // ============= Base Observations =============
+        if (observation == "lin_vel")
+        {
+            obs_list.push_back(this->obs.lin_vel * this->params.Get<float>("lin_vel_scale"));
+        }
+        else if (observation == "ang_vel")
+        {
+            // In ROS1 Gazebo, the coordinate system for angular velocity is in the world coordinate system.
+            // In ROS2 Gazebo, mujoco and real robot, the coordinate system for angular velocity is in the body coordinate system.
+            if (this->ang_vel_axis == "body")
+            {
+                obs_list.push_back(this->obs.ang_vel * this->params.Get<float>("ang_vel_scale"));
+            }
+            else if (this->ang_vel_axis == "world")
+            {
+                obs_list.push_back(QuatRotateInverse(this->obs.base_quat, this->obs.ang_vel) * this->params.Get<float>("ang_vel_scale"));
+            }
+        }
+        else if (observation == "gravity_vec")
+        {
+            obs_list.push_back(QuatRotateInverse(this->obs.base_quat, this->obs.gravity_vec));
+        }
+        else if (observation == "commands")
+        {
+            obs_list.push_back(this->obs.commands * this->params.Get<std::vector<float>>("commands_scale"));
+        }
+        else if (observation == "dof_pos")
+        {
+            std::vector<float> dof_pos_rel = this->obs.dof_pos - this->params.Get<std::vector<float>>("default_dof_pos");
+            for (int i : this->params.Get<std::vector<int>>("wheel_indices"))
+            {
+                dof_pos_rel[i] = 0.0f;
+            }
+            obs_list.push_back(dof_pos_rel * this->params.Get<float>("dof_pos_scale"));
+        }
+        else if (observation == "dof_vel")
+        {
+            obs_list.push_back(this->obs.dof_vel * this->params.Get<float>("dof_vel_scale"));
+        }
+        else if (observation == "actions")
+        {
+            obs_list.push_back(this->obs.actions);
+        }
+        // ============= Other Observations =============
+        else if (observation == "whole_body_tracking/motion_command")
+        {
+            std::vector<float> motion_cmd;
+            if (this->motion_loader)
+            {
+                auto joint_pos_sdk = this->motion_loader->GetJointPos();
+                auto joint_vel_sdk = this->motion_loader->GetJointVel();
+                auto joint_mapping = this->params.Get<std::vector<int>>("joint_mapping");
+                std::vector<float> joint_pos_training(joint_mapping.size());
+                std::vector<float> joint_vel_training(joint_mapping.size());
+                for (size_t i = 0; i < joint_mapping.size(); ++i)
+                {
+                    joint_pos_training[i] = joint_pos_sdk[joint_mapping[i]];
+                    joint_vel_training[i] = joint_vel_sdk[joint_mapping[i]];
+                }
+                motion_cmd.insert(motion_cmd.end(), joint_pos_training.begin(), joint_pos_training.end());
+                motion_cmd.insert(motion_cmd.end(), joint_vel_training.begin(), joint_vel_training.end());
+            }
+            else
+            {
+                motion_cmd.resize(this->params.Get<int>("num_of_dofs") * 2, 0.0f);
+            }
+            obs_list.push_back(motion_cmd);
+        }
+        else if (observation == "whole_body_tracking/motion_anchor_ori_b")
+        {
+            std::vector<float> anchor_ori(6, 0.0f);
+            if (this->motion_loader)
+            {
+                auto waist_sdk_indices = this->params.Get<std::vector<int>>("waist_joint_indices");
+                std::vector<float> waist_angles = {
+                    this->obs.dof_pos[InverseJointMapping(waist_sdk_indices[0])],
+                    this->obs.dof_pos[InverseJointMapping(waist_sdk_indices[1])],
+                    this->obs.dof_pos[InverseJointMapping(waist_sdk_indices[2])]
+                };
+                std::vector<float> robot_torso_quat_w = MotionLoader::ComputeTorsoQuat(this->obs.base_quat, waist_angles);
+                std::vector<float> ref_torso_quat_w = this->motion_loader->GetAnchorQuat();
+                std::vector<float> init_quat = this->motion_loader->GetInitQuat();
+                std::vector<float> motion_anchor_quat_w = QuaternionMultiply(init_quat, ref_torso_quat_w);
+                std::vector<float> robot_quat_inv = QuaternionConjugate(robot_torso_quat_w);
+                std::vector<float> relative_quat = QuaternionMultiply(robot_quat_inv, motion_anchor_quat_w);
+                std::vector<float> rot_matrix = QuaternionToRotationMatrix(relative_quat);
+                anchor_ori = MatrixFirstTwoColumns(rot_matrix);
+            }
+            obs_list.push_back(anchor_ori);
+        }
+        else if (observation == "RoboMimic_Deploy/phase")
+        {
+            float motion_time = this->episode_length_buf * this->params.Get<float>("dt") * this->params.Get<int>("decimation");
+            float count = motion_time;
+            float phase = count / this->motion_length;
+            std::vector<float> phase_vec = {phase};
+            obs_list.push_back(phase_vec);
+        }
+    }
+
+    std::vector<float> obs;
+    for (const auto& obs_vec : obs_list)
+    {
+        obs.insert(obs.end(), obs_vec.begin(), obs_vec.end());
+    }
+    return obs;
+
+}
+
+
 void RL::InitObservations()
 {
     this->obs.lin_vel = {0.0f, 0.0f, 0.0f};
@@ -205,6 +322,24 @@ void RL::InitObservations()
     this->obs.actions.clear();
     this->obs.actions.resize(this->params.Get<int>("num_of_dofs"), 0.0f);
     this->ComputeObservation();
+
+
+    this->pre_wm_image = std::vector<float>(64*64, 0.0f);
+    this->depth_image_ptr = std::make_shared<std::vector<float>>(64*64, 0.0f);
+    this->wm_input_image = std::vector<float>(64*64, 0.0f);
+    this->wm_logit = std::vector<float>(1*32*32, 0.0f);
+    this->wm_stoch = std::vector<float>(1*32*32, 0.0f);
+    this->wm_deter = std::vector<float>(1*512, 0.0f);
+    this->wm_feature = std::vector<float>(1*512, 0.0f);
+    this->wm_is_first = std::vector<float>(1, 1.0f);
+    this->wm_prop = std::vector<float>(33, 0.0f);
+    this->wm_action_history = std::vector<float>(1*5*12, 0.0f);
+    this->wm_action = std::vector<float>(1*5*12, 0.0f);
+    this->image_width = this->params.Get<int>("image_width", 64);
+    this->image_height = this->params.Get<int>("image_height", 64);
+    this->ComputeWorldObservation();
+    
+
 }
 
 void RL::InitOutputs()
@@ -269,19 +404,21 @@ void RL::InitRL(std::string robot_config_path)
     {
         throw std::runtime_error("Failed to load model from: " + model_path);
     }
+
+    if (!this->params.Get<std::string>("world_name").empty())
+    {
+        std::string world_model_path = std::string(POLICY_DIR) + "/" + robot_config_path + "/" + this->params.Get<std::string>("world_name");
+        this->world_model = InferenceRuntime::ModelFactory::load_model(world_model_path);
+        if (!this->world_model)
+        {
+            throw std::runtime_error("Failed to load world model from: " + world_model_path);
+        }
+    }
 }
 
 void RL::InitRL(std::string robot_config_path, std::string fsm_name)
 {
-    // this->limit_q_flag.store(true, std::memory_order_release);
-    // this->limit_q_timer.start();
-    // if(!this->limit_q_flag.load(std::memory_order_acquire))
-    // {
-    //     this->limit_q_flag.store(true, std::memory_order_release);
-    //     this->limit_q_timer.start();
-    // }
-    
-    
+
     try
     {
         if(this->models.count(fsm_name))

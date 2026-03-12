@@ -2,20 +2,26 @@
 # SPDX-License-Identifier: Apache-2.0
 
 panda3/wmp/walk:
-  model_name: "policy_Feb24_15-18-13_10000.pt"
-  num_observations: 33
+  model_name: "policy.pt"
+  world_name: "world_model.pt"
+  num_observations: 42
   observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
-  observations_history: [0, 1, 2, 3, 4, 5]  # 0 is the latest observation
+  # observations: ["ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
+  world_observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
+  image_width: 64
+  image_height: 64
+  # observations_history: [0, 1, 2, 3, 4]  # 0 is the latest observation
+  observations_history: [4, 3, 2, 1, 0]  # 0 is the latest observation
   observations_history_priority: "time"  # "time" or "term" priority
   clip_obs: 100.0
-  clip_actions_lower: [-100, -100, -100,
-                       -100, -100, -100,
-                       -100, -100, -100,
-                       -100, -100, -100]
-  clip_actions_upper: [100, 100, 100,
-                       100, 100, 100,
-                       100, 100, 100,
-                       100, 100, 100]
+  clip_actions_lower: [-7, -7, -7,
+                       -7, -7, -7,
+                       -7, -7, -7,
+                       -7, -7, -7]
+  clip_actions_upper: [7, 7, 7,
+                       7, 7, 7,
+                       7, 7, 7,
+                       7, 7, 7]
   rl_kp:  [55, 55, 55,
             55, 55, 55,
             55, 55, 55,
@@ -46,10 +52,10 @@ panda3/wmp/walk:
   dof_vel_scale: 0.05
   commands_scale: [1.0, 1.0, 0.25]
 
-  torque_limits: [200, 200, 200,
-                200, 200, 200,
-                200, 200, 200,
-                200, 200, 200]
+  torque_limits: [60, 60, 90,
+                60, 60, 90,
+                60, 60, 90,
+                60, 60, 90]
 
   default_dof_pos: [0.000, 0.71, -1.5,
                     0.000, 0.71, -1.5,

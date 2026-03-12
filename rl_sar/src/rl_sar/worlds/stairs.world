@@ -6445,7 +6445,7 @@
             <box>
               
             
-              <size>5.25 3 4</size>
+              <size>5.25 3 0.1</size>
               
           
             </box>
@@ -8195,6 +8195,121 @@
       
   
     </model>
+
+
+
+  <model name="box_40cm">
+    <static>true</static>
+    <pose>6 -0.5 0.2 0 0 0</pose>
+
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+
+    <model name="box_40cm2">
+    <static>true</static>
+    <pose>9.2 -0.5 0.2 0 0 0</pose>
+
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+
+
+      <model name="box_40cm3">
+    <static>true</static>
+    <pose>12.4 -0.5 0.2 0 0 0</pose>
+
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+
+
+    <model name="box_40cm4">
+    <static>true</static>
+    <pose>17.6 -0.5 0.6 0 0 0</pose>
+
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>3 3 0.4</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+
     
 
   </world>

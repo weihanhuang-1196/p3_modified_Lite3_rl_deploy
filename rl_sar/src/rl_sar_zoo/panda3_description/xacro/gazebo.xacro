@@ -173,11 +173,13 @@
 
         <!-- position = [0.37, 0, 0.03]
              y_angle = pitch 下俯，单位弧度 -->
-        <pose>0.37 0 0.03 0 0.122 0</pose>
+        <!-- <pose>0.345 0 0.05 0 0.122 0</pose> -->
+        <!-- <pose>0.37 0 0.03 0 0.0698 0</pose> -->
+        <pose>0.37 0 0.03 0 0.0698 0</pose>
         <!-- 0.122 rad ≈ 7° -->
         <camera>
           <!-- 58° → 弧度 -->
-          <horizontal_fov>1.012</horizontal_fov>
+          <horizontal_fov>1.01229</horizontal_fov>
           <image>
             <width>64</width>
             <height>64</height>
