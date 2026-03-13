@@ -734,6 +734,9 @@ if(USE_MUJOCO)
         IMPORTED_NO_SONAME TRUE
     )
 
+    #Find opencv
+    find_package(OpenCV REQUIRED)
+
     # Include directories
     include_directories(
         ${MUJOCO_INCLUDE_DIR}
@@ -765,11 +768,13 @@ if(USE_MUJOCO)
     target_include_directories(rl_sim_mujoco PRIVATE
         library/thirdparty/mujoco_simulate
         library/thirdparty/joystick
+        ${OpenCV_INCLUDE_DIRS}
     )
 
     target_link_libraries(rl_sim_mujoco
         rl_sdk observation_buffer ${YAML_CPP_LIBRARIES}
         Threads::Threads mujoco_prebuilt glfw
+        ${OpenCV_LIBS}
     )
 
     # macOS specific frameworks and libraries

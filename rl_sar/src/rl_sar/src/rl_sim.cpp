@@ -426,14 +426,14 @@ void RL_Sim::GetState(RobotState<float> *state)
     const auto &angular_velocity = this->vel.angular;
 #elif defined(USE_ROS2)
     auto info = std::static_pointer_cast<TopicInfo<sensor_msgs::msg::Imu>>(topics[imu_topic_name.c_str()]);
-    auto gazebo_imu = std::atomic_load(&info->latest_msg);
+    auto gazebo_imu = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
 
     const auto &orientation = gazebo_imu->orientation;
     const auto &angular_velocity = gazebo_imu->angular_velocity;
     const auto &linear_acceleration = gazebo_imu->linear_acceleration;
 
     auto info2 = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
-    auto robot_state_msg = std::atomic_load(&info2->latest_msg);
+    auto robot_state_msg = std::atomic_load_explicit(&info2->latest_msg, std::memory_order_acquire);
 #endif
 
     state->imu.quaternion[0] = orientation.w;
@@ -506,7 +506,7 @@ void RL_Sim::RobotControl()
     CheckTimeouts();
     {
         auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
-        auto robot_state_msg = std::atomic_load(&info->latest_msg);
+        auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
         if(!robot_state_msg) return;
     }
 
@@ -626,7 +626,7 @@ void RL_Sim::InitTopics() {
     this->cmd_topic_name = "/cmd_vel";
     auto cmd_vel_info = std::make_shared<TopicInfo<geometry_msgs::msg::Twist>>();
     cmd_vel_info->timeout_sec = 0.5;
-    cmd_vel_info->last_time.store(std::chrono::steady_clock::now());
+    cmd_vel_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     topics[this->cmd_topic_name] = cmd_vel_info;
 
     cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
@@ -639,10 +639,10 @@ void RL_Sim::InitTopics() {
     this->joy_topic_name = "/joy";
     auto joy_info = std::make_shared<TopicInfo<sensor_msgs::msg::Joy>>();
     joy_info->timeout_sec = 0.5;
-    joy_info->last_time.store(std::chrono::steady_clock::now());
+    joy_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     // 可选：设置额外回调
     joy_info->extra_callback = [this, joy_info] () {
-        auto msg = std::atomic_load(&joy_info->latest_msg);
+        auto msg = std::atomic_load_explicit(&joy_info->latest_msg, std::memory_order_acquire);
         this->joystick->JoyCallback(msg);
     };
     topics[this->joy_topic_name] = joy_info;
@@ -656,7 +656,7 @@ void RL_Sim::InitTopics() {
     this->imu_topic_name = "/imu";
     auto imu_info = std::make_shared<TopicInfo<sensor_msgs::msg::Imu>>();
     imu_info->timeout_sec = 0.5;
-    imu_info->last_time.store(std::chrono::steady_clock::now());
+    imu_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     topics[this->imu_topic_name] = imu_info;
     gazebo_imu_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Imu>(
         this->imu_topic_name, rclcpp::SystemDefaultsQoS(),
@@ -668,7 +668,7 @@ void RL_Sim::InitTopics() {
     this->robot_state_topic_name = this->ros_namespace + "robot_joint_controller/state";
     auto robot_state_info = std::make_shared<TopicInfo<robot_msgs::msg::RobotState>>();
     robot_state_info->timeout_sec = 0.5;
-    robot_state_info->last_time.store(std::chrono::steady_clock::now());
+    robot_state_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     topics[this->robot_state_topic_name] = robot_state_info;
     robot_state_subscriber = ros2_node->create_subscription<robot_msgs::msg::RobotState>(
         this->robot_state_topic_name, rclcpp::SystemDefaultsQoS(),
@@ -678,11 +678,11 @@ void RL_Sim::InitTopics() {
     this->image_topic_name = "/depth/depth_camera/depth/image_raw";
     auto image_info = std::make_shared<TopicInfo<sensor_msgs::msg::Image>>();
     image_info->timeout_sec = 1.0;
-    image_info->last_time.store(std::chrono::steady_clock::now());
+    image_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     image_info->extra_callback = [this, image_info] () {
-        auto msg = std::atomic_load(&image_info->latest_msg);
+        auto msg = std::atomic_load_explicit(&image_info->latest_msg, std::memory_order_acquire);
         auto depth_image = depth_image_to_vector(msg->data, this->image_width, this->image_height);
-        std::atomic_store(&this->depth_image_ptr, std::make_shared<std::vector<float>>(std::move(depth_image)));
+        std::atomic_store_explicit(&this->depth_image_ptr, std::make_shared<std::vector<float>>(std::move(depth_image)), std::memory_order_release);
     };
     topics[this->image_topic_name] = image_info;
     image_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Image>(
@@ -697,7 +697,7 @@ void RL_Sim::CheckTimeouts() {
 
     for (auto& kv : topics) {
         auto& info = kv.second;
-        auto dt = std::chrono::duration<double>(now - info->last_time.load()).count();
+        auto dt = std::chrono::duration<double>(now - info->last_time.load(std::memory_order_acquire)).count();
         if (dt > info->timeout_sec) {
             // std::cout << LOGGER::INFO << "RL_Sim start" << std::endl;
             // RCLCPP_WARN(node->get_logger(), "Topic %s timeout %.3f s", kv.first.c_str(), dt);
@@ -707,7 +707,7 @@ void RL_Sim::CheckTimeouts() {
             if (kv.first == "/cmd_vel") {
                 // geometry_msgs::msg::Twist stop_cmd{};
                 // auto twist_info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(info);
-                // std::atomic_store(&twist_info->latest_msg, std::make_shared<geometry_msgs::msg::Twist>(stop_cmd));
+                // std::atomic_store_explicit(&twist_info->latest_msg, std::make_shared<geometry_msgs::msg::Twist>(stop_cmd), std::memory_order_release);
             }
             if (kv.first == "/joy") {
                 // 处理 joystick 超时，例如清除输入状态
@@ -724,14 +724,14 @@ void RL_Sim::CheckTimeouts() {
                 // 处理 robot state 超时，例如设置默认状态
                 // this->robot_state_subscriber_msg = robot_msgs::msg::RobotState();
                 auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
-                auto robot_state_msg = std::atomic_load(&info->latest_msg);
+                auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
                 if(robot_state_msg)
                 {
                     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
                     {
                           robot_state_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].status_word = 0; // 设置状态字为0，表示无效或未连接
                     }
-                    std::atomic_store(&info->latest_msg, robot_state_msg);
+                    std::atomic_store_explicit(&info->latest_msg, robot_state_msg, std::memory_order_release);
                 }
 
             }
@@ -786,7 +786,7 @@ void RL_Sim::JointStatesCallback(const robot_msgs::MotorState::ConstPtr &msg, co
 #elif defined(USE_ROS2)
 void RL_Sim::RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg)
 {
-    std::atomic_store(&this->robot_state_subscriber_msg, msg);
+    std::atomic_store_explicit(&this->robot_state_subscriber_msg, msg, std::memory_order_release);
     // this->robot_state_subscriber_msg = *msg;
 }
 #endif
@@ -811,7 +811,7 @@ void RL_Sim::RunModel()
         if (this->control.navigation_mode)
         {
             auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
-            auto cmd = std::atomic_load(&info->latest_msg);
+            auto cmd = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
             if(cmd)
             {
                 if(this->config_name == "np3o")
@@ -897,7 +897,7 @@ void RL_Sim::RunModel()
 
 #ifdef CSV_LOGGER
         auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
-        auto robot_state_msg = std::atomic_load(&info->latest_msg);
+        auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
         if(!robot_state_msg) return;
         
         std::vector<float> tau_est(this->params.Get<int>("num_of_dofs"), 0.0f);
@@ -956,7 +956,7 @@ std::vector<float> RL_Sim::Forward()
             this->wm_action = this->wm_action_history;
 
             std::vector<float> input_image(this->image_width * this->image_height, 0.0f);
-            auto depth_image = std::atomic_load(&this->depth_image_ptr);
+            auto depth_image = std::atomic_load_explicit(&this->depth_image_ptr, std::memory_order_acquire);
             if(depth_image)
             {
                 this->wm_input_image = *depth_image;
@@ -1022,7 +1022,7 @@ void RL_Sim::Plot()
     plt::cla();
     plt::clf();
     auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
-    auto robot_state_msg = std::atomic_load(&info->latest_msg);
+    auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
     if(!robot_state_msg) return;
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {

@@ -25,6 +25,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <memory>
+#include <opencv2/opencv.hpp>
 
 #include <mujoco/mujoco.h>
 #include "joystick.hh"
@@ -103,6 +104,21 @@ private:
     std::map<std::string, float> joint_velocities;
     std::map<std::string, float> joint_efforts;
     void StartJointController(const std::string& ros_namespace, const std::vector<std::string>& names);
+
+    void InitDepthCamera();
+    std::vector<float> GetDepthImage();
+    std::vector<float> depth_image_to_vector(const std::vector<float>& data, int width, int height);
+
+    mjvCamera depth_cam;      // 深度相机，只需初始化一次
+    mjvOption depth_opt;      // 渲染选项
+    mjvPerturb depth_pert;    // 用户扰动，通常不用动
+    mjvScene depth_scene;     // 场景结构
+    mjrContext depth_con;     // 渲染上下文
+    std::vector<float> depth_buffer; // 深度缓冲
+    int depth_width = 64;
+    int depth_height = 64;
+
+    bool init_camera_done = false;
 
 
 };

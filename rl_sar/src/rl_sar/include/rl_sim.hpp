@@ -209,10 +209,11 @@ private:
         auto info = std::static_pointer_cast<TopicInfo<MsgT>>(topics[topic_name]);
 
         // 1️⃣ 更新最新消息（线程安全）
-        std::atomic_store(&info->latest_msg, msg);
+        // std::atomic_store(&info->latest_msg, msg);
+        std::atomic_store_explicit(&info->latest_msg, msg, std::memory_order_release);
 
         // 2️⃣ 更新时间戳
-        info->last_time.store(std::chrono::steady_clock::now());
+        info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_release);
 
         // 3️⃣ 执行扩展操作（额外逻辑）
         if (info->extra_callback) {

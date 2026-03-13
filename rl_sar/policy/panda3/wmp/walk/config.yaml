@@ -5,8 +5,8 @@ panda3/wmp/walk:
   model_name: "policy.pt"
   world_name: "world_model.pt"
   num_observations: 42
-  observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
-  # observations: ["ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
+  # observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
+  observations: ["ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
   world_observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
   image_width: 64
   image_height: 64
