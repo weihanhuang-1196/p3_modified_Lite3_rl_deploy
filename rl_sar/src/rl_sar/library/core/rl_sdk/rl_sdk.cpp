@@ -337,6 +337,8 @@ void RL::InitObservations()
     this->wm_action = std::vector<float>(1*5*12, 0.0f);
     this->image_width = this->params.Get<int>("image_width", 64);
     this->image_height = this->params.Get<int>("image_height", 64);
+    this->znear = this->params.Get<float>("znear", 0.05f);
+    this->zfar = this->params.Get<float>("zfar", 40.0f);
     this->ComputeWorldObservation();
     
 

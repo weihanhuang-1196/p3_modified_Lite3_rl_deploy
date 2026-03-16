@@ -187,8 +187,8 @@
           </image>
 
           <clip>
-            <near>0.05</near>
-            <far>2.0</far>
+            <near>0.084</near>
+            <far>40.0</far>
           </clip>
         </camera>
 

@@ -10,6 +10,8 @@ panda3/wmp/walk:
   world_observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
   image_width: 64
   image_height: 64
+  znear: 0.084
+  zfar: 40.0
   # observations_history: [0, 1, 2, 3, 4]  # 0 is the latest observation
   observations_history: [4, 3, 2, 1, 0]  # 0 is the latest observation
   observations_history_priority: "time"  # "time" or "term" priority

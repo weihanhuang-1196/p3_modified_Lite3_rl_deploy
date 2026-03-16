@@ -212,6 +212,11 @@ std::vector<float> RL_Sim::GetDepthImage()
         std::cerr << LOGGER::ERROR << "mj_model or mj_data is null!" << std::endl;
         return std::vector<float>(this->depth_width * this->depth_height, 0.0f);
     }
+    float old_znear = this->mj_model->vis.map.znear;
+    float old_zfar  = this->mj_model->vis.map.zfar;
+
+    mj_model->vis.map.znear = this->znear;
+    mj_model->vis.map.zfar = this->zfar;
 
     // 更新场景
     mjv_updateScene(
@@ -247,15 +252,22 @@ std::vector<float> RL_Sim::GetDepthImage()
         return std::vector<float>(depth_width * depth_height, 0.0f);
     }
 
+    this->mj_model->vis.map.znear = old_znear;
+    this->mj_model->vis.map.zfar  = old_zfar;
+
     // 转换为真实深度
-    const float znear = 0.05f;
-    const float zfar  = 2.0f;
+    const float znear = this->znear;
+    const float zfar  = this->zfar;
     for (auto &d : depth_buffer)
     {
         if (std::isnan(d)) d = 0.0f;
-        else if (std::isinf(d)) d = (d > 0 ? zfar : znear);
+        else if (std::isinf(d)) d = (d > 0 ? 1.0f : 0.0f); // depth buffer 范围是 0~1
+
+        // 线性化
+        d = znear * zfar / (zfar - d * (zfar - znear));
+
+        // clamp 到有效范围
         d = std::clamp(d, znear, zfar);
-        d = znear * zfar / (zfar - d * (zfar - znear)); // 线性化
     }
 
     // 扁平化处理
@@ -264,21 +276,21 @@ std::vector<float> RL_Sim::GetDepthImage()
 
 std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<float>& data, int width, int height)
 {
-    const float min_depth = 0.05f;
+    const float min_depth = this->znear;
     const float max_depth = 2.0f;
 
+    auto maxv = *std::max_element(data.begin(), data.end());
+    auto minv = *std::min_element(data.begin(), data.end());
     std::vector<float> depth_vec;
     depth_vec.reserve(width * height);
 
     // reinterpret_cast 指向原始 float 数据
     const float* data_ptr = data.data();
 
-    cv::Mat depth_mat(height, width, CV_32FC1);
-
     for (size_t i = 0; i < width * height; ++i)
     {
         float d = data_ptr[i];
-
+        
         // nan / inf -> clamp
         if (std::isnan(d)) d = 0.0f;
         else if (std::isinf(d)) d = (d > 0 ? max_depth : min_depth);
@@ -288,25 +300,43 @@ std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<float>& data,
 
         // normalize [-0.5, 0.5]
         d = (d - min_depth) / (max_depth - min_depth) - 0.5f;
-        depth_mat.at<float>(i / width, i % width) = d; // 原始深度值
-
+        
         depth_vec.push_back(d);
     }
 
-    // 显示深度图
-    cv::Mat depth_display;
-    depth_mat.convertTo(depth_display, CV_8UC1, 255.0, 127); // x*255 + 127
+    auto maxv_depth = *std::max_element(depth_vec.begin(), depth_vec.end());
+    auto minv_depth = *std::min_element(depth_vec.begin(), depth_vec.end());
 
-        // 3. 放大（插值）
-    cv::Mat depth_up;
-    cv::resize(depth_display, depth_mat, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
+    // // 显示深度图
+    // cv::Mat depth_display;
+    // depth_mat.convertTo(depth_display, CV_8UC1, 255.0, 127); // x*255 + 127
 
-    // cv::applyColorMap(depth_up, depth_display, cv::COLORMAP_JET); // 彩色深度图
-    cv::imshow("Depth Image", depth_mat);
-    cv::waitKey(1);
+    //     // 3. 放大（插值）
+    // cv::resize(depth_display, depth_mat, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
+
+    // // cv::applyColorMap(depth_up, depth_display, cv::COLORMAP_JET); // 彩色深度图
+    // cv::imshow("Depth Image", depth_mat);
+    // cv::waitKey(1);
+    // show_depth_image(depth_vec, width, height);
 
     return depth_vec; // 扁平化 vector
 }
+
+
+void RL_Sim::show_depth_image(const std::vector<float>& depth_vec, int width, int height)
+{
+    cv::Mat depth_mat(height, width, CV_32FC1, const_cast<float*>(depth_vec.data()));
+    cv::Mat depth_display;
+    depth_mat.convertTo(depth_display, CV_8UC1, 255.0, 127); // x*255 + 127
+
+            // 3. 放大（插值）
+    cv::Mat depth_up;
+    cv::resize(depth_display, depth_up, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
+
+    cv::imshow("Depth Image", depth_up);
+    cv::waitKey(1);
+}
+
 
 void RL_Sim::GetState(RobotState<float> *state)
 {
@@ -658,6 +688,7 @@ std::vector<float> RL_Sim::Forward()
                     input_image = this->wm_input_image; // 初始化前一帧图像
                 else
                     input_image = this->pre_wm_image; // 使用上一帧图像作为输入
+                show_depth_image(input_image, this->image_width, this->image_height);
                 auto start = std::chrono::steady_clock::now();
                 auto world_model_output = this->world_model->forward_world({world_obs, input_image, this->wm_logit, this->wm_stoch, this->wm_deter, this->wm_action, this->wm_is_first});
                 auto end = std::chrono::steady_clock::now();

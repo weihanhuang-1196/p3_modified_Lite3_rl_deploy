@@ -32,6 +32,7 @@
 #include "mujoco_utils.hpp"
 
 #include "matplotlibcpp.h"
+#include <algorithm>
 namespace plt = matplotlibcpp;
 
 class Button
@@ -108,6 +109,7 @@ private:
     void InitDepthCamera();
     std::vector<float> GetDepthImage();
     std::vector<float> depth_image_to_vector(const std::vector<float>& data, int width, int height);
+    void show_depth_image(const std::vector<float>& depth_vec, int width, int height);
 
     mjvCamera depth_cam;      // 深度相机，只需初始化一次
     mjvOption depth_opt;      // 渲染选项

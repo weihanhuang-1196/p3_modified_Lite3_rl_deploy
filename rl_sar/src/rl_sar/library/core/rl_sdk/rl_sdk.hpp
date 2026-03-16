@@ -316,8 +316,11 @@ public:
     std::vector<float> wm_action_history; 
     std::vector<float> wm_input_image;
 
-    int image_width;
-    int image_height;
+    float znear = 0.054f;
+    float zfar = 40.0f;
+
+    int image_width = 64;
+    int image_height = 64;
     int global_counter = 0;
     int visual_update_interval = 5;
 

@@ -427,6 +427,11 @@ void RL_Sim::GetState(RobotState<float> *state)
 #elif defined(USE_ROS2)
     auto info = std::static_pointer_cast<TopicInfo<sensor_msgs::msg::Imu>>(topics[imu_topic_name.c_str()]);
     auto gazebo_imu = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+    if (!gazebo_imu)
+    {
+        return;
+    }
+    
 
     const auto &orientation = gazebo_imu->orientation;
     const auto &angular_velocity = gazebo_imu->angular_velocity;
@@ -745,8 +750,9 @@ void RL_Sim::CheckTimeouts() {
 
 std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<uint8_t>& data, int width, int height)
 {
-    const float min_depth = 0.05f;
+    const float min_depth = this->znear;
     const float max_depth = 2.0f;
+
 
     std::vector<float> depth_vec;
     depth_vec.reserve(width * height);
@@ -761,7 +767,7 @@ std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<uint8_t>& dat
         // nan / inf -> clamp
         if (std::isnan(d)) d = 0.0f;
         else if (std::isinf(d)) d = (d > 0 ? max_depth : min_depth);
-
+        
         // clamp
         d = std::clamp(d, min_depth, max_depth);
 
@@ -770,6 +776,7 @@ std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<uint8_t>& dat
 
         depth_vec.push_back(d);
     }
+
 
     return depth_vec; // 扁平化 vector
 }
