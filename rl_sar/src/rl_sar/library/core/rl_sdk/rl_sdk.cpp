@@ -852,15 +852,17 @@ bool RLFSMState::CheckErrorCode(const std::vector<float>& status_word)
         switch (code)
         {
             case RobotState<float>::MotorCode::CODE::CODE_NONE: ;
+            case RobotState<float>::MotorCode::CODE::CODE_0231: ;
+            case RobotState<float>::MotorCode::CODE::CODE_0233: ;
             case RobotState<float>::MotorCode::CODE::CODE_ERROR_0298: ;
             case RobotState<float>::MotorCode::CODE::CODE_ERROR_0218: ;
             case RobotState<float>::MotorCode::CODE::CODE_ERROR_0250: ;
             case RobotState<float>::MotorCode::CODE::CODE_ERROR_02B1:
-                std::cout << LOGGER::ERROR << "Motor " << i << " status code " << static_cast<int>(code) << std::endl;
+                std::cout << LOGGER::ERROR << "Motor " << i << " error code " << static_cast<int>(code) << std::endl;
                 return true;
         }
     }
-    return true;
+    return false;
 }
 
 

@@ -150,7 +150,7 @@ public:
     std::string get_model_type() const override { return "onnx"; }
 
     std::vector<float> forward_motor_policy(const std::vector<float>& inputs);
-    std::vector<std::vector<float>> forward_world(const std::vector<std::vector<float>>& inputs) override { return std::vector<std::vector<float>>(); };
+    std::vector<std::vector<float>> forward_world(const std::vector<std::vector<float>>& inputs) override;
 
 private:
 #ifdef USE_ONNX
@@ -165,6 +165,9 @@ private:
      * @return Extracted data vector
      */
     std::vector<float> extract_output_data(const std::vector<Ort::Value>& outputs);
+
+
+    std::vector<std::vector<float>> extract_output_all_data(const std::vector<Ort::Value>& outputs);
 #endif
 };
 

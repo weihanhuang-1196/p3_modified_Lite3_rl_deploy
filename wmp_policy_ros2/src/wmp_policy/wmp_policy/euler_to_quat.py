@@ -26,6 +26,6 @@ q = [1,0,0,0]
 
 q = quat_mul(axis_angle("x",-90), q)  # roll
 q = quat_mul(axis_angle("z",90), q)   # yaw
-q = quat_mul(axis_angle("y",4), q)   # pitch
+q = quat_mul(axis_angle("y",0), q)   # pitch
 
 print(q)

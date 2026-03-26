@@ -233,7 +233,8 @@ bool ONNXModel::load(const std::string& model_path)
 #ifdef USE_ONNX
         // Configure session options
         Ort::SessionOptions session_options;
-        session_options.SetIntraOpNumThreads(1);
+        session_options.SetIntraOpNumThreads(2);
+        // session_options.SetInterOpNumThreads(2);
         session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
 
         // Create inference session
@@ -342,6 +343,93 @@ std::vector<float> ONNXModel::forward(const std::vector<std::vector<float>>& inp
     throw std::runtime_error("ONNX support not compiled");
 #endif
 }
+
+
+std::vector<std::vector<float>> ONNXModel::forward_world(const std::vector<std::vector<float>>& inputs)
+{
+    if (!loaded_)
+    {
+        throw std::runtime_error("Model not loaded");
+    }
+
+#ifdef USE_ONNX
+    try
+    {
+        // Create memory info
+        Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+
+        if(input_node_names_.size() != inputs.size())
+        {
+            std::cout << LOGGER::ERROR << "Input size mismatch: expected " << input_node_names_.size() << ", got " << inputs.size() << std::endl;
+            throw;
+        }
+
+        std::vector<Ort::Value> ort_inputs;
+        ort_inputs.reserve(input_node_names_.size());
+        
+        for (size_t i = 0; i < input_node_names_.size(); i++)
+        {
+            const auto& input = inputs[i];
+            auto input_shape = session_->GetInputTypeInfo(i)
+                                   .GetTensorTypeAndShapeInfo()
+                                   .GetShape();
+            
+            // 修正动态维度
+            for (auto& dim : input_shape)
+                if (dim < 0) dim = 1;
+                
+            // 检查总元素是否一致，不一致则强制用 input.size() 作为最后一维
+            int64_t total = 1;
+            for (auto d : input_shape) total *= d;
+            if (total != static_cast<int64_t>(input.size())) {
+                input_shape = {1, static_cast<int64_t>(input.size())};
+            }
+
+            auto input_tensor = Ort::Value::CreateTensor<float>(
+                memory_info,
+                const_cast<float*>(input.data()),
+                input.size(),
+                input_shape.data(),
+                input_shape.size());
+
+            ort_inputs.emplace_back(std::move(input_tensor));
+            
+        }
+
+                // --- 输入/输出名称 ---
+        std::vector<const char*> input_names;
+        for (auto& n : input_node_names_)
+            input_names.push_back(n.c_str());
+
+        std::vector<const char*> output_names;
+        for (auto& n : output_node_names_)
+            output_names.push_back(n.c_str());
+
+
+         auto outputs = session_->Run(
+            Ort::RunOptions{nullptr},
+            input_names.data(),
+            ort_inputs.data(),
+            ort_inputs.size(),
+            output_names.data(),
+            output_names.size());
+
+
+        // Extract output data
+        return extract_output_all_data(outputs);
+
+    }
+    catch (const std::exception& e)
+    {
+        std::cout << LOGGER::ERROR << "ONNX inference error: " << e.what() << std::endl;
+        throw;
+    }
+
+#else
+    throw std::runtime_error("ONNX support not compiled");
+#endif
+}
+
 
 
 
@@ -456,6 +544,35 @@ std::vector<float> ONNXModel::forward_motor_policy(const std::vector<float>& inp
 
 
 }
+
+
+std::vector<std::vector<float>> ONNXModel::extract_output_all_data(const std::vector<Ort::Value>& outputs)
+{
+    if (outputs.empty())
+    {
+        throw std::runtime_error("No outputs from ONNX model");
+    }
+    std::vector<std::vector<float>> results;
+
+    for (const auto& output : outputs)
+    {
+        if (!output.IsTensor())
+            continue;
+
+        auto info = output.GetTensorTypeAndShapeInfo();
+
+        if (info.GetElementType() != ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT)
+            continue;
+
+        const float* data = output.GetTensorData<float>();
+        size_t count = info.GetElementCount();
+
+        results.emplace_back(data, data + count);
+    }
+
+    return results;
+}
+
 
 std::vector<float> ONNXModel::extract_output_data(const std::vector<Ort::Value>& outputs)
 {

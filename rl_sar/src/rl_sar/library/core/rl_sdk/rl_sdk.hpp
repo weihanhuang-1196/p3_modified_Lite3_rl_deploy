@@ -95,8 +95,9 @@ struct RobotState
         enum class CODE
         {
             CODE_NONE = 0,   //没信号
-            CODE_0231 = 561, //初始化
-            CODE_0233 = 563, //使能
+            CODE_0231 = 561, //准备初始化
+            CODE_0233 = 563, //初始化
+            CODE_0637 = 1591, //使能
             CODE_ERROR_0298 = 664,
             CODE_ERROR_0218 = 536,
             CODE_ERROR_0250 = 592,

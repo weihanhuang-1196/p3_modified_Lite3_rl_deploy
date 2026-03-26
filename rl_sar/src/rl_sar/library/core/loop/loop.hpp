@@ -26,22 +26,31 @@
 class LoopFunc
 {
 public:
-    LoopFunc(const std::string &name, float period, std::function<void()> func, int bindCPU = -1)
-        : _name(name), _period(period), _func(func), _bindCPU(bindCPU), _running(false) {}
+    LoopFunc(const std::string &name, float period, std::function<void()> func, std::vector<int> bindCPUs = {})
+        : _name(name), _period(period), _func(func), _bindCPUs(bindCPUs), _running(false) {}
 
     void start()
     {
         _running = true;
-        std::cout << LOGGER::INFO << "[Loop] Loop start - name: " << _name << ", period: " << formatPeriod() << "ms"
-                  << (_bindCPU != -1 ? ", cpu: " + std::to_string(_bindCPU) : ", cpu: unspecified") << std::endl;
-        if (_bindCPU != -1)
+        std::cout << LOGGER::INFO << "[Loop] Loop start - name: " << _name
+              << ", period: " << formatPeriod() << "ms";
+        if (!_bindCPUs.empty())
         {
-            _thread = std::thread(&LoopFunc::loop, this);
-            setThreadAffinity(_thread.native_handle(), _bindCPU);
+            std::cout << ", cpu: ";
+            for (auto c : _bindCPUs) std::cout << c << " ";
         }
         else
         {
-            _thread = std::thread(&LoopFunc::loop, this);
+            std::cout << ", cpu: unspecified";
+        }
+        std::cout << std::endl;
+
+        _thread = std::thread(&LoopFunc::loop, this);
+
+
+        if (!_bindCPUs.empty())
+        {
+            setThreadAffinity(_thread.native_handle(), _bindCPUs);
         }
         _thread.detach();
     }
@@ -64,7 +73,7 @@ private:
     std::string _name;
     float _period;
     std::function<void()> _func;
-    int _bindCPU;
+    std::vector<int> _bindCPUs;
     std::atomic<bool> _running;
     std::mutex _mutex;
     std::condition_variable _cv;
@@ -100,17 +109,21 @@ private:
         return stream.str();
     }
 
-    void setThreadAffinity(std::thread::native_handle_type threadHandle, int cpuId)
+
+    void setThreadAffinity(std::thread::native_handle_type threadHandle,
+                       const std::vector<int>& cpuIds)
     {
 #ifdef __linux__
         cpu_set_t cpuset;
         CPU_ZERO(&cpuset);
-        CPU_SET(cpuId, &cpuset);
+        for (int cpuId : cpuIds)
+        {
+            CPU_SET(cpuId, &cpuset);
+        }
+    
         if (pthread_setaffinity_np(threadHandle, sizeof(cpu_set_t), &cpuset) != 0)
         {
-            std::ostringstream oss;
-            oss << "Error setting thread affinity: CPU " << cpuId << " may not be valid or accessible.";
-            throw std::runtime_error(oss.str());
+            throw std::runtime_error("Error setting thread affinity");
         }
 #else
         // Thread affinity not supported on this platform

@@ -385,8 +385,18 @@ def main(args=None):
     policy_node = PolicyNode(device=device)
 
     export_path = "/home/yong/yang/p3_modified_Lite3_rl_deploy/wmp_policy_ros2/src/wmp_policy/policy"
-    world_model = torch.jit.load(os.path.join(export_path, "world_model.pt"),map_location=device).to(device)
-    policy_model = torch.jit.load(os.path.join(export_path, "policy.pt"),map_location=device).to(device)
+    world_model = torch.jit.load(os.path.join(export_path, "world_model_int8.pt"),map_location=device).to(device)
+    policy_model = torch.jit.load(os.path.join(export_path, "policy_int8.pt"),map_location=device).to(device)
+
+    # for n, p in policy_model.named_parameters():
+    #     print(n, p.dtype)
+    for p in world_model.parameters():
+        print(p.dtype, p.shape)
+
+    # for p in world_model.parameters():
+    #     print(p.dtype)
+    # list(world_model.parameters())
+
     world_model.eval()
     policy_model.eval()
 

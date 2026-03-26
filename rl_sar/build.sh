@@ -85,7 +85,7 @@ run_mujoco_build() {
     print_info "Building with MuJoCo simulator support..."
     print_separator
 
-    cmake src/rl_sar/ -B cmake_build -DUSE_CMAKE=ON -DUSE_MUJOCO=ON
+    cmake src/rl_sar/ -B cmake_build -DUSE_CMAKE=ON -DUSE_MUJOCO=ON -DCMAKE_BUILD_TYPE=Debug
     cmake --build cmake_build -j$(nproc 2>/dev/null || echo 4)
 
     print_success "MuJoCo build completed!"

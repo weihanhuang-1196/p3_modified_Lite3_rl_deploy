@@ -740,6 +740,9 @@ void RL_Sim::CheckTimeouts() {
                 }
 
             }
+            if (kv.first == this->image_topic_name ){
+                
+            }
         }
     }
 }
