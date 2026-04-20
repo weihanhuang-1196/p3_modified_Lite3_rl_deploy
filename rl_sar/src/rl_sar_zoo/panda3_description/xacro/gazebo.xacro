@@ -160,14 +160,25 @@
         </imu>
       </sensor>
 
+      <sensor name="odometry_sensor" type="odom">
+        <plugin name="odom_plugin" filename="libgazebo_ros_p3d.so">
+          <ros>
+            <namespace>/</namespace>
+            <remapping>~/odom:=odom</remapping>
+          </ros>
+          <body_name>base</body_name>
+          <frame_name>odom</frame_name>
+          <update_rate>100.0</update_rate>
+        </plugin>
+      </sensor>
+
 
 
       <!-- ========== 深度相机 ========== -->
       <sensor name="depth_camera" type="depth">
         <always_on>true</always_on>
 
-        <!-- 建议 20Hz，1024 env 不然会爆 -->
-        <update_rate>20</update_rate>
+        <update_rate>40</update_rate>
 
         <visualize>false</visualize>
 
@@ -175,8 +186,40 @@
              y_angle = pitch 下俯，单位弧度 -->
         <!-- <pose>0.345 0 0.05 0 0.122 0</pose> -->
         <!-- <pose>0.37 0 0.03 0 0.0698 0</pose> -->
-        <pose>0.37 0 0.03 0 0.0698 0</pose>
-        <!-- 0.122 rad ≈ 7° -->
+        <!-- <pose>0.37 0 0.03 0 0.0698 0</pose> -->
+        <!-- <pose>0.33 0 0.128 0 0 0</pose> -->
+        <pose>0.3195 0 0.1115 0 0.174533 0</pose>
+         <!-- <pose>0.3195 0 0.1815 0 0.523599 0</pose> -->
+        <!-- 0.017453 rad ≈ 1° -->
+        <!-- 0.034907 rad ≈ 2° -->
+        <!-- 0.052360 rad ≈ 3° -->
+        <!-- 0.069813 rad ≈ 4° -->
+        <!-- 0.087266 rad ≈ 5° -->
+        <!-- 0.104720 rad ≈ 6° -->
+        <!-- 0.122173 rad ≈ 7° -->
+        <!-- 0.139626 rad ≈ 8° -->
+        <!-- 0.157080 rad ≈ 9° -->
+        <!-- 0.174533 rad ≈ 10° -->
+        <!-- 0.191986 rad ≈ 11° -->
+        <!-- 0.209440 rad ≈ 12° -->
+        <!-- 0.226893 rad ≈ 13° -->
+        <!-- 0.244346 rad ≈ 14° -->
+        <!-- 0.261799 rad ≈ 15° -->
+        <!-- 0.279253 rad ≈ 16° -->
+        <!-- 0.296706 rad ≈ 17° -->
+        <!-- 0.314159 rad ≈ 18° -->
+        <!-- 0.331613 rad ≈ 19° -->
+        <!-- 0.349066 rad ≈ 20° -->
+        <!-- 0.366519 rad ≈ 21° -->
+        <!-- 0.383972 rad ≈ 22° -->
+        <!-- 0.401426 rad ≈ 23° -->
+        <!-- 0.418879 rad ≈ 24° -->
+        <!-- 0.436332 rad ≈ 25° -->
+        <!-- 0.453786 rad ≈ 26° -->
+        <!-- 0.471239 rad ≈ 27° -->
+        <!-- 0.488692 rad ≈ 28° -->
+        <!-- 0.506145 rad ≈ 29° -->
+        <!-- 0.523599 rad ≈ 30° -->
         <camera>
           <!-- 58° → 弧度 -->
           <horizontal_fov>1.01229</horizontal_fov>
@@ -187,8 +230,8 @@
           </image>
 
           <clip>
-            <near>0.054</near>
-            <far>40.0</far>
+            <near>0.01</near>
+            <far>3.0</far>
           </clip>
         </camera>
 

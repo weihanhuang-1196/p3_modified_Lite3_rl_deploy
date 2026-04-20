@@ -215,8 +215,8 @@ std::vector<float> RL_Sim::GetDepthImage()
     float old_znear = this->mj_model->vis.map.znear;
     float old_zfar  = this->mj_model->vis.map.zfar;
 
-    mj_model->vis.map.znear = this->znear;
-    mj_model->vis.map.zfar = this->zfar;
+    mj_model->vis.map.znear = this->camera_znear;
+    mj_model->vis.map.zfar = this->camera_zfar;
 
     // 更新场景
     mjv_updateScene(
@@ -256,19 +256,81 @@ std::vector<float> RL_Sim::GetDepthImage()
     this->mj_model->vis.map.zfar  = old_zfar;
 
     // 转换为真实深度
-    const float znear = this->znear;
-    const float zfar  = this->zfar;
-    for (auto &d : depth_buffer)
+    const float znear = this->camera_znear;
+    const float zfar  = this->camera_zfar;
+
+
+    const int W = depth_width;
+    const int H = depth_height;
+
+    cv::Mat depth(H, W, CV_32FC1, depth_buffer.data());
+    depth = depth.clone();   // 必须 clone
+    cv::Mat neg_inf_mask(H, W, CV_8UC1, cv::Scalar(0));
+
+    for (int i = 0; i < H; ++i)
     {
-        if (std::isnan(d)) d = 0.0f;
-        else if (std::isinf(d)) d = (d > 0 ? 1.0f : 0.0f); // depth buffer 范围是 0~1
+        float* row = depth.ptr<float>(i);
+        uchar* mask = neg_inf_mask.ptr<uchar>(i);
 
-        // 线性化
-        d = znear * zfar / (zfar - d * (zfar - znear));
+        for (int j = 0; j < W; ++j)
+        {
+            float& d = row[j];
 
-        // clamp 到有效范围
-        d = std::clamp(d, znear, zfar);
+            if (std::isnan(d))
+            {
+                d = 1.0f;  // NaN → far
+            }
+            else if (d == std::numeric_limits<float>::infinity())
+            {
+                d = 1.0f;  // +inf → far
+            }
+            else if (d == -std::numeric_limits<float>::infinity())
+            {
+                mask[j] = 255;  // 标记需要重建
+                d = 0.0f;       // 临时 near 值
+            }
+
+            d = std::clamp(d, 0.0f, 1.0f);
+        }
     }
+
+    if (cv::countNonZero(neg_inf_mask) > 0)
+    {
+        cv::inpaint(
+            depth,
+            neg_inf_mask,
+            depth,
+            3,                  // 半径（建议 3~5）
+            cv::INPAINT_NS      // 更平滑（推荐）
+        );
+    }
+
+
+    for (int i = 0; i < H; ++i)
+    {
+        float* row = depth.ptr<float>(i);
+
+        for (int j = 0; j < W; ++j)
+        {
+            float& d = row[j];
+
+            d = znear * zfar / (zfar - d * (zfar - znear));
+            d = std::clamp(d, znear, zfar);
+        }
+    }
+    std::memcpy(depth_buffer.data(), depth.ptr<float>(), W * H * sizeof(float));
+
+    // for (auto &d : depth_buffer)
+    // {
+    //     if (std::isnan(d)) d = 0.0f;
+    //     else if (std::isinf(d)) d = (d > 0 ? 1.0f : 0.0f); // depth buffer 范围是 0~1
+
+    //     // 线性化
+    //     d = znear * zfar / (zfar - d * (zfar - znear));
+
+    //     // clamp 到有效范围
+    //     d = std::clamp(d, znear, zfar);
+    // }
 
     // 扁平化处理
     return depth_image_to_vector(depth_buffer, depth_width, depth_height);
@@ -277,10 +339,10 @@ std::vector<float> RL_Sim::GetDepthImage()
 std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<float>& data, int width, int height)
 {
     const float min_depth = this->znear;
-    const float max_depth = 2.0f;
+    const float max_depth = this->zfar;
 
-    auto maxv = *std::max_element(data.begin(), data.end());
-    auto minv = *std::min_element(data.begin(), data.end());
+    // auto maxv = *std::max_element(data.begin(), data.end());
+    // auto minv = *std::min_element(data.begin(), data.end());
     std::vector<float> depth_vec;
     depth_vec.reserve(width * height);
 
@@ -304,8 +366,8 @@ std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<float>& data,
         depth_vec.push_back(d);
     }
 
-    auto maxv_depth = *std::max_element(depth_vec.begin(), depth_vec.end());
-    auto minv_depth = *std::min_element(depth_vec.begin(), depth_vec.end());
+    // auto maxv_depth = *std::max_element(depth_vec.begin(), depth_vec.end());
+    // auto minv_depth = *std::min_element(depth_vec.begin(), depth_vec.end());
 
     // // 显示深度图
     // cv::Mat depth_display;
@@ -318,6 +380,8 @@ std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<float>& data,
     // cv::imshow("Depth Image", depth_mat);
     // cv::waitKey(1);
     // show_depth_image(depth_vec, width, height);
+
+    show_depth_image(depth_vec, width, height);
 
     return depth_vec; // 扁平化 vector
 }
@@ -672,23 +736,24 @@ std::vector<float> RL_Sim::Forward()
             this->wm_action_history.insert(this->wm_action_history.end(), this->wm_action.begin(), this->wm_action.end());
             this->wm_action = this->wm_action_history;
 
-            std::vector<float> input_image(this->image_width * this->image_height, 0.0f);
-            auto depth_image = std::atomic_load_explicit(&this->depth_image_ptr, std::memory_order_acquire);
-            if(depth_image)
-            {
-                this->wm_input_image = *depth_image;
-            }else
-            {
-                this->wm_input_image = std::vector<float>(this->image_width * this->image_height, 0.0f); // 如果没有图像数据，使用全零输入
-            }
             if(global_counter % visual_update_interval == 0)
             {
+
+                std::vector<float> input_image(this->image_width * this->image_height, 0.0f);
+                auto depth_image = std::atomic_load_explicit(&this->depth_image_ptr, std::memory_order_acquire);
+                if(depth_image)
+                {
+                    this->wm_input_image = *depth_image;
+                }else
+                {
+                    this->wm_input_image = std::vector<float>(this->image_width * this->image_height, 0.0f); // 如果没有图像数据，使用全零输入
+                }
+
                 
                 if(this->pre_wm_image.empty())
                     input_image = this->wm_input_image; // 初始化前一帧图像
                 else
                     input_image = this->pre_wm_image; // 使用上一帧图像作为输入
-                show_depth_image(input_image, this->image_width, this->image_height);
                 auto start = std::chrono::steady_clock::now();
                 auto world_model_output = this->world_model->forward_world({world_obs, input_image, this->wm_logit, this->wm_stoch, this->wm_deter, this->wm_action, this->wm_is_first});
                 auto end = std::chrono::steady_clock::now();
@@ -698,9 +763,11 @@ std::vector<float> RL_Sim::Forward()
                 this->wm_stoch = std::move(world_model_output[1]);
                 this->wm_deter = std::move(world_model_output[2]);
                 this->wm_feature = std::move(world_model_output[3]);
+                
+                this->pre_wm_image = std::move(this->wm_input_image);
+                this->wm_is_first[0] = 0;
             }
-            this->wm_is_first[0] = 0;
-
+            
             this->history_obs_buf.insert(clamped_obs);
             this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
             auto start = std::chrono::steady_clock::now();
@@ -710,7 +777,7 @@ std::vector<float> RL_Sim::Forward()
             std::cout << LOGGER::DEBUG << "Policy model forward time: " << duration.count() << " us" << std::endl;
             this->wm_action = actions;
 
-            this->pre_wm_image = std::move(this->wm_input_image);
+            
         }
     }
     else

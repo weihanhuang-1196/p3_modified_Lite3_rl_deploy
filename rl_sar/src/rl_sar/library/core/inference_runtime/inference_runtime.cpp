@@ -355,6 +355,7 @@ std::vector<std::vector<float>> ONNXModel::forward_world(const std::vector<std::
 #ifdef USE_ONNX
     try
     {
+
         // Create memory info
         Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 
@@ -405,8 +406,7 @@ std::vector<std::vector<float>> ONNXModel::forward_world(const std::vector<std::
         for (auto& n : output_node_names_)
             output_names.push_back(n.c_str());
 
-
-         auto outputs = session_->Run(
+        auto outputs = session_->Run(
             Ort::RunOptions{nullptr},
             input_names.data(),
             ort_inputs.data(),
@@ -415,8 +415,12 @@ std::vector<std::vector<float>> ONNXModel::forward_world(const std::vector<std::
             output_names.size());
 
 
+
+        auto result = extract_output_all_data(outputs);
+        
+
         // Extract output data
-        return extract_output_all_data(outputs);
+        return result;
 
     }
     catch (const std::exception& e)

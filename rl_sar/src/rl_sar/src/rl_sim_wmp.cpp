@@ -410,7 +410,11 @@ void RL_Sim_WMP::GetState(RobotState<float> *state)
     const auto &angular_velocity = this->vel.angular;
 #elif defined(USE_ROS2)
     auto info = std::static_pointer_cast<TopicInfo<sensor_msgs::msg::Imu>>(topics[imu_topic_name.c_str()]);
-    auto gazebo_imu = std::atomic_load(&info->latest_msg);
+    auto gazebo_imu = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+    if (!gazebo_imu)
+    {
+        return;
+    }
 
     const auto &orientation = gazebo_imu->orientation;
     const auto &angular_velocity = gazebo_imu->angular_velocity;

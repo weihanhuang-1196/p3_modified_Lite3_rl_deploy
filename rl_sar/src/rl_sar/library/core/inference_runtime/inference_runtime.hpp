@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <algorithm>
 #include "logger.hpp"
+#include <chrono>
 
 #ifdef USE_TORCH
 #include <torch/script.h>

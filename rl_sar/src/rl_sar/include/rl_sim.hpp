@@ -30,6 +30,7 @@
 #include <chrono>
 #include <memory>
 #include <unordered_map>
+#include <opencv2/opencv.hpp>
 
 
 #if defined(USE_ROS1)
@@ -76,6 +77,18 @@
 #include "matplotlibcpp.h"
 #include "joystick_base.hpp"
 #include "joystick_all.hpp"
+
+#include "ldelay_monitor_macros.hpp"
+
+#ifndef NDEBUG
+
+static LatencyStats world_stats("world_model", 500);
+static LatencyStats policy_stats("policy_model", 500);
+static LatencyStats forward_stats("forward", 50);
+
+#else
+#endif
+
 namespace plt = matplotlibcpp;
 
 

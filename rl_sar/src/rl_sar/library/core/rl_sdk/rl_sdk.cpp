@@ -339,6 +339,8 @@ void RL::InitObservations()
     this->image_height = this->params.Get<int>("image_height", 64);
     this->znear = this->params.Get<float>("znear", 0.05f);
     this->zfar = this->params.Get<float>("zfar", 40.0f);
+    this->camera_znear = this->params.Get<float>("camera_znear", 0.05f);
+    this->camera_zfar = this->params.Get<float>("camera_zfar", 40.0f);
     this->ComputeWorldObservation();
     
 

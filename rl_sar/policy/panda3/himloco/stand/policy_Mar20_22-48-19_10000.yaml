@@ -1,9 +1,9 @@
 # Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-panda3/himloco/walk:
-  model_name: "policy_ywz.pt"
-  num_observations: 45
+panda3/himloco/stand:
+  model_name: "policy_Mar20_22-48-19_10000.pt"
+  num_observations: 47
   observations: ["commands", "ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
   observations_history: [0, 1, 2, 3, 4, 5]  # 0 is the latest observation
   observations_history_priority: "time"  # "time" or "term" priority
@@ -16,15 +16,15 @@ panda3/himloco/walk:
                        100, 100, 100,
                        100, 100, 100,
                        100, 100, 100]
-  rl_kp:  [105, 120, 130,
-            105, 120, 130,
-            105, 120, 130,
-            105, 120, 130]
+  rl_kp:  [50, 50, 50,
+            50, 50, 50,
+            50, 50, 50,
+            50, 50, 50]
 
-  rl_kd: [3.0, 3.9, 3.0,
-           3.0, 3.9, 3.0,
-           3.0, 3.9, 3.0,
-           3.0, 3.9, 3.0]
+  rl_kd: [2, 2, 2,
+           2, 2, 2,
+           2, 2, 2,
+           2, 2, 2]
 
   fixed_kp: [80, 120, 130,
              80, 120, 130,
@@ -35,16 +35,16 @@ panda3/himloco/walk:
              3.0, 3.0, 3.0,
              3.0, 3.0, 3.0]
   num_of_dofs: 12
-  action_scale: [0.25, 0.25, 0.25,
-                 0.25, 0.25, 0.25,
-                 0.25, 0.25, 0.25,
-                 0.25, 0.25, 0.25]
+  action_scale: [0.125, 0.25, 0.25,
+                 0.125, 0.25, 0.25,
+                 0.125, 0.25, 0.25,
+                 0.125, 0.25, 0.25]
   wheel_indices: []
   lin_vel_scale: 2.0
   ang_vel_scale: 0.25
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
-  commands_scale: [1.5, 1.5, 0.25]
+  commands_scale: [1.5, 1.5, 0.25, 1.0, 1.0]
 
   torque_limits: [60, 60, 90,
                 60, 60, 90,

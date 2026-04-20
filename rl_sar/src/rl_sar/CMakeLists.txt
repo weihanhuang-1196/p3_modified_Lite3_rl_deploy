@@ -225,6 +225,7 @@ endif()
 find_package(TBB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(OpenCV REQUIRED)
 
 # Add Python library path to RPATH
 if(Python3_LIBRARIES)
@@ -348,6 +349,8 @@ include_directories(
     fsm_robot
     joystick_implement
     library/core/joystick
+    ${OpenCV_INCLUDE_DIRS}
+    library/core/monitor
     # library/core/odom
 )
 
@@ -429,6 +432,7 @@ if(NOT USE_CMAKE)
             geometry_msgs
             visualization_msgs
             nav_msgs
+            OpenCV
         )
         install(TARGETS rl_sim DESTINATION lib/${PROJECT_NAME})
     endif()

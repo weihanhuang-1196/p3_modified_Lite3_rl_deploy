@@ -26,6 +26,11 @@ q = [1,0,0,0]
 
 q = quat_mul(axis_angle("x",-90), q)  # roll
 q = quat_mul(axis_angle("z",90), q)   # yaw
-q = quat_mul(axis_angle("y",0), q)   # pitch
+q = quat_mul(axis_angle("y",10), q)   # pitch
+import numpy as np
+
+list_name = [["w","x","y","z"]]
+arr = np.array(list_name)
+
 
 print(q)

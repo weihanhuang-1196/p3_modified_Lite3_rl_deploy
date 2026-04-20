@@ -319,6 +319,8 @@ public:
 
     float znear = 0.054f;
     float zfar = 40.0f;
+    float camera_znear = 0.05f;
+    float camera_zfar = 40.0f;
 
     int image_width = 64;
     int image_height = 64;

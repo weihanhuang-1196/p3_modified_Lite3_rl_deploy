@@ -1,6 +1,6 @@
 controller_manager:
     ros__parameters:
-        update_rate: 2000  # Hz
+        update_rate: 500  # Hz
         # use_sim_time: true  # If running in simulation
 
         joint_state_broadcaster:

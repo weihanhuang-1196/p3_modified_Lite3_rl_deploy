@@ -165,8 +165,8 @@ RL_Sim::RL_Sim(int argc, char **argv)
 #endif
 
     // loop
-    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("dt"), std::bind(&RL_Sim::RobotControl, this));
-    this->loop_rl = std::make_shared<LoopFunc>("loop_rl", this->params.Get<float>("dt") * this->params.Get<int>("decimation"), std::bind(&RL_Sim::RunModel, this));
+    this->loop_control = std::make_shared<LoopFunc>("loop_control", this->params.Get<float>("dt"), std::bind(&RL_Sim::RobotControl, this), std::vector<int>{0});
+    this->loop_rl = std::make_shared<LoopFunc>("loop_rl", this->params.Get<float>("dt") * this->params.Get<int>("decimation"), std::bind(&RL_Sim::RunModel, this), std::vector<int>{1,2});
     this->loop_control->start();
     this->loop_rl->start();
 
@@ -732,11 +732,12 @@ void RL_Sim::CheckTimeouts() {
                 auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
                 if(robot_state_msg)
                 {
+                    auto new_msg = std::make_shared<robot_msgs::msg::RobotState>(*robot_state_msg); // 创建一个新的消息对象，复制现有数据
                     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
                     {
-                          robot_state_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].status_word = 0; // 设置状态字为0，表示无效或未连接
+                          new_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].status_word = 0; // 设置状态字为0，表示无效或未连接
                     }
-                    std::atomic_store_explicit(&info->latest_msg, robot_state_msg, std::memory_order_release);
+                    std::atomic_store_explicit(&info->latest_msg, new_msg, std::memory_order_release);
                 }
 
             }
@@ -751,37 +752,72 @@ void RL_Sim::CheckTimeouts() {
 #endif
 
 
-std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<uint8_t>& data, int width, int height)
+std::vector<float> RL_Sim::depth_image_to_vector(
+    const std::vector<uint8_t>& data,
+    int width,
+    int height)
 {
     const float min_depth = this->znear;
-    const float max_depth = 2.0f;
+    const float max_depth = this->zfar;
 
+    const float* data_ptr = reinterpret_cast<const float*>(data.data());
 
+    // ===== 1. 构造 Mat =====
+    cv::Mat depth(height, width, CV_32FC1, const_cast<float*>(data_ptr));
+    depth = depth.clone();  // 重要：避免修改原始 buffer
+
+    // ===== 2. 构造 mask（只修 -inf）=====
+    cv::Mat neg_inf_mask = (depth == -std::numeric_limits<float>::infinity());
+
+    // ===== 3. 统一 NaN / +inf =====
+    for (int i = 0; i < depth.rows; ++i)
+    {
+        float* row = depth.ptr<float>(i);
+        for (int j = 0; j < depth.cols; ++j)
+        {
+            float& d = row[j];
+
+            if (std::isnan(d)) d = max_depth;
+            else if (d == std::numeric_limits<float>::infinity()) d = max_depth;
+            else if (d == -std::numeric_limits<float>::infinity()) d = min_depth;
+        }
+    }
+
+    // ===== 4. inpaint（关键）=====
+    if (cv::countNonZero(neg_inf_mask) > 0)
+    {
+        // mask 必须是 8U
+        cv::Mat mask8u;
+        neg_inf_mask.convertTo(mask8u, CV_8U);
+
+        cv::inpaint(
+            depth,
+            mask8u,
+            depth,
+            3,                      // 半径（3~5 推荐）
+            cv::INPAINT_NS
+        );
+    }
+
+    // ===== 5. clamp + normalize =====
     std::vector<float> depth_vec;
     depth_vec.reserve(width * height);
 
-    // reinterpret_cast 指向原始 float 数据
-    const float* data_ptr = reinterpret_cast<const float*>(data.data());
-
-    for (size_t i = 0; i < width * height; ++i)
+    for (int i = 0; i < depth.rows; ++i)
     {
-        float d = data_ptr[i];
+        float* row = depth.ptr<float>(i);
+        for (int j = 0; j < depth.cols; ++j)
+        {
+            float d = row[j];
 
-        // nan / inf -> clamp
-        if (std::isnan(d)) d = 0.0f;
-        else if (std::isinf(d)) d = (d > 0 ? max_depth : min_depth);
-        
-        // clamp
-        d = std::clamp(d, min_depth, max_depth);
+            d = std::clamp(d, min_depth, max_depth);
+            d = (d - min_depth) / (max_depth - min_depth) - 0.5f;
 
-        // normalize [-0.5, 0.5]
-        d = (d - min_depth) / (max_depth - min_depth) - 0.5f;
-
-        depth_vec.push_back(d);
+            depth_vec.push_back(d);
+        }
     }
 
-
-    return depth_vec; // 扁平化 vector
+    return depth_vec;
 }
 
 
@@ -817,7 +853,12 @@ void RL_Sim::RunModel()
                 this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
         }
         else
-            this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
+        {
+            if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+                this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand};
+            else
+                this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
+        }
         if (this->control.navigation_mode)
         {
             auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
@@ -835,7 +876,8 @@ void RL_Sim::RunModel()
                 }
                 else
                     this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
-            }else
+            }
+            else
                 this->obs.commands = {0.0f, 0.0f, 0.0f};
 
         }
@@ -924,6 +966,8 @@ void RL_Sim::RunModel()
 
 std::vector<float> RL_Sim::Forward()
 {
+
+    
     std::unique_lock<std::mutex> lock(this->model_mutex, std::try_to_lock);
 
     // If model is being reinitialized, return previous actions to avoid blocking
@@ -932,6 +976,8 @@ std::vector<float> RL_Sim::Forward()
         std::cout << LOGGER::WARNING << "Model is being reinitialized, using previous actions" << std::endl;
         return this->obs.actions;
     }
+
+    // LAT_STATS_SCOPE(forward_stats);
 
     std::vector<float> clamped_obs = this->ComputeObservation();
     std::vector<float> world_obs;
@@ -965,46 +1011,59 @@ std::vector<float> RL_Sim::Forward()
             this->wm_action_history.insert(this->wm_action_history.end(), this->wm_action.begin(), this->wm_action.end());
             this->wm_action = this->wm_action_history;
 
-            std::vector<float> input_image(this->image_width * this->image_height, 0.0f);
-            auto depth_image = std::atomic_load_explicit(&this->depth_image_ptr, std::memory_order_acquire);
-            if(depth_image)
-            {
-                this->wm_input_image = *depth_image;
-            }else
-            {
-                this->wm_input_image = std::vector<float>(this->image_width * this->image_height, 0.0f); // 如果没有图像数据，使用全零输入
-            }
+
             if(global_counter % visual_update_interval == 0)
             {
+                std::vector<float> input_image(this->image_width * this->image_height, 0.0f);
+                auto depth_image = std::atomic_load_explicit(&this->depth_image_ptr, std::memory_order_acquire);
+                if(depth_image)
+                {
+                    this->wm_input_image = *depth_image;
+                }else
+                {
+                    this->wm_input_image = std::vector<float>(this->image_width * this->image_height, 0.0f); // 如果没有图像数据，使用全零输入
+                }
                 
                 if(this->pre_wm_image.empty())
                     input_image = this->wm_input_image; // 初始化前一帧图像
                 else
                     input_image = this->pre_wm_image; // 使用上一帧图像作为输入
-                auto start = std::chrono::steady_clock::now();
-                auto world_model_output = this->world_model->forward_world({world_obs, input_image, this->wm_logit, this->wm_stoch, this->wm_deter, this->wm_action, this->wm_is_first});
-                auto end = std::chrono::steady_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-                std::cout << LOGGER::DEBUG << "World model forward time: " << duration.count() << " us" << std::endl;
-                this->wm_logit = std::move(world_model_output[0]);
-                this->wm_stoch = std::move(world_model_output[1]);
-                this->wm_deter = std::move(world_model_output[2]);
-                this->wm_feature = std::move(world_model_output[3]);
+                // auto start = std::chrono::steady_clock::now();
+                {
+                    LAT_STATS_SCOPE(world_stats);
+                    auto world_model_output = this->world_model->forward_world({world_obs, input_image, this->wm_logit, this->wm_stoch, this->wm_deter, this->wm_action, this->wm_is_first});
+                    this->wm_logit = std::move(world_model_output[0]);
+                    this->wm_stoch = std::move(world_model_output[1]);
+                    this->wm_deter = std::move(world_model_output[2]);
+                    this->wm_feature = std::move(world_model_output[3]);
+                }
+
+                // auto end = std::chrono::steady_clock::now();
+                // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                // std::cout << LOGGER::DEBUG << "World model forward time: " << duration.count() << " us" << std::endl;
+                
+
+                this->pre_wm_image = std::move(this->wm_input_image);
             }
             this->wm_is_first[0] = 0;
 
             this->history_obs_buf.insert(clamped_obs);
             this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
-            auto start = std::chrono::steady_clock::now();
-            actions = this->model->forward({this->obs.commands, this->history_obs, this->wm_feature});
-            auto end = std::chrono::steady_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-            std::cout << LOGGER::DEBUG << "Policy model forward time: " << duration.count() << " us" << std::endl;
+            // auto start = std::chrono::steady_clock::now();
+            {
+
+                LAT_STATS_SCOPE(policy_stats);
+                actions = this->model->forward({this->obs.commands, this->history_obs, this->wm_feature});
+            }
+            
+            // auto end = std::chrono::steady_clock::now();
+            // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+            // std::cout << LOGGER::DEBUG << "Policy model forward time: " << duration.count() << " us" << std::endl;
             this->wm_action = actions;
 
 
 
-            this->pre_wm_image = std::move(this->wm_input_image);
+            
         }
         
     }

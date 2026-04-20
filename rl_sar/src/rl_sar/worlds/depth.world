@@ -1,0 +1,162 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <world name="depth_camera_test_world">
+
+    <gravity>0 0 -9.8</gravity>
+
+    <!-- 地面 -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- 光照 -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- 固定相机支架 -->
+    <model name="fixed_depth_camera">
+      <static>true</static>
+      <!-- 世界坐标: x y z roll pitch yaw -->
+      <pose>0 0 1.0 0 0 0</pose>
+
+      <link name="camera_link">
+        <sensor name="depth_camera" type="depth">
+          <always_on>true</always_on>
+          <update_rate>30</update_rate>
+          <visualize>false</visualize>
+          <pose>0 0 0 0 0.4538 0</pose>
+
+          <camera>
+            <horizontal_fov>1.012</horizontal_fov>
+
+            <image>
+              <width>64</width>
+              <height>64</height>
+              <format>R32F</format>
+            </image>
+
+            <clip>
+              <near>0.01</near>
+              <far>3.0</far>
+            </clip>
+          </camera>
+
+          <plugin name="depth_camera_plugin" filename="libgazebo_ros_camera.so">
+            <ros>
+              <namespace>/depth</namespace>  <!-- 你的命名空间 -->
+              <argument>~/image_raw:=image_raw</argument>
+              <argument>~/camera_info:=camera_info</argument>
+              <argument>~/depth/image_raw:=depth/image_raw</argument>
+              <argument>~/depth/camera_info:=depth/camera_info</argument>
+              <argument>~/points:=points</argument>
+            </ros>
+            <frame_name>camera_link</frame_name>
+            <!-- 其余配置保持不变 -->
+          </plugin>
+        </sensor>
+
+        <visual name="camera_visual">
+          <geometry>
+            <box>
+              <size>0.05 0.05 0.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 1m 目标 -->
+    <model name="box_1m">
+      <static>true</static>
+      <pose>1.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 2m 目标 -->
+    <model name="box_2m">
+      <static>true</static>
+      <pose>2.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 3m 目标 -->
+    <model name="box_3m">
+      <static>true</static>
+      <pose>3.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 5m 目标 -->
+    <model name="box_5m">
+      <static>true</static>
+      <pose>5.0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
