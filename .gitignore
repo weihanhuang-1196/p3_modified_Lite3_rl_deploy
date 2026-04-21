@@ -40,5 +40,10 @@ MUJOCO_LOG.TXT
 *.tar.gz
 temp_extract*/
 
+
+# model
+*.onnx
+*.pt
+
 # robot descriptions
 # rl_sar_zoo
