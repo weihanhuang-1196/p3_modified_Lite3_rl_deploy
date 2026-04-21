@@ -212,11 +212,11 @@ std::vector<float> RL_Sim::GetDepthImage()
         std::cerr << LOGGER::ERROR << "mj_model or mj_data is null!" << std::endl;
         return std::vector<float>(this->depth_width * this->depth_height, 0.0f);
     }
-    float old_znear = this->mj_model->vis.map.znear;
-    float old_zfar  = this->mj_model->vis.map.zfar;
+    float znear = this->mj_model->vis.map.znear;
+    float zfar  = this->mj_model->vis.map.zfar;
 
-    mj_model->vis.map.znear = this->camera_znear;
-    mj_model->vis.map.zfar = this->camera_zfar;
+    // mj_model->vis.map.znear = this->camera_znear;
+    // mj_model->vis.map.zfar = this->camera_zfar;
 
     // 更新场景
     mjv_updateScene(
@@ -252,12 +252,12 @@ std::vector<float> RL_Sim::GetDepthImage()
         return std::vector<float>(depth_width * depth_height, 0.0f);
     }
 
-    this->mj_model->vis.map.znear = old_znear;
-    this->mj_model->vis.map.zfar  = old_zfar;
+    // this->mj_model->vis.map.znear = old_znear;
+    // this->mj_model->vis.map.zfar  = old_zfar;
 
     // 转换为真实深度
-    const float znear = this->camera_znear;
-    const float zfar  = this->camera_zfar;
+    // const float znear = this->camera_znear;
+    // const float zfar  = this->camera_zfar;
 
 
     const int W = depth_width;

@@ -44,9 +44,30 @@
 #include "ros_bag_recorder.hpp"
 #endif
 
+#include "joystick_base.hpp"
+#include "joystick_all.hpp"
+
+#include "ldelay_monitor_macros.hpp"
+
 
 
 namespace plt = matplotlibcpp;
+
+// 话题信息基类，包含超时机制和回调扩展
+struct TopicInfoBase {
+    double timeout_sec; // 超时时间
+    std::atomic<std::chrono::steady_clock::time_point> last_time;
+    std::function<void()> extra_callback; // 回调扩展
+    virtual ~TopicInfoBase() = default;
+};
+
+template<typename MsgT>
+struct TopicInfo : public TopicInfoBase {
+    std::shared_ptr<MsgT> latest_msg{nullptr};
+};
+
+
+
 
 class RL_Real : public RL
 {
@@ -109,6 +130,42 @@ private:
 #ifdef ROS_BAG_RECORDER
     std::unique_ptr<RosbagRecorder> rosbag_recorder;
 #endif
+
+
+
+    template<typename MsgT>
+    void GenericCallback(const std::string& topic_name, const std::shared_ptr<MsgT>& msg) {
+        auto info = std::static_pointer_cast<TopicInfo<MsgT>>(topics[topic_name]);
+
+        // 1️⃣ 更新最新消息（线程安全）
+        // std::atomic_store(&info->latest_msg, msg);
+        std::atomic_store_explicit(&info->latest_msg, msg, std::memory_order_release);
+
+        // 2️⃣ 更新时间戳
+        info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_release);
+
+        // 3️⃣ 执行扩展操作（额外逻辑）
+        if (info->extra_callback) {
+            info->extra_callback();
+        }
+    };
+
+    void CheckTimeouts();
+    void InitTopics();
+    std::unordered_map<std::string, std::shared_ptr<TopicInfoBase>> topics;
+
+    std::string cmd_topic_name;
+    std::string joy_topic_name;
+    std::string imu_topic_name;
+    std::string robot_state_topic_name;
+    std::string image_topic_name;
+
+    std::shared_ptr<joystick_base> joystick; // joystick pointer
+
+
+
+
+
 };
 
 #endif // RL_REAL_HPP

@@ -508,7 +508,7 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
 void RL_Sim::RobotControl()
 {
 
-    CheckTimeouts();
+    // CheckTimeouts();
     {
         auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
         auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
@@ -626,6 +626,9 @@ void RL_Sim::CmdvelCallback(
 #if defined(USE_ROS2)
 void RL_Sim::InitTopics() {
 
+    rclcpp::QoS qos_cmd(10);
+    qos_cmd.reliable();
+    qos_cmd.durability_volatile();
     
     // 初始化 /cmd_vel 话题信息
     this->cmd_topic_name = "/cmd_vel";
@@ -635,9 +638,15 @@ void RL_Sim::InitTopics() {
     topics[this->cmd_topic_name] = cmd_vel_info;
 
     cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
-        this->cmd_topic_name, rclcpp::SystemDefaultsQoS(),
+        this->cmd_topic_name, 
+        qos_cmd,
         [this](const geometry_msgs::msg::Twist::SharedPtr msg){ GenericCallback(this->cmd_topic_name, msg); }
     );
+
+
+    rclcpp::QoS qos_joy(10);
+    qos_joy.reliable();
+    qos_joy.durability_volatile();
 
 
     // 初始化 /joy 话题信息
@@ -652,7 +661,7 @@ void RL_Sim::InitTopics() {
     };
     topics[this->joy_topic_name] = joy_info;
     joy_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Joy>(
-        this->joy_topic_name, rclcpp::SystemDefaultsQoS(),
+        this->joy_topic_name, qos_joy,
         [this](const sensor_msgs::msg::Joy::SharedPtr msg){ GenericCallback(this->joy_topic_name, msg); }
     );
 
@@ -664,7 +673,7 @@ void RL_Sim::InitTopics() {
     imu_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     topics[this->imu_topic_name] = imu_info;
     gazebo_imu_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Imu>(
-        this->imu_topic_name, rclcpp::SystemDefaultsQoS(),
+        this->imu_topic_name, rclcpp::SensorDataQoS(),
         [this](const sensor_msgs::msg::Imu::SharedPtr msg){ GenericCallback(this->imu_topic_name, msg); }
     );
 
@@ -676,7 +685,7 @@ void RL_Sim::InitTopics() {
     robot_state_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     topics[this->robot_state_topic_name] = robot_state_info;
     robot_state_subscriber = ros2_node->create_subscription<robot_msgs::msg::RobotState>(
-        this->robot_state_topic_name, rclcpp::SystemDefaultsQoS(),
+        this->robot_state_topic_name, rclcpp::SensorDataQoS(),
         [this](const robot_msgs::msg::RobotState::SharedPtr msg){ GenericCallback(this->robot_state_topic_name, msg); }
     );
 
@@ -691,7 +700,7 @@ void RL_Sim::InitTopics() {
     };
     topics[this->image_topic_name] = image_info;
     image_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Image>(
-        this->image_topic_name, rclcpp::SystemDefaultsQoS(),
+        this->image_topic_name, rclcpp::SensorDataQoS(),
         [this](const sensor_msgs::msg::Image::SharedPtr msg){ GenericCallback(this->image_topic_name, msg); }
     );
 

@@ -48,6 +48,22 @@ RL_Real::RL_Real(int argc, char **argv)
     // read params from yaml
     this->ReadYaml(this->robot_name, "base.yaml");
 
+    this->config_name = this->params.Get<std::string>("algorithm");
+
+    // init joystick
+    this->joystick = JoystickManager::GetInstance().CreateJoystick(
+        this->params.Get<std::string>("joystick_type"),
+        *this
+    );
+    if(!this->joystick)
+    {
+        std::cout << LOGGER::ERROR << "[Joystick] No joystick registered for type: " 
+                  << this->params.Get<std::string>("joystick_type") << std::endl;
+        return;
+    }
+
+
+
     // auto load FSM by robot_name
     if (FSMManager::GetInstance().IsTypeSupported(this->robot_name))
     {
@@ -65,37 +81,39 @@ RL_Real::RL_Real(int argc, char **argv)
     // init robot
 
     this->robot_command_publisher_msg.motor_command.resize(this->params.Get<int>("num_of_dofs"));
-    this->robot_state_subscriber_msg.motor_state.resize(this->params.Get<int>("num_of_dofs"));
+    // this->robot_state_subscriber_msg.motor_state.resize(this->params.Get<int>("num_of_dofs"));
     this->InitJointNum(this->params.Get<int>("num_of_dofs"));
     this->InitOutputs();
     this->InitControl();
 
+    this->InitTopics();
+
     // publisher
-    this->robot_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
-        this->ros_namespace + "robot_joint_controller/command", rclcpp::SystemDefaultsQoS());
-    this->robot_real_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
-        this->ros_namespace + "rl_sar/Robot_Command", rclcpp::SystemDefaultsQoS());
+    // this->robot_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
+    //     this->ros_namespace + "robot_joint_controller/command", rclcpp::SystemDefaultsQoS());
+    // this->robot_real_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
+    //     this->ros_namespace + "rl_sar/Robot_Command", rclcpp::SystemDefaultsQoS());
 
-    this->imu_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::Imu>(
-        "/imu", rclcpp::SystemDefaultsQoS());
+    // this->imu_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::Imu>(
+    //     "/imu", rclcpp::SystemDefaultsQoS());
 
-    this->joint_state_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::JointState>(
-        "/joint_states", rclcpp::SystemDefaultsQoS());
+    // this->joint_state_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::JointState>(
+    //     "/joint_states", rclcpp::SystemDefaultsQoS());
     
 
     // subscriber
-    this->cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
-        "/cmd_vel", rclcpp::SystemDefaultsQoS(),
-        [this] (const geometry_msgs::msg::Twist::SharedPtr msg) {this->CmdvelCallback(msg);}
-    );
-    this->joy_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Joy>(
-        "/joy", rclcpp::SystemDefaultsQoS(),
-        [this] (const sensor_msgs::msg::Joy::SharedPtr msg) {this->JoyCallback(msg);}
-    );
-    this->robot_state_subscriber = ros2_node->create_subscription<robot_msgs::msg::RobotState>(
-        this->ros_namespace + "rl_sar/Robot_State", rclcpp::SystemDefaultsQoS(),
-        [this] (const robot_msgs::msg::RobotState::SharedPtr msg) {this->RobotStateCallback(msg);}
-    );
+    // this->cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
+    //     "/cmd_vel", rclcpp::SystemDefaultsQoS(),
+    //     [this] (const geometry_msgs::msg::Twist::SharedPtr msg) {this->CmdvelCallback(msg);}
+    // );
+    // this->joy_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Joy>(
+    //     "/joy", rclcpp::SystemDefaultsQoS(),
+    //     [this] (const sensor_msgs::msg::Joy::SharedPtr msg) {this->JoyCallback(msg);}
+    // );
+    // this->robot_state_subscriber = ros2_node->create_subscription<robot_msgs::msg::RobotState>(
+    //     this->ros_namespace + "rl_sar/Robot_State", rclcpp::SystemDefaultsQoS(),
+    //     [this] (const robot_msgs::msg::RobotState::SharedPtr msg) {this->RobotStateCallback(msg);}
+    // );
 
 
     // loop
@@ -145,27 +163,180 @@ RL_Real::~RL_Real()
 
 
 
+
+void RL_Real::InitTopics() {
+
+
+    this->robot_command_publisher = ros2_node->create_publisher<robot_msgs::msg::RobotCommand>(
+        this->ros_namespace + "rl_sar/Robot_Command", rclcpp::SensorDataQoS());
+
+    this->joint_state_publisher_ = ros2_node->create_publisher<sensor_msgs::msg::JointState>(
+        "/joint_states", rclcpp::SensorDataQoS());
+
+
+    rclcpp::QoS qos_cmd(10);
+    qos_cmd.reliable();
+    qos_cmd.durability_volatile();
+    
+    // 初始化 /cmd_vel 话题信息
+    this->cmd_topic_name = "/cmd_vel";
+    auto cmd_vel_info = std::make_shared<TopicInfo<geometry_msgs::msg::Twist>>();
+    cmd_vel_info->timeout_sec = 0.5;
+    cmd_vel_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
+    topics[this->cmd_topic_name] = cmd_vel_info;
+
+    cmd_vel_subscriber = ros2_node->create_subscription<geometry_msgs::msg::Twist>(
+        this->cmd_topic_name, 
+        qos_cmd,
+        [this](const geometry_msgs::msg::Twist::SharedPtr msg){ GenericCallback(this->cmd_topic_name, msg); }
+    );
+
+
+    rclcpp::QoS qos_joy(10);
+    qos_joy.reliable();
+    qos_joy.durability_volatile();
+
+
+    // 初始化 /joy 话题信息
+    this->joy_topic_name = "/joy";
+    auto joy_info = std::make_shared<TopicInfo<sensor_msgs::msg::Joy>>();
+    joy_info->timeout_sec = 0.5;
+    joy_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
+    // 可选：设置额外回调
+    joy_info->extra_callback = [this, joy_info] () {
+        auto msg = std::atomic_load_explicit(&joy_info->latest_msg, std::memory_order_acquire);
+        this->joystick->JoyCallback(msg);
+    };
+    topics[this->joy_topic_name] = joy_info;
+    joy_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Joy>(
+        this->joy_topic_name, qos_joy,
+        [this](const sensor_msgs::msg::Joy::SharedPtr msg){ GenericCallback(this->joy_topic_name, msg); }
+    );
+
+
+    // 初始化 /imu 话题信息
+    // this->imu_topic_name = "/imu";
+    // auto imu_info = std::make_shared<TopicInfo<sensor_msgs::msg::Imu>>();
+    // imu_info->timeout_sec = 0.5;
+    // imu_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
+    // topics[this->imu_topic_name] = imu_info;
+    // gazebo_imu_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Imu>(
+    //     this->imu_topic_name, rclcpp::SensorDataQoS(),
+    //     [this](const sensor_msgs::msg::Imu::SharedPtr msg){ GenericCallback(this->imu_topic_name, msg); }
+    // );
+
+
+    // 初始化 /robot_joint_controller/state 话题信息
+    this->robot_state_topic_name = this->ros_namespace + "rl_sar/Robot_State";
+    auto robot_state_info = std::make_shared<TopicInfo<robot_msgs::msg::RobotState>>();
+    robot_state_info->timeout_sec = 0.5;
+    robot_state_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
+    topics[this->robot_state_topic_name] = robot_state_info;
+
+    this->robot_state_subscriber = ros2_node->create_subscription<robot_msgs::msg::RobotState>(
+        this->robot_state_topic_name, rclcpp::SensorDataQoS(),
+        [this] (const robot_msgs::msg::RobotState::SharedPtr msg) {this->RobotStateCallback(msg);}
+    );
+
+
+
+    // this->image_topic_name = "/depth/depth_camera/depth/image_raw";
+    // auto image_info = std::make_shared<TopicInfo<sensor_msgs::msg::Image>>();
+    // image_info->timeout_sec = 1.0;
+    // image_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
+    // image_info->extra_callback = [this, image_info] () {
+    //     auto msg = std::atomic_load_explicit(&image_info->latest_msg, std::memory_order_acquire);
+    //     auto depth_image = depth_image_to_vector(msg->data, this->image_width, this->image_height);
+    //     std::atomic_store_explicit(&this->depth_image_ptr, std::make_shared<std::vector<float>>(std::move(depth_image)), std::memory_order_release);
+    // };
+    // topics[this->image_topic_name] = image_info;
+    // image_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Image>(
+    //     this->image_topic_name, rclcpp::SensorDataQoS(),
+    //     [this](const sensor_msgs::msg::Image::SharedPtr msg){ GenericCallback(this->image_topic_name, msg); }
+    // );
+
+}
+
+
+
+void RL_Real::CheckTimeouts() {
+    auto now = std::chrono::steady_clock::now();
+
+    for (auto& kv : topics) {
+        auto& info = kv.second;
+        auto dt = std::chrono::duration<double>(now - info->last_time.load(std::memory_order_acquire)).count();
+        if (dt > info->timeout_sec) {
+            // std::cout << LOGGER::INFO << "RL_Real start" << std::endl;
+            // RCLCPP_WARN(node->get_logger(), "Topic %s timeout %.3f s", kv.first.c_str(), dt);
+            // std::cout << LOGGER::INFO  << kv.first << " timeout " << dt << " s" << std::endl;
+
+            if (kv.first == "/cmd_vel") {
+                // geometry_msgs::msg::Twist stop_cmd{};
+                // auto twist_info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(info);
+                // std::atomic_store_explicit(&twist_info->latest_msg, std::make_shared<geometry_msgs::msg::Twist>(stop_cmd), std::memory_order_release);
+            }
+            if (kv.first == "/joy") {
+                // 处理 joystick 超时，例如清除输入状态
+                // this->control.x = 0.0f;
+                // this->control.y = 0.0f;
+                // this->control.yaw = 0.0f;
+                // this->joystick->ClearInput();
+            }
+            if (kv.first == "/imu") {
+                // 处理 IMU 超时，例如设置默认状态
+                // this->gazebo_imu = sensor_msgs::msg::Imu();
+            }
+             if (kv.first == this->robot_state_topic_name) {
+                // 处理 robot state 超时，例如设置默认状态
+                // this->robot_state_subscriber_msg = robot_msgs::msg::RobotState();
+                auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
+                auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+                if(robot_state_msg)
+                {
+                    auto new_msg = std::make_shared<robot_msgs::msg::RobotState>(*robot_state_msg); // 创建一个新的消息对象，复制现有数据
+                    for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
+                    {
+                          new_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].status_word = 0; // 设置状态字为0，表示无效或未连接
+                    }
+                    std::atomic_store_explicit(&info->latest_msg, new_msg, std::memory_order_release);
+                }
+
+            }
+            if (kv.first == this->image_topic_name ){
+                
+            }
+        }
+    }
+}
+
+
+
+
 void RL_Real::GetState(RobotState<float> *state)
 {
-    const auto orientation = this->robot_state_subscriber_msg.imu.quaternion;
-    const auto angular_velocity = this->robot_state_subscriber_msg.imu.gyroscope;
+
+    auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
+    auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+
+    const auto orientation = robot_state_msg->imu.quaternion;
+    const auto angular_velocity = robot_state_msg->imu.gyroscope;
 
 
-    this->imu_.orientation.x = orientation[1];
-    this->imu_.orientation.y = orientation[2];
-    this->imu_.orientation.z = orientation[3];
-    this->imu_.orientation.w = orientation[0];
+    // this->imu_.orientation.x = orientation[1];
+    // this->imu_.orientation.y = orientation[2];
+    // this->imu_.orientation.z = orientation[3];
+    // this->imu_.orientation.w = orientation[0];
     
-    this->imu_.angular_velocity.x = angular_velocity[0];
-    this->imu_.angular_velocity.y = angular_velocity[1];
-    this->imu_.angular_velocity.z = angular_velocity[2];
+    // this->imu_.angular_velocity.x = angular_velocity[0];
+    // this->imu_.angular_velocity.y = angular_velocity[1];
+    // this->imu_.angular_velocity.z = angular_velocity[2];
     
-    this->imu_.linear_acceleration.x = this->robot_state_subscriber_msg.imu.accelerometer[0];
-    this->imu_.linear_acceleration.y = this->robot_state_subscriber_msg.imu.accelerometer[1];
-    this->imu_.linear_acceleration.z = this->robot_state_subscriber_msg.imu.accelerometer[2];
+    // this->imu_.linear_acceleration.x = robot_state_msg->imu.accelerometer[0];
+    // this->imu_.linear_acceleration.y = robot_state_msg->imu.accelerometer[1];
+    // this->imu_.linear_acceleration.z = robot_state_msg->imu.accelerometer[2];
 
 
-    this->imu_publisher_->publish(this->imu_);
+    // this->imu_publisher_->publish(this->imu_);
 
     state->imu.quaternion[0] = orientation[0];
     state->imu.quaternion[1] = orientation[1];
@@ -185,9 +356,9 @@ void RL_Real::GetState(RobotState<float> *state)
 
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {
-        state->motor_state.q[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].q;
-        state->motor_state.dq[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].dq;
-        state->motor_state.tau_est[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau_est;
+        state->motor_state.q[i] = robot_state_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].q;
+        state->motor_state.dq[i] = robot_state_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].dq;
+        state->motor_state.tau_est[i] = robot_state_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau_est;
 
         joint_state_msg.name[this->params.Get<std::vector<int>>("joint_mapping")[i]] = this->params.Get<std::vector<std::string>>("joint_names")[i];
         joint_state_msg.position[this->params.Get<std::vector<int>>("joint_mapping")[i]] = state->motor_state.q[i];
@@ -220,6 +391,13 @@ void RL_Real::SetCommand(const RobotCommand<float> *command)
 
 void RL_Real::RobotControl()
 {
+    // CheckTimeouts();
+    {
+        auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
+        auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+        if(!robot_state_msg) return;
+    }
+
     this->GetState(&this->robot_state);
 
     this->StateController(&this->robot_state, &this->robot_command);
@@ -235,81 +413,81 @@ void RL_Real::CmdvelCallback(const geometry_msgs::msg::Twist::SharedPtr msg)
     this->cmd_vel = *msg;
 }
 
-void RL_Real::JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg)
-{
-    this->joy_msg = *msg;
+// void RL_Real::JoyCallback(const sensor_msgs::msg::Joy::SharedPtr msg)
+// {
+//     this->joy_msg = *msg;
 
-    // joystick control
-    // Description of buttons and axes(F710):
-    // |__ buttons[]: A=0, B=1, X=2, Y=3, LB=4, RB=5, back=6, start=7, power=8, stickL=9, stickR=10
-    // |__ axes[]: Lx=0, Ly=1, Rx=3, Ry=4, LT=2, RT=5, DPadX=6, DPadY=7
+//     // joystick control
+//     // Description of buttons and axes(F710):
+//     // |__ buttons[]: A=0, B=1, X=2, Y=3, LB=4, RB=5, back=6, start=7, power=8, stickL=9, stickR=10
+//     // |__ axes[]: Lx=0, Ly=1, Rx=3, Ry=4, LT=2, RT=5, DPadX=6, DPadY=7
 
-    if (this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::A);
-    if (this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::B);
-    if (this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
-    if (this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
-    if (this->joy_msg.buttons[4]) this->control.SetGamepad(Input::Gamepad::LB);
-    if (this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::RB);
-    if (this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LStick);
-    if (this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RStick);
-    if (this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::DPadUp);
-    if (this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::DPadDown);
-    if (this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::DPadLeft);
-    if (this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::DPadRight);
-    if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
-    if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
-    if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
-    if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::LB_A);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::LB_B);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::LB_X);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::LB_Y);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LB_LStick);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::LB_RStick);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadUp);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadDown);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadRight);
-    if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadLeft);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::RB_A);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::RB_B);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::RB_X);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::RB_Y);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::RB_LStick);
-    if (this->joy_msg.buttons[5] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RB_RStick);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadUp);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadDown);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadRight);
-    if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadLeft);
-    if (this->joy_msg.buttons[4] && this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::LB_RB);
+//     if (this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::A);
+//     if (this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::B);
+//     if (this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
+//     if (this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
+//     if (this->joy_msg.buttons[4]) this->control.SetGamepad(Input::Gamepad::LB);
+//     if (this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::RB);
+//     if (this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LStick);
+//     if (this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RStick);
+//     if (this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::DPadUp);
+//     if (this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::DPadDown);
+//     if (this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::DPadLeft);
+//     if (this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::DPadRight);
+//     if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
+//     if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::X);
+//     if (this->joy_msg.axes[7] > 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
+//     if (this->joy_msg.axes[7] < 0 && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::Y);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::LB_A);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::LB_B);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::LB_X);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::LB_Y);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::LB_LStick);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::LB_RStick);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadUp);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadDown);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::LB_DPadRight);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::LB_DPadLeft);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[0]) this->control.SetGamepad(Input::Gamepad::RB_A);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[1]) this->control.SetGamepad(Input::Gamepad::RB_B);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[2]) this->control.SetGamepad(Input::Gamepad::RB_X);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[3]) this->control.SetGamepad(Input::Gamepad::RB_Y);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[9]) this->control.SetGamepad(Input::Gamepad::RB_LStick);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.buttons[10]) this->control.SetGamepad(Input::Gamepad::RB_RStick);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadUp);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[7] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadDown);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] < 0) this->control.SetGamepad(Input::Gamepad::RB_DPadRight);
+//     if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] > 0) this->control.SetGamepad(Input::Gamepad::RB_DPadLeft);
+//     if (this->joy_msg.buttons[4] && this->joy_msg.buttons[5]) this->control.SetGamepad(Input::Gamepad::LB_RB);
 
-    // this->control.x = this->joy_msg.axes[1]; // LY
-    if(this->joy_msg.axes[1] >= 0.7f)
-        this->control.x = 0.7f;
-    else if (this->joy_msg.axes[1] <= - 0.7f)
-        this->control.x = -0.7f;
-    else
-        this->control.x = this->joy_msg.axes[1];
-
-
-    this->control.y = this->joy_msg.axes[0]; // LX
-    this->control.yaw = this->joy_msg.axes[3]; // RX
-    this->control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
-    this->control.height = this->joy_msg.axes[4];
-
-    if(this->joy_msg.buttons[7] == 1)
-    {
-        motor_enable_changed = true;
-    }
-
-    if (this->joy_msg.buttons[7] == 0 && motor_enable_changed)
-    {
-        motor_enable_changed = false;
-        this->motor_enabled = !this->motor_enabled;
-    }
+//     // this->control.x = this->joy_msg.axes[1]; // LY
+//     if(this->joy_msg.axes[1] >= 0.7f)
+//         this->control.x = 0.7f;
+//     else if (this->joy_msg.axes[1] <= - 0.7f)
+//         this->control.x = -0.7f;
+//     else
+//         this->control.x = this->joy_msg.axes[1];
 
 
+//     this->control.y = this->joy_msg.axes[0]; // LX
+//     this->control.yaw = this->joy_msg.axes[3]; // RX
+//     this->control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
+//     this->control.height = this->joy_msg.axes[4];
 
-}
+//     if(this->joy_msg.buttons[7] == 1)
+//     {
+//         motor_enable_changed = true;
+//     }
+
+//     if (this->joy_msg.buttons[7] == 0 && motor_enable_changed)
+//     {
+//         motor_enable_changed = false;
+//         this->motor_enabled = !this->motor_enabled;
+//     }
+
+
+
+// }
 
 
 void RL_Real::RobotStateCallback(const robot_msgs::msg::RobotState::SharedPtr msg)
@@ -324,20 +502,43 @@ void RL_Real::RunModel()
     {
         this->episode_length_buf += 1;
         this->obs.ang_vel = this->robot_state.imu.gyroscope;
-        if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-            this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
-        else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-            this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
-        else
-            this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-        if (this->control.navigation_mode)
+        if(this->config_name == "np3o")
         {
             if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
                 this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
             else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-                this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z, 0.0f,0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
+                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
             else
-                this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+        }
+        else
+        {
+            if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+                this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand};
+            else
+                this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
+        }
+        if (this->control.navigation_mode)
+        {
+            auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
+            auto cmd = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+            if(cmd)
+            {
+                if(this->config_name == "np3o")
+                {
+                    if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+                        this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+                    else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
+                        this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z, 0.0f,0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
+                    else
+                        this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+                }
+                else
+                    this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
+            }
+            else
+                this->obs.commands = {0.0f, 0.0f, 0.0f};
+
         }
         this->obs.base_quat = this->robot_state.imu.quaternion;
         this->obs.dof_pos = this->robot_state.motor_state.q;
@@ -363,11 +564,14 @@ void RL_Real::RunModel()
         // this->AttitudeProtect(this->robot_state.imu.quaternion, 75.0f, 75.0f);
 
 #ifdef CSV_LOGGER
+        auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
+        auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+        if(!robot_state_msg) return;
         std::vector<float> tau_est(this->params.Get<int>("num_of_dofs"), 0.0f);
         for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
         {
             // tau_est[i] = this->joint_efforts[this->params.Get<std::vector<std::string>>("joint_controller_names")[i]];
-            tau_est[i] = this->robot_state_subscriber_msg.motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau_est;
+            tau_est[i] = robot_state_msg->motor_state[this->params.Get<std::vector<int>>("joint_mapping")[i]].tau_est;
         }
         this->CSVLogger(this->output_dof_tau, tau_est, this->obs.dof_pos, this->output_dof_pos, this->obs.dof_vel);
 #endif
@@ -391,9 +595,22 @@ std::vector<float> RL_Real::Forward()
     if (this->params.Get<std::vector<int>>("observations_history").size() != 0)
     {
 
-        this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
-        actions = this->model->forward({clamped_obs,this->history_obs});
-        this->history_obs_buf.insert(clamped_obs);
+        if(this->config_name == "np3o")
+        {
+            
+            this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
+            actions = this->model->forward({clamped_obs,this->history_obs});
+            this->history_obs_buf.insert(clamped_obs);
+            
+        }
+        else if(this->config_name == "himloco")
+        {
+            this->history_obs_buf.insert(clamped_obs);
+            this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
+            actions = this->model->forward({this->history_obs});
+        }else{
+            actions = this->model->forward({clamped_obs});
+        }
         
     }
     else
@@ -417,11 +634,14 @@ void RL_Real::Plot()
     this->plot_t.push_back(this->motiontime);
     plt::cla();
     plt::clf();
+    auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
+    auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+    if(!robot_state_msg) return;
     for (int i = 0; i < this->params.Get<int>("num_of_dofs"); ++i)
     {
         this->plot_real_joint_pos[i].erase(this->plot_real_joint_pos[i].begin());
         this->plot_target_joint_pos[i].erase(this->plot_target_joint_pos[i].begin());
-        this->plot_real_joint_pos[i].push_back(this->robot_state_subscriber_msg.motor_state[i].q);
+        this->plot_real_joint_pos[i].push_back(robot_state_msg->motor_state[i].q);
         this->plot_target_joint_pos[i].push_back(this->robot_command_publisher_msg.motor_command[i].q);
         plt::subplot(this->params.Get<int>("num_of_dofs"), 1, i + 1);
         plt::named_plot("_real_joint_pos", this->plot_t, this->plot_real_joint_pos[i], "r");

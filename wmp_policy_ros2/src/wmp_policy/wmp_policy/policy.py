@@ -577,7 +577,7 @@ def main(args=None):
     duration = 0.02
     policy_node = PolicyNode(device=device)
 
-    export_path = "/home/yong/yang/p3_modified_Lite3_rl_deploy/wmp_policy_ros2/src/wmp_policy/policy/yuxuan-4-17"
+    export_path = "/home/yong/yang/p3_modified_Lite3_rl_deploy/wmp_policy_ros2/src/wmp_policy/policy/47000"
     # world_model = torch.jit.load(os.path.join(export_path, "world_model_int8.pt"),map_location=device).to(device)
     # policy_model = torch.jit.load(os.path.join(export_path, "policy_int8.pt"),map_location=device).to(device)
 

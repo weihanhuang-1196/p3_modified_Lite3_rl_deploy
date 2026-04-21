@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<robot name="panda3_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find panda3_description)/urdf/panda3.urdf"/>
+    <!-- gazebo sim -->
+    <xacro:include filename="$(find panda3_description)/xacro/gazebo.xacro"/>
+
+    <!-- real robot -->
+    <!-- <xacro:include filename="$(find panda7_description)/xacro/real.xacro"/> -->
+
+
+
+</robot>

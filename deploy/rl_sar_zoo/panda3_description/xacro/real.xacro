@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    
+    <xacro:property name="ros_version" value="$(env ROS_VERSION)" />
+
+
+    <ros2_control name="RobotHWInterface" type="system">
+        <hardware>
+            <plugin>robot_hw_interface/RobotHWInterface</plugin>
+        </hardware>
+
+        <xacro:macro name="joint_interface" params="joint_name">
+            <joint name="${joint_name}">
+            <command_interface name="effort"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+            </joint>
+        </xacro:macro>
+
+        <xacro:macro name="leg_joints" params="prefix">
+            <xacro:joint_interface joint_name="${prefix}_hip_joint" />
+            <xacro:joint_interface joint_name="${prefix}_thigh_joint" />
+            <xacro:joint_interface joint_name="${prefix}_calf_joint" />
+        </xacro:macro>
+
+        <xacro:leg_joints prefix="FL"/>
+        <xacro:leg_joints prefix="FR"/>
+        <xacro:leg_joints prefix="RL"/>
+        <xacro:leg_joints prefix="RR"/>
+
+
+    </ros2_control>
+
+
+
+
+</robot>
