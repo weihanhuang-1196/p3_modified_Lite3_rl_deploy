@@ -73,16 +73,19 @@ private:
     std::string command_;
     pid_t pid_{-1};
     std::vector<std::string> topics_ = {
-            "--all"
-            // "/cmd_vel",
-            // "/Devices/joy",
-            // "/controller_state",
-            // "/rl_sar/Robot_State",
-            // "/rl_sar/Robot_Command",
-            // "/joint_states",
-            // "/tf",
-            // "/tf_static",
-            // "/robot_description",
-            // "/parameter_events"
+            // "--all"
+            "/cmd_vel",
+            "/Devices/joy",
+            "/controller_state",
+            "/rl_sar/Robot_State",
+            "/rl_sar/Robot_Command",
+            "/joint_states",
+            "/tf",
+            "/tf_static",
+            "/robot_description",
+            "/parameter_events",
+            "/depth/depth_camera/depth/image_raw",
+            "/robot_joint_controller/state",
+            "/robot_joint_controller/command"
         };
 };

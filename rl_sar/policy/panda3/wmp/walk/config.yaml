@@ -4,8 +4,8 @@
 panda3/wmp/walk:
 #   model_name: "policy_4_17_6000.onnx"
 #   world_name: "world_model_4_17_6000.onnx"
-  model_name: "policy_4_14_47000.onnx"
-  world_name: "world_model_4_14_47000.onnx"
+  model_name: "policy_yuxuan_4_17.onnx"
+  world_name: "world_model_yuxuan_4_17.onnx"
 #   model_name: "policy_4_14_47000.onnx"
 #   world_name: "world_model_4_14_47000.onnx"
   # num_observations: 33
@@ -41,25 +41,25 @@ panda3/wmp/walk:
 #                        5.5, 5.5, 5.5]
 
 
-  rl_kp: [55, 55, 55,
-          55, 55, 55,
-          55, 55, 55,
-          55, 55, 55]
+  # rl_kp: [55, 55, 55,
+  #         55, 55, 55,
+  #         55, 55, 55,
+  #         55, 55, 55]
 
-  rl_kd: [1.8, 1.8, 1.8,
-           1.8, 1.8, 1.8,
-           1.8, 1.8, 1.8,
-           1.8, 1.8, 1.8]
+  # rl_kd: [1.8, 1.8, 1.8,
+  #          1.8, 1.8, 1.8,
+  #          1.8, 1.8, 1.8,
+  #          1.8, 1.8, 1.8]
 
-  # rl_kp: [60, 60, 60,
-  #         60, 60, 60,
-  #         60, 60, 60,
-  #         60, 60, 60]
+  rl_kp: [60, 60, 60,
+          60, 60, 60,
+          60, 60, 60,
+          60, 60, 60]
 
-  # rl_kd: [2, 2, 2,
-  #          2, 2, 2,
-  #          2, 2, 2,
-  #          2, 2, 2]
+  rl_kd: [2, 2, 2,
+           2, 2, 2,
+           2, 2, 2,
+           2, 2, 2]
 
 
   fixed_kp: [80, 120, 130,

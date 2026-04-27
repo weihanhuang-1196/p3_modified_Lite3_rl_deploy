@@ -181,7 +181,7 @@ torch::Tensor TorchModel::vector_to_torch(const std::vector<float>& data, const 
 {
     // Use torch::tensor() + reshape() to match test program behavior
     // auto tensor = torch::tensor(data, torch::kFloat32).reshape(shape);
-    auto tensor = torch::from_blob(const_cast<float*>(data.data()), shape, torch::kFloat32).clone();
+    auto tensor = torch::from_blob(const_cast<float*>(data.data()), shape, torch::kFloat32);
     return tensor;
 }
 
