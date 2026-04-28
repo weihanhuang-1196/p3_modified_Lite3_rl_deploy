@@ -1,0 +1,11 @@
+active_policy: walk_ppo
+
+policies:
+  tingtao-3-26:
+    type: "himoloco_walk_ppo"
+    policy_config_path: "himloco/walk/policy_Mar25_21-24-28_10000_tingtao-3-26.yaml"
+
+
+  Apr17_07-40-33_WMP:
+    type: wmp_ppo
+    policy_config_path: "wmp/walk/Apr17_07-40-33_WMP.yaml"
