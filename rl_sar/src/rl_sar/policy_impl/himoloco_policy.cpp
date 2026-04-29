@@ -1,5 +1,5 @@
 #include "himoloco_policy.hpp"
-
+#include "policy_context_builder.hpp"
 
 namespace rl_policy{
 
@@ -9,7 +9,7 @@ namespace rl_policy{
 void HimolocoPolicy::OnInit()
 {
 
-    rl_policy::PolicyContextBuilder context_builder;
+    PolicyContextBuilder context_builder;
     std::vector<float> lin_vel = {0.0f, 0.0f, 0.0f};
     std::vector<float> ang_vel = {0.0f, 0.0f, 0.0f};
     std::vector<float> gravity_vec = {0.0f, 0.0f, -1.0f};
@@ -28,8 +28,9 @@ void HimolocoPolicy::OnInit()
         dof_vel
     );
     context_builder.SetCommand(command);
+    std::vector<float> last_actions(12, 0.0f);
     context_builder.SetLastActions(last_actions);
-    rl_policy::PolicyContext ctx = context_builder.Build();
+    PolicyContext ctx = context_builder.Build();
 
 
     this->obs = ComputeObservation(ctx);
@@ -64,7 +65,7 @@ void HimolocoPolicy::BuildObservation(const PolicyContext& context)
 std::vector<float>& HimolocoPolicy::ProcessObservation()
 {
     this->history_obs_buf.insert(this->obs);
-    this->history_obs = this->history_obs_buf.get_obs_vec(this->params.Get<std::vector<int>>("observations_history"));
+    this->history_obs = this->history_obs_buf.get_obs_vec(this->_params.Get<std::vector<int>>("observations_history"));
     return this->history_obs;
 }
 
@@ -83,7 +84,7 @@ PolicyOutput& HimolocoPolicy::ComputeOutput(const std::vector<float>& actions, c
     std::vector<float> actions_scaled = actions * _action_scale;
     std::vector<float> pos_actions_scaled = actions_scaled;
     std::vector<float> vel_actions_scaled(actions.size(), 0.0f);
-    for (int i : this->params.Get<std::vector<int>>("wheel_indices"))
+    for (int i : this->_params.Get<std::vector<int>>("wheel_indices"))
     {
         pos_actions_scaled[i] = 0.0f;
         vel_actions_scaled[i] = actions_scaled[i];
@@ -93,7 +94,7 @@ PolicyOutput& HimolocoPolicy::ComputeOutput(const std::vector<float>& actions, c
     output.target_dof_pos = pos_actions_scaled + _default_dof_pos;
     output.target_dof_vel = vel_actions_scaled;
     output.target_dof_tau = _kp * (all_actions_scaled + _default_dof_pos - context.joints.dof_pos) - _kd * context.joints.dof_vel;
-    output.target_dof_tau = clamp(output_dof_tau, -_torque_limits, _torque_limits);
+    output.target_dof_tau = clamp( output.target_dof_tau, -_torque_limits, _torque_limits);
     return output;
 
 }
@@ -114,11 +115,11 @@ std::vector<float> HimolocoPolicy::ComputeObservation(const PolicyContext& conte
         {
             // In ROS1 Gazebo, the coordinate system for angular velocity is in the world coordinate system.
             // In ROS2 Gazebo, mujoco and real robot, the coordinate system for angular velocity is in the body coordinate system.
-            if (this->ang_vel_axis == "body")
+            if (this->_ang_vel_axis == "body")
             {
                 obs_list.push_back(context.robot.ang_vel * _ang_vel_scale);
             }
-            else if (this->ang_vel_axis == "world")
+            else if (this->_ang_vel_axis == "world")
             {
                 obs_list.push_back(QuatRotateInverse(context.robot.base_quat, context.robot.ang_vel) * _ang_vel_scale);
             }

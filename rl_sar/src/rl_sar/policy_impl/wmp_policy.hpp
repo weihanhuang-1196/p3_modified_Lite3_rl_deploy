@@ -12,7 +12,7 @@ class WMPPolicy : public PolicyBase
 private:
     /* data */
 public:
-    WMPPolicy(/* args */) = default;
+    WMPPolicy(std::string name):PolicyBase(name){};
     ~WMPPolicy() = default;
 
     WMPPolicy(const WMPPolicy&) = delete;

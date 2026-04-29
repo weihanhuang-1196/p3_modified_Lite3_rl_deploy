@@ -20,11 +20,10 @@ public:
 
     void SwitchPolicy(const std::string& policy_name);
 
-    PolicyOutput Forward(const PolicyContext& context);
+    PolicyOutput Forward(PolicyContext& context);
 
     const std::string& ActivePolicyName() const;
 
-    virtual void Reset();
 
 private:
     std::unordered_map<std::string, std::unique_ptr<PolicyBase>> policies_;

@@ -30,6 +30,10 @@
 #include "motion_loader.hpp"
 #include "one_shot_async_timer.hpp"
 
+#include "register_policies.hpp"
+#include "policy_manager.hpp"
+#include "policy_context_builder.hpp"
+
 template <typename T>
 struct RobotCommand
 {
@@ -327,6 +331,10 @@ public:
     int global_counter = 0;
     int visual_update_interval = 5;
 
+
+
+    rl_policy::PolicyManager policy_manager;
+    rl_policy::PolicyContextBuilder context_builder;
 
 
 

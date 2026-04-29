@@ -351,6 +351,8 @@ include_directories(
     library/core/joystick
     ${OpenCV_INCLUDE_DIRS}
     library/core/monitor
+    library/core/rl_policy
+    policy_impl
     # library/core/odom
 )
 
@@ -374,12 +376,40 @@ if(NOT USE_CMAKE)
     endif()
 endif()
 
+
+
+# library for observation buffer
+add_library(observation_buffer library/core/observation_buffer/observation_buffer.cpp)
+if(NOT USE_CMAKE)
+    if($ENV{ROS_DISTRO} MATCHES "foxy|humble")
+        install(TARGETS observation_buffer DESTINATION lib/${PROJECT_NAME})
+    endif()
+endif()
+
+
+set(POLICY_SRC_DIR library/core/rl_policy)
+set(POLICY_IMPL policy_impl)
+add_library(rl_policy 
+    ${POLICY_SRC_DIR}/policy_base.cpp 
+    ${POLICY_SRC_DIR}/policy_context_builder.cpp
+    ${POLICY_SRC_DIR}/policy_factory.cpp
+    ${POLICY_SRC_DIR}/policy_manager.cpp
+    policy_impl/himoloco_policy.cpp
+    policy_impl/register_policies.cpp
+    policy_impl/wmp_policy.cpp
+)
+target_link_libraries(rl_policy PUBLIC
+    inference_runtime
+    observation_buffer
+)
+
 # library for motion loader
 add_library(motion_loader library/core/motion_loader/motion_loader.cpp)
 
 # library for rl sdk
 add_library(rl_sdk library/core/rl_sdk/rl_sdk.cpp)
 target_link_libraries(rl_sdk PUBLIC
+    rl_policy
     motion_loader
     inference_runtime
     Python3::Python
@@ -398,13 +428,7 @@ if(NOT USE_CMAKE)
     endif()
 endif()
 
-# library for observation buffer
-add_library(observation_buffer library/core/observation_buffer/observation_buffer.cpp)
-if(NOT USE_CMAKE)
-    if($ENV{ROS_DISTRO} MATCHES "foxy|humble")
-        install(TARGETS observation_buffer DESTINATION lib/${PROJECT_NAME})
-    endif()
-endif()
+
 
 # executable for rl sim
 if(NOT USE_CMAKE)

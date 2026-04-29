@@ -20,7 +20,7 @@ class HimolocoPolicy : public PolicyBase
 private:
     /* data */
 public:
-    HimolocoPolicy(/* args */) = default;
+    explicit HimolocoPolicy(std::string name):PolicyBase(name){};
     ~HimolocoPolicy() = default;
 
     HimolocoPolicy(const HimolocoPolicy&) = delete;

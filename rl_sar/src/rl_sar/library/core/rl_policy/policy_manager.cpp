@@ -59,7 +59,7 @@ void PolicyManager::SwitchPolicy(const std::string& policy_name)
     active_policy_->Reset();
 }
 
-PolicyOutput PolicyManager::Forward(const PolicyContext& context)
+PolicyOutput PolicyManager::Forward(PolicyContext& context)
 {
     if (!active_policy_)
     {

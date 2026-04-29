@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 #include <memory>
-#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 
@@ -54,13 +53,11 @@ public:
     PolicyBase(const PolicyBase&) = delete;
     PolicyBase& operator=(const PolicyBase&) = delete;
 
-    PolicyOutput& Forward(const PolicyContext& context);
+    PolicyOutput& Forward(PolicyContext& context);
 
-    void init(const YAML::Node& config_node, const std::string& policy_dir);
+    void Init(const YAML::Node& config_node, const std::string& policy_dir);
 
     void Reset();
-
-    virtual void InitObservations() = 0;
     
 
 protected:
@@ -68,7 +65,7 @@ protected:
     virtual void OnReset() = 0;
     virtual void LoadModel(const std::string & policy_dir) = 0;
     virtual void BuildObservation(const PolicyContext& context) = 0;
-    virtual std::vector<float> ProcessObservation() = 0;
+    virtual std::vector<float>& ProcessObservation() = 0;
     virtual std::vector<float> RunInference(const std::vector<float>& model_input) = 0;
     virtual PolicyOutput& ComputeOutput(const std::vector<float>& actions, const PolicyContext& context) = 0;
 
@@ -79,15 +76,14 @@ protected:
     bool _initialized = false;
 
     // rl model
-    std::unique_ptr<InferenceRuntime::Model> _model;
     PolicyOutput output;
 
     int _num_of_dofs;
     std::vector<float> _action_scale;
-    int _lin_vel_scale;
-    int _ang_vel_scale;
-    int _dof_pos_scale;
-    int _dof_vel_scale;
+    float _lin_vel_scale;
+    float _ang_vel_scale;
+    float _dof_pos_scale;
+    float _dof_vel_scale;
     std::vector<float> _default_dof_pos;
     float _clip_obs;
     std::vector<float> _clip_actions;
@@ -100,6 +96,7 @@ protected:
     std::vector<float> _torque_limits;
     std::vector<float> _clip_actions_upper;
     std::vector<float> _clip_actions_lower;
+    std::string _ang_vel_axis;
 
 
 
@@ -108,7 +105,7 @@ protected:
 
 
     
-}
+} // rl_policy
 
 
 

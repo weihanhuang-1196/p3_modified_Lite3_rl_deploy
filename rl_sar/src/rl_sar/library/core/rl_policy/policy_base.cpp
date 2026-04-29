@@ -1,18 +1,20 @@
 #include "policy_base.hpp"
 
+#include <algorithm>
 
+namespace rl_policy{
 
-void PolicyBase::init(const YAML::Node& config_node, const std::string& policy_dir)
+void PolicyBase::Init(const YAML::Node& config_node, const std::string& policy_dir)
 {
-    if (initialized_)
+    if (_initialized)
     {
         return;
     }
     _params.config_node = config_node;
     _num_of_dofs = _params.Get<int>("num_of_dofs", 12);
-    _lin_vel_scale = _params.Get<int>("lin_vel_scale", 1);
+    _lin_vel_scale = _params.Get<float>("lin_vel_scale", 1.0f);
     _ang_vel_scale = _params.Get<float>("ang_vel_scale", 1.0f);
-    _dof_pos_scale = _params.Get<int>("dof_pos_scale", 1);
+    _dof_pos_scale = _params.Get<float>("dof_pos_scale", 1.0f);
     _dof_vel_scale = _params.Get<float>("dof_vel_scale", 1.0f);
     _action_scale = _params.Get<std::vector<float>>("action_scale", std::vector<float>(_num_of_dofs, 1.0));
     _kp = _params.Get<std::vector<float>>("rl_kp", std::vector<float>(_num_of_dofs, 1.0));
@@ -25,7 +27,7 @@ void PolicyBase::init(const YAML::Node& config_node, const std::string& policy_d
     _torque_limits = _params.Get<std::vector<float>>("torque_limits");
     _clip_actions_upper = _params.Get<std::vector<float>>("clip_actions_upper");
     _clip_actions_lower = _params.Get<std::vector<float>>("clip_actions_lower");
-
+    _ang_vel_axis = _params.Get<std::string>("ang_vel_axis");
     OnInit();
 
     LoadModel(policy_dir);
@@ -33,11 +35,11 @@ void PolicyBase::init(const YAML::Node& config_node, const std::string& policy_d
 }
 
 
-PolicyOutput& PolicyBase::Forward(const PolicyContext& context)
+PolicyOutput& PolicyBase::Forward(PolicyContext& context)
 {
-    if (!initialized_)
+    if (!_initialized)
     {
-        throw std::runtime_error("Policy is not initialized: " + name_);
+        throw std::runtime_error("Policy is not initialized: " + _name);
     }
 
     BuildObservation(context);
@@ -56,3 +58,6 @@ void PolicyBase::Reset()
 {
     OnReset();
 }
+
+
+} // rl_policy
