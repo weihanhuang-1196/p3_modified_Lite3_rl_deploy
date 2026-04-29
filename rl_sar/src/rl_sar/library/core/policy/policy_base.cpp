@@ -18,12 +18,17 @@ void PolicyBase::init(const YAML::Node& config_node, const std::string& policy_d
     _kp = _params.Get<std::vector<float>>("rl_kp", std::vector<float>(_num_of_dofs, 1.0));
     _kd = _params.Get<std::vector<float>>("rl_kd", std::vector<float>(_num_of_dofs, 1.0));
     _num_observations = _params.Get<int>("num_observations", 1);
-    _default_dof_pos_ = _params.Get<std::vector<float>>("default_dof_pos");
-
+    _default_dof_pos = _params.Get<std::vector<float>>("default_dof_pos");
+    _observations = _params.Get<std::vector<std::string>>("observations");
+    _commands_scale = _params.Get<std::vector<float>>("commands_scale");
+    _actions = std::vector<float>(_num_of_dofs, 0.0f);
+    _torque_limits = _params.Get<std::vector<float>>("torque_limits");
+    _clip_actions_upper = _params.Get<std::vector<float>>("clip_actions_upper");
+    _clip_actions_lower = _params.Get<std::vector<float>>("clip_actions_lower");
 
     OnInit();
 
-    LoadModel();
+    LoadModel(policy_dir);
 
 }
 
@@ -35,12 +40,12 @@ PolicyOutput& PolicyBase::Forward(const PolicyContext& context)
         throw std::runtime_error("Policy is not initialized: " + name_);
     }
 
-    std::vector<float> obs = BuildObservation(context);
-    std::vector<float> model_input = ProcessObservation(obs);
-    std::vector<float> actions = RunInference(model_input);
-    PolicyOutput output = ComputeOutput(actions, context);
-    output.raw_actions = actions;
-    // last_actions_ = actions;
+    BuildObservation(context);
+    std::vector<float> model_input = ProcessObservation();
+    _actions = RunInference(model_input);
+    context.last_actions = _actions;
+    output = ComputeOutput(_actions, context);
+    output.raw_actions = _actions;
 
     return output;
 
@@ -49,5 +54,5 @@ PolicyOutput& PolicyBase::Forward(const PolicyContext& context)
 
 void PolicyBase::Reset()
 {
-
+    OnReset();
 }

@@ -12,7 +12,7 @@ PolicyFactory::Instance().Register(
     "himoloco_walk_ppo",
     []()
     {
-        return std::make_unique<HimolocoWalkPolicy>();
+        return std::make_unique<HimolocoPolicy>();
     }
 );
 
@@ -20,7 +20,7 @@ PolicyFactory::Instance().Register(
     "wmp_ppo",
     []()
     {
-        return std::make_unique<WmpPPOPolicy>();
+        return std::make_unique<WMPPolicy>();
     }
 );
 

@@ -24,10 +24,16 @@ void PolicyManager::LoadFromYaml(
         YAML::Node policy_config = it->second;
 
         std::string type = policy_config["type"].as<std::string>();
+        std::string policy_config_path = std::string(POLICY_DIR) + "/" + policy_config["policy_config_path"].as<std::string>();
+        YAML::Node policy_yaml = YAML::LoadFile(policy_config_path);
+        if(!policy_yaml["policy_name"])
+        {
+            throw std::runtime_error("Missing policy configuration in yaml: " + policy_config_path);
+        }
 
         auto policy = PolicyFactory::Instance().Create(type);
 
-        policy->Init(policy_config, policy_dir);
+        policy->Init(policy_yaml, policy_dir);
 
         policies_[policy_name] = std::move(policy);
     }

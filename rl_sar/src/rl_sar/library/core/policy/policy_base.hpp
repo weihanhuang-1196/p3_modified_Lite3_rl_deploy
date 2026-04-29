@@ -58,17 +58,19 @@ public:
 
     void init(const YAML::Node& config_node, const std::string& policy_dir);
 
+    void Reset();
+
     virtual void InitObservations() = 0;
     
 
 protected:
-    virtual void ComputeOutput(const std::vector<float>& actions, std::vector<float> &output_dof_pos, std::vector<float> &output_dof_vel, std::vector<float> &output_dof_tau) = 0;
-    virtual void onInit() = 0;
-    virtual void LoadModel() = 0;
-    virtual std::vector<float> BuildObservation(const PolicyContext& context) = 0;
-    virtual std::vector<float> ProcessObservation(const std::vector<float>& obs) = 0;
+    virtual void OnInit() = 0;
+    virtual void OnReset() = 0;
+    virtual void LoadModel(const std::string & policy_dir) = 0;
+    virtual void BuildObservation(const PolicyContext& context) = 0;
+    virtual std::vector<float> ProcessObservation() = 0;
     virtual std::vector<float> RunInference(const std::vector<float>& model_input) = 0;
-    virtual PolicyOutput ComputeOutput(const std::vector<float>& actions, const PolicyContext& context) = 0;
+    virtual PolicyOutput& ComputeOutput(const std::vector<float>& actions, const PolicyContext& context) = 0;
 
 protected:
     YamlParams _params;
@@ -78,6 +80,7 @@ protected:
 
     // rl model
     std::unique_ptr<InferenceRuntime::Model> _model;
+    PolicyOutput output;
 
     int _num_of_dofs;
     std::vector<float> _action_scale;
@@ -91,6 +94,12 @@ protected:
     std::vector<float> _kp;
     std::vector<float> _kd;
     int _num_observations;
+    std::vector<std::string> _observations;
+    std::vector<float> _commands_scale;
+    std::vector<float> _actions;
+    std::vector<float> _torque_limits;
+    std::vector<float> _clip_actions_upper;
+    std::vector<float> _clip_actions_lower;
 
 
 

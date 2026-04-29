@@ -3,14 +3,49 @@
 
 namespace rl_policy{
 
-
-wmp_policy::wmp_policy(/* args */)
+void WMPPolicy::OnInit()
 {
+
 }
 
-wmp_policy::~wmp_policy()
+void WMPPolicy::OnReset()
 {
+
 }
+
+void WMPPolicy::LoadModel(const std::string & policy_dir)
+{
+
+}
+
+
+void WMPPolicy::BuildObservation(const PolicyContext& context)
+{
+
+}
+
+std::vector<float>& WMPPolicy::ProcessObservation()
+{
+
+}
+
+
+std::vector<float> WMPPolicy::RunInference(const std::vector<float>& model_input)
+{
+
+}
+
+PolicyOutput& WMPPolicy::ComputeOutput(const std::vector<float>& actions, const PolicyContext& context)
+{
+
+}
+
+
+std::vector<float> WMPPolicy::ComputeObservation(const PolicyContext& context)
+{
+
+}
+
 
 
 
