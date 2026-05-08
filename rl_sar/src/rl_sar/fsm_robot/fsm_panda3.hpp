@@ -122,7 +122,7 @@ public:
             }
             else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
             {
-                return "RLFSMStateRLCrouch";
+                return "RLFSMStateRLWmp";
             }
             else if (rl.control.current_keyboard == Input::Keyboard::Num5 || rl.control.current_gamepad == Input::Gamepad::RB)
             {
@@ -252,7 +252,7 @@ public:
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
         {
-            return "RLFSMStateRLCrouch";
+            return "RLFSMStateRLWmp";
         }
         return state_name_;
     }
@@ -278,7 +278,9 @@ public:
         std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/walk";
         try
         {
-            rl.InitRL(robot_config_path, "RLFSMStateRLWalk");
+            // rl.InitRL(robot_config_path, "RLFSMStateRLWalk");
+            rl.policy_manager.SwitchPolicy(this->state_name_);
+            rl.InitRL();
             rl.now_state = *fsm_state;
         }
         catch (const std::exception& e)
@@ -292,7 +294,7 @@ public:
     void Run() override
     {
         // position transition from last default_dof_pos to current default_dof_pos
-        // if (Interpolate(percent_transition, rl.now_state.motor_state.q, rl.params.Get<std::vector<float>>("default_dof_pos"), 0.5f, "Policy transition", true)) return;
+        if (Interpolate(percent_transition, rl.now_state.motor_state.q, rl.params.Get<std::vector<float>>("default_dof_pos"), 0.5f, "Policy transition", true)) return;
 
         if (!rl.rl_init_done) rl.rl_init_done = true;
 
@@ -326,7 +328,17 @@ public:
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
         {
-            return "RLFSMStateRLCrouch";
+            return "RLFSMStateRLWmp";
+        }
+        else if (rl.next_policy_switch.exchange(false))
+        {
+            rl.policy_manager.SwitchNextPolicy();
+            rl.InitRL();
+        }
+        else if (rl.prev_policy_switch.exchange(false))
+        {
+            rl.policy_manager.SwitchPrevPolicy();
+            rl.InitRL();
         }
         
         return state_name_;
@@ -351,7 +363,9 @@ public:
         std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/crouch";
         try
         {
-            rl.InitRL(robot_config_path, "RLFSMStateRLCrouch");
+            // rl.InitRL(robot_config_path, "RLFSMStateRLCrouch");
+            // rl.policy_manager.SwitchPolicy("RLFSMStateRLCrouch");
+            rl.InitRL();
             rl.now_state = *fsm_state;
         }
         catch (const std::exception& e)
@@ -399,12 +413,89 @@ public:
         }
         else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
         {
-            return "RLFSMStateRLCrouch";
+            return "RLFSMStateRLWmp";
         }
         
         return state_name_;
     }
 };
+
+
+class RLFSMStateRLWmp : public RLFSMState
+{
+private:
+    /* data */
+public:
+    RLFSMStateRLWmp(RL *rl) : RLFSMState(*rl, "RLFSMStateRLCrouch"){};
+    float percent_transition = 0.0f;
+    void Enter() override
+    {
+        percent_transition = 0.0f;
+        rl.episode_length_buf = 0;
+
+        try
+        {
+            rl.policy_manager.SwitchPolicy(this->state_name_);
+            rl.InitRL();
+            rl.now_state = *fsm_state;
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << LOGGER::ERROR << "InitRL() failed: " << e.what() << std::endl;
+            rl.rl_init_done = false;
+            rl.fsm.RequestStateChange("RLFSMStatePassive");
+        }
+    }
+
+    void Run() override
+    {
+        // position transition from last default_dof_pos to current default_dof_pos
+        if (Interpolate(percent_transition, rl.now_state.motor_state.q, rl.params.Get<std::vector<float>>("default_dof_pos"), 0.5f, "Policy transition", true)) return;
+
+        if (!rl.rl_init_done) rl.rl_init_done = true;
+
+        // std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] x:" << rl.control.x << " y:" << rl.control.y << " yaw:" << rl.control.yaw << " height:" << rl.control.height << std::flush;
+        RLControl();
+    }
+
+    void Exit() override
+    {
+        rl.rl_init_done = false;
+    }
+
+        std::string CheckChange() override
+    {
+        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
+        {
+            return "RLFSMStatePassive";
+        }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num5 || rl.control.current_gamepad == Input::Gamepad::RB)
+        {
+            return "RLFSMStateGetDown";
+        }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
+        {
+            return "RLFSMStateRLStand";
+        }
+        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::X)
+        {
+            return "RLFSMStateRLWalk";
+        }
+        else if (rl.next_policy_switch.exchange(false))
+        {
+            rl.policy_manager.SwitchNextPolicy();
+            rl.InitRL();
+        }
+        else if (rl.prev_policy_switch.exchange(false))
+        {
+            rl.policy_manager.SwitchPrevPolicy();
+            rl.InitRL();
+        }
+        return state_name_;
+    }
+
+};
+
 
 
 
@@ -433,6 +524,8 @@ public:
             return std::make_shared<panda3_fsm::RLFSMStateRLStand>(rl);
         else if (state_name == "RLFSMStateRLCrouch")
             return std::make_shared<panda3_fsm::RLFSMStateRLCrouch>(rl);
+        else if (state_name == "RLFSMStateRLWmp")
+            return std::make_shared<panda3_fsm::RLFSMStateRLWmp>(rl);
         return nullptr;
     }
     std::string GetType() const override { return "panda3"; }
@@ -444,7 +537,8 @@ public:
             "RLFSMStateGetDown",
             "RLFSMStateRLWalk",
             "RLFSMStateRLStand",
-            "RLFSMStateRLCrouch"
+            "RLFSMStateRLCrouch",
+            "RLFSMStateRLWmp"
         };
     }
     std::string GetInitialState() const override { return initial_state_; }

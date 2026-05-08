@@ -57,7 +57,7 @@
 
 #include "robot_msgs/msg/controller_state.hpp"
 
-#define ROS_BAG_RECORDER
+// #define ROS_BAG_RECORDER
 
 #ifdef ROS_BAG_RECORDER
 #include "ros_bag_recorder.hpp"
@@ -79,6 +79,8 @@
 #include "joystick_all.hpp"
 
 #include "ldelay_monitor_macros.hpp"
+
+#include "register_policies.hpp"
 
 #ifndef NDEBUG
 

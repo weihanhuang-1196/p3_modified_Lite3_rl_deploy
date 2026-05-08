@@ -307,21 +307,35 @@ std::vector<float> RL::ComputeWorldObservation()
 
 void RL::InitObservations()
 {
-    this->obs.lin_vel = {0.0f, 0.0f, 0.0f};
-    this->obs.ang_vel = {0.0f, 0.0f, 0.0f};
-    this->obs.gravity_vec = {0.0f, 0.0f, -1.0f};
+
+    auto commands = std::vector<float>(this->params.Get<int>("num_of_command"), 0.0f);
+    context_builder.SetCommand(commands);
+
+    auto lin_vel = {0.0f, 0.0f, 0.0f};
+    auto ang_vel = {0.0f, 0.0f, 0.0f};
+    auto gravity_vec = {0.0f, 0.0f, -1.0f};
+    auto base_quat = {0.0f, 0.0f, 0.0f, 1.0f};
+    context_builder.SetRobotState(lin_vel, ang_vel, gravity_vec, base_quat);
+
+    auto dof_pos = this->params.Get<std::vector<float>>("default_dof_pos");
+    auto dof_vel = std::vector<float>(this->params.Get<int>("num_of_dofs"), 0.0f);
+    context_builder.SetJointState(dof_pos, dof_vel);
+
+    auto actions = std::vector<float>(this->params.Get<int>("num_of_dofs"), 0.0f);
+    context_builder.SetLastActions(this->obs.actions);
+
 
     
-    auto commands = this->params.Get<std::vector<float>>("commands_scale").size();
-    this->obs.commands = std::vector<float>(commands, 0.0f);
+    // auto commands = this->params.Get<std::vector<float>>("commands_scale").size();
+    // this->obs.commands = std::vector<float>(commands, 0.0f);
 
-    this->obs.base_quat = {0.0f, 0.0f, 0.0f, 1.0f};
-    this->obs.dof_pos = this->params.Get<std::vector<float>>("default_dof_pos");
-    this->obs.dof_vel.clear();
-    this->obs.dof_vel.resize(this->params.Get<int>("num_of_dofs"), 0.0f);
-    this->obs.actions.clear();
-    this->obs.actions.resize(this->params.Get<int>("num_of_dofs"), 0.0f);
-    this->ComputeObservation();
+    // this->obs.base_quat = {0.0f, 0.0f, 0.0f, 1.0f};
+    // this->obs.dof_pos = this->params.Get<std::vector<float>>("default_dof_pos");
+    // this->obs.dof_vel.clear();
+    // this->obs.dof_vel.resize(this->params.Get<int>("num_of_dofs"), 0.0f);
+    // this->obs.actions.clear();
+    // this->obs.actions.resize(this->params.Get<int>("num_of_dofs"), 0.0f);
+    // this->ComputeObservation();
 
 
     this->pre_wm_image = std::vector<float>(64*64, 0.0f);
@@ -375,6 +389,18 @@ void RL::InitJointNum(size_t num_joints)
     this->start_state.motor_state.resize(num_joints);
     this->now_state.motor_state.resize(num_joints);
     this->robot_command.motor_command.resize(num_joints);
+}
+
+
+void RL::InitRL()
+{
+    std::lock_guard<std::mutex> lock(this->model_mutex);
+
+    this->params.SetNode(policy_manager.getActivePolicyConfig().config_node);
+    this->InitObservations();
+    this->InitJointNum(this->params.Get<int>("num_of_dofs"));
+    this->InitOutputs();
+    this->InitControl();
 }
 
 void RL::InitRL(std::string robot_config_path)

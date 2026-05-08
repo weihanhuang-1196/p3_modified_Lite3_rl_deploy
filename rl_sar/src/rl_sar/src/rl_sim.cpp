@@ -58,6 +58,21 @@ RL_Sim::RL_Sim(int argc, char **argv)
     // read params from yaml
     this->ReadYaml(this->robot_name, "base.yaml");
 
+    // loading policy config
+    try
+    {
+        rl_policy::RegisterAllPolicies(); //register policies
+        this->policy_manager.LoadFromYaml(this->robot_name, "base.yaml");
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << LOGGER::ERROR << "failed: "<< e.what() << std::endl;
+        std::cout << LOGGER::ERROR << "Failed to load policy configure " << std::endl;
+        return;
+    }
+    
+    
+
     this->config_name = this->params.Get<std::string>("algorithm");
     // init joystick
     this->joystick = JoystickManager::GetInstance().CreateJoystick(
@@ -851,51 +866,65 @@ void RL_Sim::RunModel()
     if (this->rl_init_done && simulation_running)
     {
         this->episode_length_buf += 1;
-        this->obs.ang_vel = this->robot_state.imu.gyroscope;
-        if(this->config_name == "np3o")
-        {
-            if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-                this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
-            else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
-            else
-                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-        }
-        else
-        {
-            if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-                this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand};
-            else
-                this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
-        }
-        if (this->control.navigation_mode)
-        {
-            auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
-            auto cmd = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
-            if(cmd)
-            {
-                if(this->config_name == "np3o")
-                {
-                    if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-                        this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
-                    else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-                        this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z, 0.0f,0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
-                    else
-                        this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-                }
-                else
-                    this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
-            }
-            else
-                this->obs.commands = {0.0f, 0.0f, 0.0f};
+        auto ang_vel = this->robot_state.imu.gyroscope;
+        auto commands = {this->control.x, this->control.y, this->control.yaw};
+        // if(this->config_name == "np3o")
+        // {
+        //     if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+        //         this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+        //     else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
+        //         this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
+        //     else
+        //         this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+        // }
+        // else
+        // {
+        //     if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+        //         this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand};
+        //     else
+        //         this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
+        // }
+        // if (this->control.navigation_mode)
+        // {
+        //     auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
+        //     auto cmd = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
+        //     if(cmd)
+        //     {
+        //         if(this->config_name == "np3o")
+        //         {
+        //             if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+        //                 this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+        //             else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
+        //                 this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z, 0.0f,0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
+        //             else
+        //                 this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+        //         }
+        //         else
+        //             this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
+        //     }
+        //     else
+        //         this->obs.commands = {0.0f, 0.0f, 0.0f};
 
-        }
-        this->obs.base_quat = this->robot_state.imu.quaternion;
-        this->obs.dof_pos = this->robot_state.motor_state.q;
-        this->obs.dof_vel = this->robot_state.motor_state.dq;
+        // }
+        auto base_quat = this->robot_state.imu.quaternion;
+        auto dof_pos = this->robot_state.motor_state.q;
+        auto dof_vel = this->robot_state.motor_state.dq;
+        auto lin_vel = {0.0f, 0.0f, 0.0f};
+        auto gravity_vec = {0.0f, 0.0f, -1.0f};
 
-        this->obs.actions = this->Forward();
-        this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
+
+
+        context_builder.SetCommand(commands);
+        context_builder.SetRobotState(lin_vel, ang_vel, gravity_vec, base_quat);
+        context_builder.SetJointState(dof_pos, dof_vel);
+
+        rl_policy::PolicyContext ctx = context_builder.Build();
+        rl_policy::PolicyOutput output = policy_manager.Forward(ctx);
+        auto actions = output.raw_actions;
+        context_builder.SetLastActions(actions);
+
+        // this->obs.actions = this->Forward();
+        // this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
 
 
 
@@ -938,17 +967,17 @@ void RL_Sim::RunModel()
 
         // output_actions_queue.push(this->obs.actions); // for logging
 
-        if (!this->output_dof_pos.empty())
+        if (!output.target_dof_pos.empty())
         {
-            output_dof_pos_queue.push(this->output_dof_pos);
+            output_dof_pos_queue.push(std::move(output.target_dof_pos));
         }
-        if (!this->output_dof_vel.empty())
+        if (!output.target_dof_vel.empty())
         {
-            output_dof_vel_queue.push(this->output_dof_vel);
+            output_dof_vel_queue.push(std::move(output.target_dof_vel));
         }
-        if (!this->output_dof_tau.empty())
+        if (!output.target_dof_tau.empty())
         {
-            output_dof_tau_queue.push(this->output_dof_tau);
+            output_dof_tau_queue.push(std::move(output.target_dof_tau));
         }
 
         // this->TorqueProtect(this->output_dof_tau);

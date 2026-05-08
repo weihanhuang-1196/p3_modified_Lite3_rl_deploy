@@ -1,12 +1,13 @@
-# Copyright (c) 2025-2026 Weizhao Yang
+# Copyright (c) 2024-2025 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-panda3v2/himloco/walk:
-  model_name: "policy_Apr25_12-37-02_10000.pt"
+panda3/himoloco_walk_ppo:
+  model_name: "policy_Jan27_22-15-44_8200-tingtao-1-28.pt"
   num_observations: 45
   observations: ["commands", "ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
   observations_history: [0, 1, 2, 3, 4, 5]  # 0 is the latest observation
   observations_history_priority: "time"  # "time" or "term" priority
+  ang_vel_axis: "body"
   clip_obs: 100.0
   clip_actions_lower: [-100, -100, -100,
                        -100, -100, -100,
@@ -16,15 +17,15 @@ panda3v2/himloco/walk:
                        100, 100, 100,
                        100, 100, 100,
                        100, 100, 100]
-  rl_kp: [58, 58, 55,
-          58, 58, 55,
-          58, 58, 55,
-          58, 58, 55]
+  rl_kp:  [50, 50, 50,
+            50, 50, 50,
+            50, 50, 50,
+            50, 50, 50]
 
-  rl_kd: [2.1, 2.1, 4.6,
-          2.1, 2.1, 4.6,
-          2.1, 2.1, 4.6,
-          2.1, 2.1, 4.6]
+  rl_kd: [2, 2, 2,
+           2, 2, 2,
+           2, 2, 2,
+           2, 2, 2]
 
   fixed_kp: [80, 120, 130,
              80, 120, 130,
@@ -45,16 +46,17 @@ panda3v2/himloco/walk:
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
   commands_scale: [1.5, 1.5, 0.25]
+  num_of_command: 3
 
   torque_limits: [60, 60, 90,
                 60, 60, 90,
                 60, 60, 90,
                 60, 60, 90]
 
-  default_dof_pos: [0.000, 0.65, -1.25,
-                    0.000, 0.65, -1.25,
-                    0.000, 0.65, -1.25,
-                    0.000, 0.65, -1.25]
+  default_dof_pos: [0.000, 0.6, -1.15,
+                    0.000, 0.6, -1.15,
+                    0.000, 0.6, -1.15,
+                    0.000, 0.6, -1.15]
 #   joint_mapping: [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
   joint_mapping: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   

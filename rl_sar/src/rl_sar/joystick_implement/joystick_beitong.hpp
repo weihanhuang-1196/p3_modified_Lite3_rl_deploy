@@ -34,6 +34,8 @@ public:
         if (this->joy_msg.buttons[4]) this->user.control.SetGamepad(Input::Gamepad::X);
         if (this->joy_msg.buttons[6]) this->user.control.SetGamepad(Input::Gamepad::LB);
         if (this->joy_msg.buttons[7]) this->user.control.SetGamepad(Input::Gamepad::RB);
+        // if (this->joy_msg.buttons[8]) this->user.control.SetGamepad(Input::Gamepad::LStick);
+        // if (this->joy_msg.buttons[9]) this->user.control.SetGamepad(Input::Gamepad::RStick);
         // if (this->joy_msg.buttons[9]) this->user.control.SetGamepad(Input::Gamepad::LStick);
         // if (this->joy_msg.buttons[10]) this->user.control.SetGamepad(Input::Gamepad::RStick);
         // if (this->joy_msg.axes[7] > 0) this->user.control.SetGamepad(Input::Gamepad::DPadUp);
@@ -71,6 +73,28 @@ public:
         this->user.control.yaw = this->joy_msg.axes[2]; // RX
         this->user.control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
         this->user.control.height = this->joy_msg.axes[4];
+
+        if(this->joy_msg.buttons[8] == 1)
+        {
+            
+            this->user.prev_policy_changed = true;
+        }
+
+        if(this->joy_msg.buttons[9] == 1)
+        {
+            this->user.next_policy_changed = true;
+        }
+        if(this->joy_msg.buttons[8] == 0 && this->user.prev_policy_changed == true)
+        {
+            this->user.prev_policy_changed = false;
+            this->user.prev_policy_switch.store(true);
+        }
+        else if(this->joy_msg.buttons[9] == 0 && this->user.next_policy_changed == true)
+        {
+            this->user.next_policy_changed = false;
+            this->user.next_policy_switch.store(true);
+        }
+
 
         if(this->joy_msg.buttons[11] == 1)
         {

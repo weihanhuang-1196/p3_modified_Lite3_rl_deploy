@@ -39,6 +39,25 @@ struct YamlParams
     {
         return config_node[key].IsDefined();
     }
+
+    void SetNode(const YAML::Node& node)
+    {
+        config_node = node;
+    }
+};
+
+
+template <typename T>
+struct Observations
+{
+    std::vector<T> lin_vel;
+    std::vector<T> ang_vel;
+    std::vector<T> gravity_vec;
+    std::vector<T> commands;
+    std::vector<T> base_quat;
+    std::vector<T> dof_pos;
+    std::vector<T> dof_vel;
+    std::vector<T> actions;
 };
 
 
@@ -55,9 +74,11 @@ public:
 
     PolicyOutput& Forward(PolicyContext& context);
 
-    void Init(const YAML::Node& config_node, const std::string& policy_dir);
+    void Init(const YAML::Node config_node, const std::string& policy_dir);
 
     void Reset();
+
+    const YamlParams& getConfig() const;
     
 
 protected:
@@ -68,6 +89,8 @@ protected:
     virtual std::vector<float>& ProcessObservation() = 0;
     virtual std::vector<float> RunInference(const std::vector<float>& model_input) = 0;
     virtual PolicyOutput& ComputeOutput(const std::vector<float>& actions, const PolicyContext& context) = 0;
+
+    void InitObservations();
 
 protected:
     YamlParams _params;
@@ -96,7 +119,8 @@ protected:
     std::vector<float> _torque_limits;
     std::vector<float> _clip_actions_upper;
     std::vector<float> _clip_actions_lower;
-    std::string _ang_vel_axis;
+    std::string _ang_vel_axis = "body";
+    Observations<float> obs;
 
 
 

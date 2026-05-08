@@ -181,29 +181,29 @@ struct Control
     }
 };
 
-struct YamlParams
-{
-    YAML::Node config_node;
+// struct YamlParams
+// {
+//     YAML::Node config_node;
 
-    // Get config value by key
-    // WARNING: For vectors/containers, store result in a variable before using iterators/references:
-    //   ✓ auto vec = params.Get<std::vector<int>>("key"); vec.begin()
-    //   ✗ params.Get<std::vector<int>>("key").begin()  // dangling reference!
-    template<typename T>
-    T Get(const std::string& key, const T& default_value = T()) const
-    {
-        if (config_node[key])
-        {
-            return config_node[key].as<T>();
-        }
-        return default_value;
-    }
+//     // Get config value by key
+//     // WARNING: For vectors/containers, store result in a variable before using iterators/references:
+//     //   ✓ auto vec = params.Get<std::vector<int>>("key"); vec.begin()
+//     //   ✗ params.Get<std::vector<int>>("key").begin()  // dangling reference!
+//     template<typename T>
+//     T Get(const std::string& key, const T& default_value = T()) const
+//     {
+//         if (config_node[key])
+//         {
+//             return config_node[key].as<T>();
+//         }
+//         return default_value;
+//     }
 
-    bool Has(const std::string& key) const
-    {
-        return config_node[key].IsDefined();
-    }
-};
+//     bool Has(const std::string& key) const
+//     {
+//         return config_node[key].IsDefined();
+//     }
+// };
 
 template <typename T>
 struct Observations
@@ -221,10 +221,10 @@ struct Observations
 class RL
 {
 public:
-    RL():motor_enable_changed(false), motor_enabled(false){};
+    RL():motor_enable_changed(false), motor_enabled(false), next_policy_changed(false), prev_policy_changed(false){};
     ~RL() {};
 
-    YamlParams params;
+    rl_policy::YamlParams params;
     Observations<float> obs;
     std::vector<int> obs_dims;
 
@@ -243,6 +243,7 @@ public:
     void InitObservations();
     void InitOutputs();
     void InitControl();
+    void InitRL();
     void InitRL(std::string robot_config_path);
     void InitRL(std::string robot_config_path, std::string fsm_name);
     void InitJointNum(size_t num_joints);
@@ -270,6 +271,10 @@ public:
     // motor enable change flag
     bool motor_enable_changed;
     void KeyboardInterface();
+    bool next_policy_changed;
+    bool prev_policy_changed;
+    std::atomic<bool> next_policy_switch;
+    std::atomic<bool> prev_policy_switch;
 
     // history buffer
     ObservationBuffer history_obs_buf;
@@ -335,6 +340,7 @@ public:
 
     rl_policy::PolicyManager policy_manager;
     rl_policy::PolicyContextBuilder context_builder;
+    std::string policy_name;
 
 
 

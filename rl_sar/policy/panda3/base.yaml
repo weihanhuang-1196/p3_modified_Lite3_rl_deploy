@@ -46,13 +46,29 @@ panda3:
 
   algorithm: "wmp" # np3o himloco wmp
 
-active_policy: walk_ppo
 policies:
-  tingtao-3-26:
+  RLFSMStateRLWalk:
     type: "himoloco_walk_ppo"
-    policy_config_path: "himloco/walk/policy_Mar25_21-24-28_10000_tingtao-3-26.yaml"
+    selected: tingtao-3-26
+    policy_list:
+      tingtao-3-26:
+        policy_config_path: "himoloco_walk_ppo/policy_Mar25_21-24-28_10000_tingtao-3-26.yaml"
+      yong-1-29:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan28_10-19-07_10000_yong-1-29.yaml"
+      tingtao-1-28:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan27_22-15-44_8200-tingtao-1-28.yaml"
+      tingtao_1-29:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan27_22-15-44_8200-tingtao_1-29.yaml"
+      yong-1-28:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan27_18-09-31_4000-yong-1-28.yaml"
+      tingtao-1-27:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
 
 
-  Apr17_07-40-33_WMP:
+
+  RLFSMStateRLWmp:
     type: wmp_ppo
-    policy_config_path: "wmp/walk/Apr17_07-40-33_WMP.yaml"
+    selected: Apr17_07
+    policy_list:
+      Apr17_07:
+        policy_config_path: "wmp_ppo/Apr17_07-40-33_WMP.yaml"

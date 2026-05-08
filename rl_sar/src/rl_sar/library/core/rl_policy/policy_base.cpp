@@ -4,13 +4,17 @@
 
 namespace rl_policy{
 
-void PolicyBase::Init(const YAML::Node& config_node, const std::string& policy_dir)
+void PolicyBase::Init(const YAML::Node config_node, const std::string& policy_dir)
 {
     if (_initialized)
     {
         return;
     }
-    _params.config_node = config_node;
+    if(!config_node[policy_dir])
+    {
+        throw;
+    }
+    _params.config_node = config_node[policy_dir];
     _num_of_dofs = _params.Get<int>("num_of_dofs", 12);
     _lin_vel_scale = _params.Get<float>("lin_vel_scale", 1.0f);
     _ang_vel_scale = _params.Get<float>("ang_vel_scale", 1.0f);
@@ -28,11 +32,51 @@ void PolicyBase::Init(const YAML::Node& config_node, const std::string& policy_d
     _clip_actions_upper = _params.Get<std::vector<float>>("clip_actions_upper");
     _clip_actions_lower = _params.Get<std::vector<float>>("clip_actions_lower");
     _ang_vel_axis = _params.Get<std::string>("ang_vel_axis");
-    OnInit();
 
-    LoadModel(policy_dir);
+    InitObservations();
+
+
+    OnInit();
+    try
+    {
+        LoadModel(policy_dir);
+    }
+    catch(const std::exception& e)
+    {
+        throw;
+    }
+
+    _initialized = true;
+    
+    
 
 }
+
+void PolicyBase::InitObservations()
+{
+    this->obs.lin_vel = {0.0f, 0.0f, 0.0f};
+    this->obs.ang_vel = {0.0f, 0.0f, 0.0f};
+    this->obs.gravity_vec = {0.0f, 0.0f, -1.0f};
+
+    
+    auto commands = this->_params.Get<std::vector<float>>("commands_scale").size();
+    this->obs.commands = std::vector<float>(commands, 0.0f);
+
+    this->obs.base_quat = {0.0f, 0.0f, 0.0f, 1.0f};
+    this->obs.dof_pos = this->_params.Get<std::vector<float>>("default_dof_pos");
+    this->obs.dof_vel.clear();
+    this->obs.dof_vel.resize(this->_params.Get<int>("num_of_dofs"), 0.0f);
+    this->obs.actions.clear();
+    this->obs.actions.resize(this->_params.Get<int>("num_of_dofs"), 0.0f);
+
+}
+
+
+const YamlParams& PolicyBase::getConfig() const
+{
+    return _params;
+}
+
 
 
 PolicyOutput& PolicyBase::Forward(PolicyContext& context)
@@ -56,6 +100,7 @@ PolicyOutput& PolicyBase::Forward(PolicyContext& context)
 
 void PolicyBase::Reset()
 {
+    InitObservations();
     OnReset();
 }
 
