@@ -31,18 +31,19 @@ protected:
     void OnReset() override;
     void LoadModel(const std::string & policy_dir) override;
     void BuildObservation(const PolicyContext& context) override;
-    std::vector<float>& ProcessObservation() override;
-    std::vector<float> RunInference(const std::vector<float>& model_input) override;
+    std::vector<std::vector<float>> ProcessObservation() override;
+    std::vector<float> RunInference(std::vector<std::vector<float>>& model_input) override;
     PolicyOutput& ComputeOutput(const std::vector<float>& actions, const PolicyContext& context) override;
 
 private:
-    std::vector<float> ComputeObservation(const PolicyContext& context);
-    std::vector<int> obs_dims;
-    ObservationBuffer history_obs_buf;
-    std::vector<float> history_obs;
-    std::unique_ptr<InferenceRuntime::Model> model;
+    std::vector<float> ComputeObservation(const PolicyContext& context, const std::vector<std::string>& observations);
+    std::vector<int> _obs_dims;
+    ObservationBuffer _history_obs_buf;
+    std::vector<float> _history_obs;
+    std::unique_ptr<InferenceRuntime::Model> _model;
 
-    std::vector<float> obs;
+    std::vector<float> _obs;
+    std::string _policy_model_name;
 
     
 

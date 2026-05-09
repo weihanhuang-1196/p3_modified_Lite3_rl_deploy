@@ -38,14 +38,15 @@ void PolicyContextBuilder::SetLastActions(
     context_.last_actions = last_actions;
 }
 
-// void PolicyContextBuilder::SetDepthImage(
-//     const std::vector<float>& depth_image,
-//     const std::vector<int64_t>& shape)
-// {
-//     context_.tensors[tensor_keys::DEPTH_IMAGE] = Tensor{
-//         depth_image,
-//         shape
-//     };
-// }
+void PolicyContextBuilder::SetTensorData(
+    const std::vector<float> data,
+    const std::vector<int64_t> shape,
+    const std::string key)
+{
+    context_.tensors[key] = Tensor{
+        data,
+        shape
+    };
+}
 
 }  // namespace rl_policy

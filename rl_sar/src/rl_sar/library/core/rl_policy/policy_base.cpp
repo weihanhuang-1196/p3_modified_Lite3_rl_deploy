@@ -32,6 +32,8 @@ void PolicyBase::Init(const YAML::Node config_node, const std::string& policy_di
     _clip_actions_upper = _params.Get<std::vector<float>>("clip_actions_upper");
     _clip_actions_lower = _params.Get<std::vector<float>>("clip_actions_lower");
     _ang_vel_axis = _params.Get<std::string>("ang_vel_axis");
+    _observations_history = _params.Get<std::vector<int>>("observations_history");
+    _observations_history_priority = _params.Get<std::string>("observations_history_priority");
 
     InitObservations();
 
@@ -87,7 +89,7 @@ PolicyOutput& PolicyBase::Forward(PolicyContext& context)
     }
 
     BuildObservation(context);
-    std::vector<float> model_input = ProcessObservation();
+    auto model_input = ProcessObservation();
     _actions = RunInference(model_input);
     context.last_actions = _actions;
     output = ComputeOutput(_actions, context);

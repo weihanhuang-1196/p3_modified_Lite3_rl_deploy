@@ -17,6 +17,10 @@ void HimolocoPolicy::OnInit()
     std::vector<float> dof_pos = this->_params.Get<std::vector<float>>("default_dof_pos");
     std::vector<float> dof_vel(this->_params.Get<int>("num_of_dofs"), 0.0f);
     std::vector<float> command(this->_params.Get<int>("num_of_command"), 0.0f);
+
+    _policy_model_name = this->_params.Get<std::string>("model_name");
+
+
     context_builder.SetRobotState(
         lin_vel,
         ang_vel,
@@ -33,12 +37,12 @@ void HimolocoPolicy::OnInit()
     PolicyContext ctx = context_builder.Build();
 
 
-    this->obs = ComputeObservation(ctx);
-    const auto& observations_history = this->_params.Get<std::vector<int>>("observations_history");  // avoid dangling reference
+    _obs = ComputeObservation(ctx, _observations);
+    const auto& observations_history = _observations_history;  // avoid dangling reference
     if (!observations_history.empty())
     {
         int history_length = *std::max_element(observations_history.begin(), observations_history.end()) + 1;
-        this->history_obs_buf = ObservationBuffer(1, this->obs_dims, history_length, this->_params.Get<std::string>("observations_history_priority"));
+        _history_obs_buf = ObservationBuffer(1, _obs_dims, history_length, _observations_history_priority);
     }
 
 }
@@ -46,9 +50,9 @@ void HimolocoPolicy::OnInit()
 
 void HimolocoPolicy::LoadModel(const std::string & policy_dir)
 {
-    std::string model_path = std::string(POLICY_DIR) + "/" + policy_dir + "/" + this->_params.Get<std::string>("model_name");
-    this->model = InferenceRuntime::ModelFactory::load_model(model_path);
-    if (!this->model)
+    std::string model_path = std::string(POLICY_DIR) + "/" + policy_dir + "/" + _policy_model_name;
+    _model = InferenceRuntime::ModelFactory::load_model(model_path);
+    if (!_model)
     {
         throw std::runtime_error("Failed to load model from: " + model_path);
     }
@@ -57,22 +61,24 @@ void HimolocoPolicy::LoadModel(const std::string & policy_dir)
 
 void HimolocoPolicy::BuildObservation(const PolicyContext& context)
 {
-    this->obs = ComputeObservation(context);
+    
+    _obs = clamp(ComputeObservation(context, _observations), -_clip_obs, _clip_obs);
     
 }
 
 
-std::vector<float>& HimolocoPolicy::ProcessObservation()
+std::vector<std::vector<float>> HimolocoPolicy::ProcessObservation()
 {
-    this->history_obs_buf.insert(this->obs);
-    this->history_obs = this->history_obs_buf.get_obs_vec(this->_params.Get<std::vector<int>>("observations_history"));
-    return this->history_obs;
+
+    _history_obs_buf.insert(_obs);
+    _history_obs = _history_obs_buf.get_obs_vec(_observations_history);
+    return {_history_obs};
 }
 
 
-std::vector<float> HimolocoPolicy::RunInference(const std::vector<float>& model_input)
+std::vector<float> HimolocoPolicy::RunInference(std::vector<std::vector<float>>& model_input)
 {
-    std::vector<float> actions = this->model->forward({model_input});
+    std::vector<float> actions = _model->forward(model_input);
     if (!_clip_actions_upper.empty() && !_clip_actions_lower.empty())
         return clamp(actions, _clip_actions_lower, _clip_actions_upper);
     else
@@ -84,11 +90,6 @@ PolicyOutput& HimolocoPolicy::ComputeOutput(const std::vector<float>& actions, c
     std::vector<float> actions_scaled = actions * _action_scale;
     std::vector<float> pos_actions_scaled = actions_scaled;
     std::vector<float> vel_actions_scaled(actions.size(), 0.0f);
-    for (int i : this->_params.Get<std::vector<int>>("wheel_indices"))
-    {
-        pos_actions_scaled[i] = 0.0f;
-        vel_actions_scaled[i] = actions_scaled[i];
-    }
     std::vector<float> all_actions_scaled = pos_actions_scaled + vel_actions_scaled;
 
     output.target_dof_pos = pos_actions_scaled + _default_dof_pos;
@@ -100,11 +101,11 @@ PolicyOutput& HimolocoPolicy::ComputeOutput(const std::vector<float>& actions, c
 }
 
 
-std::vector<float> HimolocoPolicy::ComputeObservation(const PolicyContext& context)
+std::vector<float> HimolocoPolicy::ComputeObservation(const PolicyContext& context, const std::vector<std::string>& observations)
 {
     std::vector<std::vector<float>> obs_list;
 
-    for (const std::string &observation : _observations)
+    for (const std::string &observation : observations)
     {
         // ============= Base Observations =============
         if (observation == "lin_vel")
@@ -151,10 +152,10 @@ std::vector<float> HimolocoPolicy::ComputeObservation(const PolicyContext& conte
         }
     }
 
-    this->obs_dims.clear();
+    _obs_dims.clear();
     for (const auto& obs : obs_list)
     {
-       this->obs_dims.push_back(obs.size());
+       _obs_dims.push_back(obs.size());
     }
 
     std::vector<float> obs;
@@ -162,18 +163,16 @@ std::vector<float> HimolocoPolicy::ComputeObservation(const PolicyContext& conte
     {
         obs.insert(obs.end(), obs_vec.begin(), obs_vec.end());
     }
-    std::vector<float> clamped_obs = clamp(obs, -this->_params.Get<float>("clip_obs"), this->_params.Get<float>("clip_obs"));
-    return clamped_obs;
+    return obs;
 }
 
 
 void HimolocoPolicy::OnReset()
 {
-    const auto& observations_history = this->_params.Get<std::vector<int>>("observations_history");  // avoid dangling reference
-    if (!observations_history.empty())
+    if (!_observations_history.empty())
     {
-        int history_length = *std::max_element(observations_history.begin(), observations_history.end()) + 1;
-        this->history_obs_buf = ObservationBuffer(1, this->obs_dims, history_length, this->_params.Get<std::string>("observations_history_priority"));
+        int history_length = *std::max_element(_observations_history.begin(), _observations_history.end()) + 1;
+        _history_obs_buf = ObservationBuffer(1, _obs_dims, history_length, _observations_history_priority);
     }
 }
 

@@ -68,9 +68,25 @@ public:
         // if (this->joy_msg.buttons[5] && this->joy_msg.axes[6] > 0) this->user.control.SetGamepad(Input::Gamepad::RB_DPadLeft);
         // if (this->joy_msg.buttons[4] && this->joy_msg.buttons[5]) this->user.control.SetGamepad(Input::Gamepad::LB_RB);
 
-        this->user.control.x = this->joy_msg.axes[1]; // LY
-        this->user.control.y = this->joy_msg.axes[0]; // LX
-        this->user.control.yaw = this->joy_msg.axes[2]; // RX
+        if(this->joy_msg.axes[0] == 1.0f && this->joy_msg.axes[1] == 1.0f)
+        {
+            this->user.control.x = 0.0f;
+            this->user.control.y = 0.0f;
+        }else
+        {
+            this->user.control.x = this->joy_msg.axes[1]; // LY
+            this->user.control.y = this->joy_msg.axes[0]; // LX
+        }
+        if(this->joy_msg.axes[2] == 1.0f && this->joy_msg.axes[3] == 1.0f)
+        {
+            this->user.control.yaw = 0.0f;
+        }else
+        {
+            this->user.control.yaw = this->joy_msg.axes[2]; // RX
+        }
+
+
+        
         this->user.control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
         this->user.control.height = this->joy_msg.axes[4];
 

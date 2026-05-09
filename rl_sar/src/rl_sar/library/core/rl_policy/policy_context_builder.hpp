@@ -26,9 +26,10 @@ public:
     void SetLastActions(
         const std::vector<float>& last_actions);
 
-    // void SetDepthImage(
-    //     const std::vector<float>& depth_image,
-    //     const std::vector<int64_t>& shape);
+    void SetTensorData(
+        const std::vector<float> data,
+        const std::vector<int64_t> shape,
+        const std::string key);
 
 private:
     PolicyContext context_;

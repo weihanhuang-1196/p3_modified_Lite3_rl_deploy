@@ -86,8 +86,8 @@ protected:
     virtual void OnReset() = 0;
     virtual void LoadModel(const std::string & policy_dir) = 0;
     virtual void BuildObservation(const PolicyContext& context) = 0;
-    virtual std::vector<float>& ProcessObservation() = 0;
-    virtual std::vector<float> RunInference(const std::vector<float>& model_input) = 0;
+    virtual std::vector<std::vector<float>> ProcessObservation() = 0;
+    virtual std::vector<float> RunInference(std::vector<std::vector<float>>& model_input) = 0;
     virtual PolicyOutput& ComputeOutput(const std::vector<float>& actions, const PolicyContext& context) = 0;
 
     void InitObservations();
@@ -121,6 +121,8 @@ protected:
     std::vector<float> _clip_actions_lower;
     std::string _ang_vel_axis = "body";
     Observations<float> obs;
+    std::vector<int> _observations_history;
+    std::string _observations_history_priority;
 
 
 

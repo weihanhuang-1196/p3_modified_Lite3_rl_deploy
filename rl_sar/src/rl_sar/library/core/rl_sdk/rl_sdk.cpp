@@ -323,6 +323,7 @@ void RL::InitObservations()
 
     auto actions = std::vector<float>(this->params.Get<int>("num_of_dofs"), 0.0f);
     context_builder.SetLastActions(this->obs.actions);
+    this->depth_image_ptr = std::make_shared<std::vector<float>>(64*64, 0.0f);
 
 
     
@@ -338,24 +339,24 @@ void RL::InitObservations()
     // this->ComputeObservation();
 
 
-    this->pre_wm_image = std::vector<float>(64*64, 0.0f);
-    this->depth_image_ptr = std::make_shared<std::vector<float>>(64*64, 0.0f);
-    this->wm_input_image = std::vector<float>(64*64, 0.0f);
-    this->wm_logit = std::vector<float>(1*32*32, 0.0f);
-    this->wm_stoch = std::vector<float>(1*32*32, 0.0f);
-    this->wm_deter = std::vector<float>(1*512, 0.0f);
-    this->wm_feature = std::vector<float>(1*512, 0.0f);
-    this->wm_is_first = std::vector<float>(1, 1.0f);
-    this->wm_prop = std::vector<float>(33, 0.0f);
-    this->wm_action_history = std::vector<float>(1*5*12, 0.0f);
-    this->wm_action = std::vector<float>(1*5*12, 0.0f);
-    this->image_width = this->params.Get<int>("image_width", 64);
-    this->image_height = this->params.Get<int>("image_height", 64);
-    this->znear = this->params.Get<float>("znear", 0.05f);
-    this->zfar = this->params.Get<float>("zfar", 40.0f);
-    this->camera_znear = this->params.Get<float>("camera_znear", 0.05f);
-    this->camera_zfar = this->params.Get<float>("camera_zfar", 40.0f);
-    this->ComputeWorldObservation();
+    // this->pre_wm_image = std::vector<float>(64*64, 0.0f);
+    
+    // this->wm_input_image = std::vector<float>(64*64, 0.0f);
+    // this->wm_logit = std::vector<float>(1*32*32, 0.0f);
+    // this->wm_stoch = std::vector<float>(1*32*32, 0.0f);
+    // this->wm_deter = std::vector<float>(1*512, 0.0f);
+    // this->wm_feature = std::vector<float>(1*512, 0.0f);
+    // this->wm_is_first = std::vector<float>(1, 1.0f);
+    // this->wm_prop = std::vector<float>(33, 0.0f);
+    // this->wm_action_history = std::vector<float>(1*5*12, 0.0f);
+    // this->wm_action = std::vector<float>(1*5*12, 0.0f);
+    // this->image_width = this->params.Get<int>("image_width", 64);
+    // this->image_height = this->params.Get<int>("image_height", 64);
+    // this->znear = this->params.Get<float>("znear", 0.05f);
+    // this->zfar = this->params.Get<float>("zfar", 40.0f);
+    // this->camera_znear = this->params.Get<float>("camera_znear", 0.05f);
+    // this->camera_zfar = this->params.Get<float>("camera_zfar", 40.0f);
+    // this->ComputeWorldObservation();
     
 
 }

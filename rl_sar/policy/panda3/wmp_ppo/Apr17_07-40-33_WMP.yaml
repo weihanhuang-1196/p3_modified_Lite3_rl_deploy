@@ -13,6 +13,7 @@ panda3/wmp_ppo:
   num_observations: 42
   observations: ["ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
   world_observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
+  ang_vel_axis: "body"
   image_width: 64
   image_height: 64
   znear: 0.0
@@ -82,6 +83,7 @@ panda3/wmp_ppo:
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
   commands_scale: [0.4, 1.0, 0.15]
+  num_of_command: 3
 
   torque_limits: [60, 60, 90,
                 60, 60, 90,

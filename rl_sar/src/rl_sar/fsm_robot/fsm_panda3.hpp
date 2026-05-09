@@ -426,7 +426,7 @@ class RLFSMStateRLWmp : public RLFSMState
 private:
     /* data */
 public:
-    RLFSMStateRLWmp(RL *rl) : RLFSMState(*rl, "RLFSMStateRLCrouch"){};
+    RLFSMStateRLWmp(RL *rl) : RLFSMState(*rl, "RLFSMStateRLWmp"){};
     float percent_transition = 0.0f;
     void Enter() override
     {

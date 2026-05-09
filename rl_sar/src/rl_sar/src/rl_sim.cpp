@@ -523,7 +523,7 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
 void RL_Sim::RobotControl()
 {
 
-    // CheckTimeouts();
+    CheckTimeouts();
     {
         auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
         auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
@@ -710,7 +710,8 @@ void RL_Sim::InitTopics() {
     image_info->last_time.store(std::chrono::steady_clock::now(), std::memory_order_relaxed);
     image_info->extra_callback = [this, image_info] () {
         auto msg = std::atomic_load_explicit(&image_info->latest_msg, std::memory_order_acquire);
-        auto depth_image = depth_image_to_vector(msg->data, this->image_width, this->image_height);
+        auto depth_image = depth_image_to_vector(msg->data, 64, 64);
+        show_depth_image(depth_image, 64, 64);
         std::atomic_store_explicit(&this->depth_image_ptr, std::make_shared<std::vector<float>>(std::move(depth_image)), std::memory_order_release);
     };
     topics[this->image_topic_name] = image_info;
@@ -740,9 +741,9 @@ void RL_Sim::CheckTimeouts() {
             }
             if (kv.first == "/joy") {
                 // 处理 joystick 超时，例如清除输入状态
-                // this->control.x = 0.0f;
-                // this->control.y = 0.0f;
-                // this->control.yaw = 0.0f;
+                this->control.x = 0.0f;
+                this->control.y = 0.0f;
+                this->control.yaw = 0.0f;
                 // this->joystick->ClearInput();
             }
             if (kv.first == "/imu") {
@@ -781,8 +782,8 @@ std::vector<float> RL_Sim::depth_image_to_vector(
     int width,
     int height)
 {
-    const float min_depth = this->znear;
-    const float max_depth = this->zfar;
+    const float min_depth = 0.0f;
+    const float max_depth = 2.0f;
 
     const float* data_ptr = reinterpret_cast<const float*>(data.data());
 
@@ -843,6 +844,24 @@ std::vector<float> RL_Sim::depth_image_to_vector(
 
     return depth_vec;
 }
+
+void RL_Sim::show_depth_image(const std::vector<float>& depth_vec, int width, int height)
+{
+#ifndef NDEBUG
+    cv::Mat depth_mat(height, width, CV_32FC1, const_cast<float*>(depth_vec.data()));
+    cv::Mat depth_display;
+    depth_mat.convertTo(depth_display, CV_8UC1, 255.0, 127); // x*255 + 127
+
+    //         // 3. 放大（插值）
+    // cv::Mat depth_up;
+    // cv::resize(depth_display, depth_up, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
+
+    cv::namedWindow("Depth Image", cv::WINDOW_NORMAL);
+    cv::imshow("Depth Image", depth_display);
+    cv::waitKey(1);
+#endif
+}
+
 
 
 
@@ -917,6 +936,9 @@ void RL_Sim::RunModel()
         context_builder.SetCommand(commands);
         context_builder.SetRobotState(lin_vel, ang_vel, gravity_vec, base_quat);
         context_builder.SetJointState(dof_pos, dof_vel);
+
+        auto depth_image = std::atomic_load_explicit(&this->depth_image_ptr, std::memory_order_acquire);
+        context_builder.SetTensorData(*depth_image, std::vector<int64_t>(2,64), "depth_image");
 
         rl_policy::PolicyContext ctx = context_builder.Build();
         rl_policy::PolicyOutput output = policy_manager.Forward(ctx);

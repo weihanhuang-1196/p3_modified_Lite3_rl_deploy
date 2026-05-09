@@ -267,6 +267,7 @@ private:
 
 
     std::vector<float> depth_image_to_vector(const std::vector<uint8_t>& data, int width, int height);
+    void show_depth_image(const std::vector<float>& depth_vec, int width, int height);
 
 
 };
