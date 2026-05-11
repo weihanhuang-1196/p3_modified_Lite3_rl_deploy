@@ -12,8 +12,8 @@ void WMPPolicy::OnInit()
     std::vector<float> gravity_vec = {0.0f, 0.0f, -1.0f};
     std::vector<float> base_quat = {1.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> dof_pos = this->_params.Get<std::vector<float>>("default_dof_pos");
-    std::vector<float> dof_vel(this->_params.Get<int>("num_of_dofs"), 0.0f);
-    std::vector<float> command(this->_params.Get<int>("num_of_command"), 0.0f);
+    std::vector<float> dof_vel(_num_of_dofs, 0.0f);
+    std::vector<float> command(_num_of_command, 0.0f);
     _policy_model_name = this->_params.Get<std::string>("model_name");
     _world_model_name = this->_params.Get<std::string>("world_name");
     _world_observations = this->_params.Get<std::vector<std::string>>("world_observations");
@@ -68,6 +68,17 @@ void WMPPolicy::OnReset()
         int history_length = *std::max_element(_observations_history.begin(), _observations_history.end()) + 1;
         this->_history_obs_buf = ObservationBuffer(1, this->_obs_dims, history_length, _observations_history_priority);
     }
+    std::fill(_wm_logit.begin(), _wm_logit.end(), 0.0f);
+    std::fill(_wm_stoch.begin(), _wm_stoch.end(), 0.0f);
+    std::fill(_wm_deter.begin(), _wm_deter.end(), 0.0f);
+    std::fill(_wm_feature.begin(), _wm_feature.end(), 0.0f);
+    std::fill(_wm_is_first.begin(), _wm_is_first.end(), 0.0f);
+    std::fill(_wm_action.begin(), _wm_action.end(), 0.0f);
+    std::fill(_wm_prop.begin(), _wm_prop.end(), 0.0f);
+    std::fill(_wm_action_history.begin(), _wm_action_history.end(), 0.0f);
+    std::fill(_pre_wm_image.begin(), _pre_wm_image.end(), 0.0f);
+    std::fill(_wm_input_image.begin(), _wm_input_image.end(), 0.0f); 
+
 }
 
 void WMPPolicy::LoadModel(const std::string & policy_dir)
@@ -90,8 +101,9 @@ void WMPPolicy::LoadModel(const std::string & policy_dir)
 
 void WMPPolicy::BuildObservation(const PolicyContext& context)
 {
-    _obs = clamp(ComputeObservation(context, _observations), -_clip_obs, _clip_obs);
     _world_obs = ComputeObservation(context, _world_observations);
+    _obs = clamp(ComputeObservation(context, _observations), -_clip_obs, _clip_obs);
+    
 
 
     _current_command =  context.command.velocity;
@@ -100,6 +112,7 @@ void WMPPolicy::BuildObservation(const PolicyContext& context)
         rl_policy::Tensor depth_image = context.GetTensor("depth_image");
         if(!depth_image.data.empty())
         {
+            
             _wm_input_image = std::move(depth_image.data);
         }
         else
@@ -110,6 +123,24 @@ void WMPPolicy::BuildObservation(const PolicyContext& context)
         std::fill(_wm_input_image.begin(), _wm_input_image.end(), 0.0f);
     }
 }
+
+void WMPPolicy::show_depth_image(const std::vector<float>& depth_vec, int width, int height)
+{
+#ifndef NDEBUG
+    cv::Mat depth_mat(height, width, CV_32FC1, const_cast<float*>(depth_vec.data()));
+    cv::Mat depth_display;
+    depth_mat.convertTo(depth_display, CV_8UC1, 255.0, 127); // x*255 + 127
+
+    //         // 3. 放大（插值）
+    // cv::Mat depth_up;
+    // cv::resize(depth_display, depth_up, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
+
+    cv::namedWindow("Depth Image", cv::WINDOW_NORMAL);
+    cv::imshow("Depth Image", depth_display);
+    cv::waitKey(1);
+#endif
+}
+
 
 std::vector<std::vector<float>> WMPPolicy::ProcessObservation()
 {
@@ -134,6 +165,7 @@ std::vector<float> WMPPolicy::RunInference(std::vector<std::vector<float>>& mode
         else
             input_image = _pre_wm_image;
 
+        // show_depth_image(input_image,64,64);
         auto world_model_output = _world_model->forward_world({_world_obs, input_image, _wm_logit, _wm_stoch, _wm_deter, _wm_action, _wm_is_first});
         _wm_logit = std::move(world_model_output[0]);
         _wm_stoch = std::move(world_model_output[1]);

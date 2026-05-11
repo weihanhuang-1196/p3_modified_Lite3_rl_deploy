@@ -63,12 +63,28 @@ policies:
         policy_config_path: "himoloco_walk_ppo/policy_Jan27_18-09-31_4000-yong-1-28.yaml"
       tingtao-1-27:
         policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
+      tingtao-2-27:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
+      tingtao-3-27:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
+      tingtao-4-27:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
+      tingtao-5-27:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
+      tingtao-6-27:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
+      tingtao-7-27:
+        policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
 
 
 
   RLFSMStateRLWmp:
     type: wmp_ppo
-    selected: Apr17_07
+    selected: Apr21_11-34-18_WMP
     policy_list:
-      Apr17_07:
+      Apr17_07-40-33_WMP:
         policy_config_path: "wmp_ppo/Apr17_07-40-33_WMP.yaml"
+      Apr21_11-34-18_WMP_38000:
+        policy_config_path: "wmp_ppo/Apr21_11-34-18_WMP_38000.yaml"
+      Apr21_11-34-18_WMP:
+        policy_config_path: "wmp_ppo/Apr21_11-34-18_WMP.yaml"

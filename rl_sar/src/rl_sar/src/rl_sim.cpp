@@ -523,7 +523,7 @@ void RL_Sim::SetCommand(const RobotCommand<float> *command)
 void RL_Sim::RobotControl()
 {
 
-    CheckTimeouts();
+    // CheckTimeouts();
     {
         auto info = std::static_pointer_cast<TopicInfo<robot_msgs::msg::RobotState>>(topics[robot_state_topic_name.c_str()]);
         auto robot_state_msg = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
@@ -711,7 +711,7 @@ void RL_Sim::InitTopics() {
     image_info->extra_callback = [this, image_info] () {
         auto msg = std::atomic_load_explicit(&image_info->latest_msg, std::memory_order_acquire);
         auto depth_image = depth_image_to_vector(msg->data, 64, 64);
-        show_depth_image(depth_image, 64, 64);
+        // show_depth_image(depth_image, 64, 64);
         std::atomic_store_explicit(&this->depth_image_ptr, std::make_shared<std::vector<float>>(std::move(depth_image)), std::memory_order_release);
     };
     topics[this->image_topic_name] = image_info;
@@ -884,52 +884,15 @@ void RL_Sim::RunModel()
 {
     if (this->rl_init_done && simulation_running)
     {
+        LAT_STATS_SCOPE(run_model_stats);
         this->episode_length_buf += 1;
-        auto ang_vel = this->robot_state.imu.gyroscope;
-        auto commands = {this->control.x, this->control.y, this->control.yaw};
-        // if(this->config_name == "np3o")
-        // {
-        //     if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-        //         this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
-        //     else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-        //         this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
-        //     else
-        //         this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-        // }
-        // else
-        // {
-        //     if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-        //         this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand};
-        //     else
-        //         this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
-        // }
-        // if (this->control.navigation_mode)
-        // {
-        //     auto info = std::static_pointer_cast<TopicInfo<geometry_msgs::msg::Twist>>(topics[cmd_topic_name.c_str()]);
-        //     auto cmd = std::atomic_load_explicit(&info->latest_msg, std::memory_order_acquire);
-        //     if(cmd)
-        //     {
-        //         if(this->config_name == "np3o")
-        //         {
-        //             if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-        //                 this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
-        //             else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-        //                 this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z, 0.0f,0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
-        //             else
-        //                 this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-        //         }
-        //         else
-        //             this->obs.commands = {(float)cmd->linear.x, (float)cmd->linear.y, (float)cmd->angular.z};
-        //     }
-        //     else
-        //         this->obs.commands = {0.0f, 0.0f, 0.0f};
-
-        // }
-        auto base_quat = this->robot_state.imu.quaternion;
-        auto dof_pos = this->robot_state.motor_state.q;
-        auto dof_vel = this->robot_state.motor_state.dq;
-        auto lin_vel = {0.0f, 0.0f, 0.0f};
-        auto gravity_vec = {0.0f, 0.0f, -1.0f};
+        std::vector<float> ang_vel = this->robot_state.imu.gyroscope;
+        std::vector<float> commands = {this->control.x, this->control.y, this->control.yaw};
+        std::vector<float> base_quat = this->robot_state.imu.quaternion;
+        std::vector<float> dof_pos = this->robot_state.motor_state.q;
+        std::vector<float> dof_vel = this->robot_state.motor_state.dq;
+        std::vector<float> lin_vel = {0.0f, 0.0f, 0.0f};
+        std::vector<float> gravity_vec = {0.0f, 0.0f, -1.0f};
 
 
 
@@ -941,7 +904,12 @@ void RL_Sim::RunModel()
         context_builder.SetTensorData(*depth_image, std::vector<int64_t>(2,64), "depth_image");
 
         rl_policy::PolicyContext ctx = context_builder.Build();
-        rl_policy::PolicyOutput output = policy_manager.Forward(ctx);
+        rl_policy::PolicyOutput output;
+        {
+            LAT_STATS_SCOPE(forward_stats);
+            output = policy_manager.Forward(ctx);
+        }
+        
         auto actions = output.raw_actions;
         context_builder.SetLastActions(actions);
 

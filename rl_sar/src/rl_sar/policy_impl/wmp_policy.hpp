@@ -12,6 +12,8 @@
 #include "observation_buffer.hpp"
 #include "inference_runtime.hpp"
 
+#include <opencv2/opencv.hpp>
+
 
 
 namespace rl_policy{
@@ -39,6 +41,7 @@ protected:
 
 private:
     std::vector<float> ComputeObservation(const PolicyContext& context, const std::vector<std::string>& observations);
+    void show_depth_image(const std::vector<float>& depth_vec, int width, int height);
     std::vector<int> _obs_dims;
     ObservationBuffer _history_obs_buf;
     std::vector<float> _history_obs;

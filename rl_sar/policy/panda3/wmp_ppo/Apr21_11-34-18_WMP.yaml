@@ -1,0 +1,99 @@
+# Copyright (c) 2024-2025 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
+panda3/wmp_ppo:
+#   model_name: "policy_4_17_6000.onnx"
+#   world_name: "world_model_4_17_6000.onnx"
+  model_name: "policy_Apr21_11-34-18_WMP.onnx"
+  world_name: "world_model_Apr21_11-34-18_WMP.onnx"
+#   model_name: "policy_4_14_47000.onnx"
+#   world_name: "world_model_4_14_47000.onnx"
+#   num_observations: 33
+#   observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
+  num_observations: 42
+  observations: ["ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
+  world_observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel"]
+  ang_vel_axis: "body"
+  image_width: 64
+  image_height: 64
+  znear: 0.0
+  zfar: 2.0
+  camera_znear: 0.01
+  camera_zfar: 3.0
+  # observations_history: [0, 1, 2, 3, 4]  # 0 is the latest observation
+  observations_history: [4, 3, 2, 1, 0]  # 0 is the latest observation
+  observations_history_priority: "time"  # "time" or "term" priority
+  clip_obs: 100.0
+  clip_actions_lower: [-100, -100, -100,
+                       -100, -100, -100,
+                       -100, -100, -100,
+                       -100, -100, -100]
+  clip_actions_upper: [100, 100, 100,
+                       100, 100, 100,
+                       100, 100, 100,
+                       100, 100, 100]
+#   clip_actions_lower: [-5.5, -5.5, -5.5,
+#                        -5.5, -5.5, -5.5,
+#                        -5.5, -5.5, -5.5,
+#                        -5.5, -5.5, -5.5]
+#   clip_actions_upper: [5.5, 5.5, 5.5,
+#                        5.5, 5.5, 5.5,
+#                        5.5, 5.5, 5.5,
+#                        5.5, 5.5, 5.5]
+
+
+  # rl_kp: [55, 55, 55,
+  #         55, 55, 55,
+  #         55, 55, 55,
+  #         55, 55, 55]
+
+  rl_kd: [1.8, 1.8, 1.8,
+           1.8, 1.8, 1.8,
+           1.8, 1.8, 1.8,
+           1.8, 1.8, 1.8]
+
+  rl_kp: [60, 60, 60,
+          60, 60, 60,
+          60, 60, 60,
+          60, 60, 60]
+
+  # rl_kd: [2, 2, 2,
+  #          2, 2, 2,
+  #          2, 2, 2,
+  #          2, 2, 2]
+
+
+  fixed_kp: [80, 120, 130,
+             80, 120, 130,
+             80, 120, 130,
+             80, 120, 130]
+
+  fixed_kd: [3.0, 3.0, 3.0,
+             3.0, 3.0, 3.0,
+             3.0, 3.0, 3.0,
+             3.0, 3.0, 3.0]
+  num_of_dofs: 12
+  action_scale: [0.25, 0.25, 0.25,
+                 0.25, 0.25, 0.25,
+                 0.25, 0.25, 0.25,
+                 0.25, 0.25, 0.25]
+  wheel_indices: []
+  lin_vel_scale: 1.0
+  ang_vel_scale: 0.25
+  dof_pos_scale: 1.0
+  dof_vel_scale: 0.05
+  commands_scale: [1.0, 1.0, 0.15]
+  num_of_command: 3
+
+  torque_limits: [60, 60, 90,
+                60, 60, 90,
+                60, 60, 90,
+                60, 60, 90]
+
+  default_dof_pos: [0.000, 0.71, -1.5,
+                    0.000, 0.71, -1.5,
+                    0.000, 0.71, -1.5,
+                    0.000, 0.71, -1.5]
+  # joint_mapping: [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+  joint_mapping: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  

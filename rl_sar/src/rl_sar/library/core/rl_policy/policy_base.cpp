@@ -34,6 +34,8 @@ void PolicyBase::Init(const YAML::Node config_node, const std::string& policy_di
     _ang_vel_axis = _params.Get<std::string>("ang_vel_axis");
     _observations_history = _params.Get<std::vector<int>>("observations_history");
     _observations_history_priority = _params.Get<std::string>("observations_history_priority");
+    _clip_obs = _params.Get<float>("clip_obs");
+    _num_of_command = _params.Get<int>("num_of_command");
 
     InitObservations();
 
@@ -74,12 +76,25 @@ void PolicyBase::InitObservations()
 }
 
 
-const YamlParams& PolicyBase::getConfig() const
+const YamlParams& PolicyBase::GetConfig() const
 {
     return _params;
 }
 
+const std::string PolicyBase::GetName() const
+{
+    return _name;
+}
 
+void PolicyBase::SetPolicyName(std::string policy_name)
+{
+    _policy_name = std::move(policy_name);
+}
+
+const std::string PolicyBase::GetPolicyName() const
+{
+    return _policy_name;
+}
 
 PolicyOutput& PolicyBase::Forward(PolicyContext& context)
 {
@@ -88,6 +103,7 @@ PolicyOutput& PolicyBase::Forward(PolicyContext& context)
         throw std::runtime_error("Policy is not initialized: " + _name);
     }
 
+    std::lock_guard<std::mutex> lock(this->inference_lock);
     BuildObservation(context);
     auto model_input = ProcessObservation();
     _actions = RunInference(model_input);
@@ -102,6 +118,7 @@ PolicyOutput& PolicyBase::Forward(PolicyContext& context)
 
 void PolicyBase::Reset()
 {
+    std::lock_guard<std::mutex> lock(this->inference_lock);
     InitObservations();
     OnReset();
 }

@@ -87,6 +87,7 @@
 static LatencyStats world_stats("world_model", 500);
 static LatencyStats policy_stats("policy_model", 500);
 static LatencyStats forward_stats("forward", 50);
+static LatencyStats run_model_stats("run_model", 50);
 
 #else
 #endif

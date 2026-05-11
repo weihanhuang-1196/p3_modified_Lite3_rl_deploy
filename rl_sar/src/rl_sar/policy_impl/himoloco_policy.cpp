@@ -14,9 +14,8 @@ void HimolocoPolicy::OnInit()
     std::vector<float> ang_vel = {0.0f, 0.0f, 0.0f};
     std::vector<float> gravity_vec = {0.0f, 0.0f, -1.0f};
     std::vector<float> base_quat = {1.0f, 0.0f, 0.0f, 0.0f};
-    std::vector<float> dof_pos = this->_params.Get<std::vector<float>>("default_dof_pos");
-    std::vector<float> dof_vel(this->_params.Get<int>("num_of_dofs"), 0.0f);
-    std::vector<float> command(this->_params.Get<int>("num_of_command"), 0.0f);
+    std::vector<float> dof_vel(_num_of_dofs, 0.0f);
+    std::vector<float> command(_num_of_command, 0.0f);
 
     _policy_model_name = this->_params.Get<std::string>("model_name");
 
@@ -28,11 +27,11 @@ void HimolocoPolicy::OnInit()
         base_quat
     );
     context_builder.SetJointState(
-        dof_pos,
+        _default_dof_pos,
         dof_vel
     );
     context_builder.SetCommand(command);
-    std::vector<float> last_actions(12, 0.0f);
+    std::vector<float> last_actions(_num_of_dofs, 0.0f);
     context_builder.SetLastActions(last_actions);
     PolicyContext ctx = context_builder.Build();
 
@@ -78,6 +77,7 @@ std::vector<std::vector<float>> HimolocoPolicy::ProcessObservation()
 
 std::vector<float> HimolocoPolicy::RunInference(std::vector<std::vector<float>>& model_input)
 {
+
     std::vector<float> actions = _model->forward(model_input);
     if (!_clip_actions_upper.empty() && !_clip_actions_lower.empty())
         return clamp(actions, _clip_actions_lower, _clip_actions_upper);

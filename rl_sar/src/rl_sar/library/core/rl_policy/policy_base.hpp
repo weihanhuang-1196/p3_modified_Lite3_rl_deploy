@@ -12,6 +12,7 @@
 #include <memory>
 #include <stdexcept>
 #include <iostream>
+#include <mutex>
 
 namespace rl_policy{
 
@@ -78,7 +79,13 @@ public:
 
     void Reset();
 
-    const YamlParams& getConfig() const;
+    const YamlParams& GetConfig() const;
+
+    const std::string GetName() const;
+
+    const std::string GetPolicyName() const;
+
+    void SetPolicyName(std::string policy_name);
     
 
 protected:
@@ -93,8 +100,12 @@ protected:
     void InitObservations();
 
 protected:
+
+    std::mutex inference_lock;
+
     YamlParams _params;
     std::string _name;
+    std::string _policy_name;
 
     bool _initialized = false;
 
@@ -123,6 +134,7 @@ protected:
     Observations<float> obs;
     std::vector<int> _observations_history;
     std::string _observations_history_priority;
+    int _num_of_command;
 
 
 

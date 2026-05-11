@@ -41,6 +41,7 @@ void PolicyManager::LoadFromYaml(
             try
             {
                 policy->Init(policy_yaml, policy_dir);
+                policy->SetPolicyName(policy_name);
             }
             catch(const std::exception& e)
             {
@@ -61,10 +62,6 @@ void PolicyManager::LoadFromYaml(
 void PolicyManager::SwitchPolicy(const std::string& fsm_name, std::string policy_name)
 {
 
-    if(active_fsm_name_.compare(fsm_name) != 0)
-    {
-        active_policy_index_ = 0;
-    }
 
     auto policy_map = policies_.find(fsm_name);
 
@@ -77,6 +74,19 @@ void PolicyManager::SwitchPolicy(const std::string& fsm_name, std::string policy
     {
         policy_name = root["policies"][fsm_name]["selected"].as<std::string>();
     }
+
+    if(active_fsm_name_.compare(fsm_name) != 0)
+    {
+        auto& order = policy_order_.at(fsm_name);
+        auto it = std::find(order.begin(), order.end(), policy_name);
+        if(it == order.end())
+            throw std::runtime_error(
+            "PolicyManager::SetActivePolicy failed, policy not found: " + policy_name +
+            ", active_fsm_name: " + fsm_name);
+
+        active_policy_index_ = static_cast<size_t>(std::distance(order.begin(), it));
+    }
+
     
     auto it = policy_map->second.find(policy_name);
     if(it == policy_map->second.end())
@@ -89,7 +99,8 @@ void PolicyManager::SwitchPolicy(const std::string& fsm_name, std::string policy
     active_fsm_name_ = fsm_name;
 
     active_policy_->Reset();
-    std::cout << LOGGER::INFO << "switch policy:  " << policy_name  << std::endl;
+    
+    std::cout << LOGGER::INFO << "switch policy:  " << active_policy_->GetPolicyName()  << std::endl;
 }
 
 void PolicyManager::SwitchNextPolicy()
@@ -151,7 +162,7 @@ const YamlParams& PolicyManager::getActivePolicyConfig() const
     {
         throw std::runtime_error("No active policy selected");
     }
-    return active_policy_->getConfig();
+    return active_policy_->GetConfig();
 }
 
 }  // namespace rl_policy
