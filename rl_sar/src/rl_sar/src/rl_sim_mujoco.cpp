@@ -96,6 +96,20 @@ RL_Sim::RL_Sim(int argc, char **argv)
 
     // read params from yaml
     this->ReadYaml(this->robot_name, "base.yaml");
+
+    // loading policy config
+    try
+    {
+        rl_policy::RegisterAllPolicies(); //register policies
+        this->policy_manager.LoadFromYaml(this->robot_name, "base.yaml");
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << LOGGER::ERROR << "failed: "<< e.what() << std::endl;
+        std::cout << LOGGER::ERROR << "Failed to load policy configure " << std::endl;
+        return;
+    }
+
     this->config_name = this->params.Get<std::string>("algorithm");
 
     // auto load FSM by robot_name
@@ -366,20 +380,6 @@ std::vector<float> RL_Sim::depth_image_to_vector(const std::vector<float>& data,
         depth_vec.push_back(d);
     }
 
-    // auto maxv_depth = *std::max_element(depth_vec.begin(), depth_vec.end());
-    // auto minv_depth = *std::min_element(depth_vec.begin(), depth_vec.end());
-
-    // // 显示深度图
-    // cv::Mat depth_display;
-    // depth_mat.convertTo(depth_display, CV_8UC1, 255.0, 127); // x*255 + 127
-
-    //     // 3. 放大（插值）
-    // cv::resize(depth_display, depth_mat, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
-
-    // // cv::applyColorMap(depth_up, depth_display, cv::COLORMAP_JET); // 彩色深度图
-    // cv::imshow("Depth Image", depth_mat);
-    // cv::waitKey(1);
-    // show_depth_image(depth_vec, width, height);
 
     show_depth_image(depth_vec, width, height);
 
@@ -393,11 +393,12 @@ void RL_Sim::show_depth_image(const std::vector<float>& depth_vec, int width, in
     cv::Mat depth_display;
     depth_mat.convertTo(depth_display, CV_8UC1, 255.0, 127); // x*255 + 127
 
-            // 3. 放大（插值）
-    cv::Mat depth_up;
-    cv::resize(depth_display, depth_up, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
+    //         // 3. 放大（插值）
+    // cv::Mat depth_up;
+    // cv::resize(depth_display, depth_up, cv::Size(width*6, height*6), 0, 0, cv::INTER_LINEAR);
 
-    cv::imshow("Depth Image", depth_up);
+    cv::namedWindow("Depth Image", cv::WINDOW_NORMAL);
+    cv::imshow("Depth Image", depth_display);
     cv::waitKey(1);
 }
 
@@ -595,7 +596,7 @@ void RL_Sim::GetSysJoystick()
 
     float ly = -float(this->sys_js_axis[1]) / float(this->sys_js_max_value);
     float lx = -float(this->sys_js_axis[0]) / float(this->sys_js_max_value);
-    float rx = -float(this->sys_js_axis[3]) / float(this->sys_js_max_value);
+    float rx = -float(this->sys_js_axis[2]) / float(this->sys_js_max_value);
 
     bool has_input = (ly != 0.0f || lx != 0.0f || rx != 0.0f);
 
@@ -615,6 +616,28 @@ void RL_Sim::GetSysJoystick()
     }
     // this->control.stand = (this->sys_js_axis[7] < 0 ? 1.0f : 0.0f);
     // this->control.height = -float(this->sys_js_axis[4]) / float(this->sys_js_max_value);
+
+
+       if(this->sys_js_button[8].on_press)
+        {
+            
+            this->prev_policy_changed = true;
+        }
+
+        if(this->sys_js_button[9].on_press)
+        {
+            this->next_policy_changed = true;
+        }
+        if(this->sys_js_button[8].on_press && this->prev_policy_changed == true)
+        {
+            this->prev_policy_changed = false;
+            this->prev_policy_switch.store(true);
+        }
+        else if(this->sys_js_button[9].on_press && this->next_policy_changed == true)
+        {
+            this->next_policy_changed = false;
+            this->next_policy_switch.store(true);
+        }
 
 
 
@@ -639,41 +662,62 @@ void RL_Sim::RunModel()
     if (this->rl_init_done && simulation_running)
     {
         this->episode_length_buf += 1;
-        this->obs.ang_vel = this->robot_state.imu.gyroscope;
-        if(this->config_name == "np3o")
+        std::vector<float> ang_vel = this->robot_state.imu.gyroscope;
+        std::vector<float> commands = {this->control.x, this->control.y, this->control.yaw};
+        std::vector<float> base_quat = this->robot_state.imu.quaternion;
+        std::vector<float> dof_pos = this->robot_state.motor_state.q;
+        std::vector<float> dof_vel = this->robot_state.motor_state.dq;
+        std::vector<float> lin_vel = {0.0f, 0.0f, 0.0f};
+        std::vector<float> gravity_vec = {0.0f, 0.0f, -1.0f};
+        context_builder.SetCommand(commands);
+        context_builder.SetRobotState(lin_vel, ang_vel, gravity_vec, base_quat);
+        context_builder.SetJointState(dof_pos, dof_vel);
+        auto depth_image = std::atomic_load_explicit(&this->depth_image_ptr, std::memory_order_acquire);
+        context_builder.SetTensorData(*depth_image, std::vector<int64_t>(2,64), "depth_image");
+        rl_policy::PolicyContext ctx = context_builder.Build();
+        rl_policy::PolicyOutput output;
         {
-            if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
-                this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
-            else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
-                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
-            else
-                this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-        }
-        else
-            this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
+            LAT_STATS_SCOPE(forward_stats);
+            output = policy_manager.Forward(ctx);
+        }        
+        auto actions = output.raw_actions;
+        context_builder.SetLastActions(actions);        
+        
+        // this->obs.ang_vel = this->robot_state.imu.gyroscope;
+        // if(this->config_name == "np3o")
+        // {
+        //     if(this->current_rl_fsm_name.compare("RLFSMStateRLStand") == 0)
+        //         this->obs.commands = {0.0f, 0.0f, 0.0f, 0.0f,this->control.stand, 0.0f,0.0f,0.0f,0.0f,0.0f};
+        //     else if(this->current_rl_fsm_name.compare("RLFSMStateRLCrouch") == 0)
+        //         this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw, this->control.height, 0.0f, 0.0f,0.0f,0.0f,0.0f,0.0f};
+        //     else
+        //         this->obs.commands = {(float)this->control.x, (float)this->control.y, (float)this->control.yaw,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+        // }
+        // else
+        //     this->obs.commands = {this->control.x, this->control.y, this->control.yaw};
         //not currently available for non-ros mujoco version
         // if (this->control.navigation_mode)
         // {
         //     this->obs.commands = {(float)this->cmd_vel.linear.x, (float)this->cmd_vel.linear.y, (float)this->cmd_vel.angular.z};
         // }
-        this->obs.base_quat = this->robot_state.imu.quaternion;
-        this->obs.dof_pos = this->robot_state.motor_state.q;
-        this->obs.dof_vel = this->robot_state.motor_state.dq;
+        // this->obs.base_quat = this->robot_state.imu.quaternion;
+        // this->obs.dof_pos = this->robot_state.motor_state.q;
+        // this->obs.dof_vel = this->robot_state.motor_state.dq;
 
-        this->obs.actions = this->Forward();
-        this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
+        // this->obs.actions = this->Forward();
+        // this->ComputeOutput(this->obs.actions, this->output_dof_pos, this->output_dof_vel, this->output_dof_tau);
 
-        if (!this->output_dof_pos.empty())
+        if (!output.target_dof_pos.empty())
         {
-            output_dof_pos_queue.push(this->output_dof_pos);
+            output_dof_pos_queue.push(std::move(output.target_dof_pos));
         }
-        if (!this->output_dof_vel.empty())
+        if (!output.target_dof_vel.empty())
         {
-            output_dof_vel_queue.push(this->output_dof_vel);
+            output_dof_vel_queue.push(std::move(output.target_dof_vel));
         }
-        if (!this->output_dof_tau.empty())
+        if (!output.target_dof_tau.empty())
         {
-            output_dof_tau_queue.push(this->output_dof_tau);
+            output_dof_tau_queue.push(std::move(output.target_dof_tau));
         }
 
         // this->TorqueProtect(this->output_dof_tau);

@@ -261,7 +261,6 @@ private:
     tbb::concurrent_queue<std::vector<float>> output_actions_queue;
 
 
-
     std::shared_ptr<joystick_base> joystick; // joystick pointer
 
     // std::unique_ptr<odom_utils::legged_odom> legged_odom_ptr;

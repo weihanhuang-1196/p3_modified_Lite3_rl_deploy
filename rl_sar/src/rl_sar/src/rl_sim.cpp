@@ -75,6 +75,8 @@ RL_Sim::RL_Sim(int argc, char **argv)
 
     this->config_name = this->params.Get<std::string>("algorithm");
     // init joystick
+    // auto joystick_list = this->params.Get<std::vector<std::string>>("joystick_type");
+    // JoystickManager::GetInstance().CreateJoystickMap(joystick_list, *this);
     this->joystick = JoystickManager::GetInstance().CreateJoystick(
         this->params.Get<std::string>("joystick_type"),
         *this
@@ -673,6 +675,8 @@ void RL_Sim::InitTopics() {
     joy_info->extra_callback = [this, joy_info] () {
         auto msg = std::atomic_load_explicit(&joy_info->latest_msg, std::memory_order_acquire);
         this->joystick->JoyCallback(msg);
+        // auto joystick = JoystickManager::GetInstance().GetJoystick(msg->header.frame_id);
+        // joystick->JoyCallback(msg);
     };
     topics[this->joy_topic_name] = joy_info;
     joy_subscriber = ros2_node->create_subscription<sensor_msgs::msg::Joy>(

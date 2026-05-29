@@ -18,6 +18,10 @@ class PolicyManager
     using PolicyMap = std::unordered_map<std::string,PolicyPtr>;
     using PolicyGroupMap = std::unordered_map<std::string,PolicyMap>;
 public:
+    PolicyManager() = default;
+    PolicyManager(const PolicyManager&) = delete;
+    PolicyManager& operator=(const PolicyManager&) = delete;
+
     void LoadFromYaml(
         const std::string& yaml_path,
         const std::string& policy_dir);

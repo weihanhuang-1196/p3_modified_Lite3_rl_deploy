@@ -1,5 +1,8 @@
 <robot
   name="panda3v2">
+
+
+
   <link
     name="base_link">
     <inertial>

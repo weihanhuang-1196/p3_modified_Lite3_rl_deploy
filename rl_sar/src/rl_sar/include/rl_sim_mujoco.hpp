@@ -7,7 +7,7 @@
 #define RL_SIM_HPP
 
 // #define PLOT
-#define CSV_LOGGER
+// #define CSV_LOGGER
 
 #include "rl_sdk.hpp"
 #include "observation_buffer.hpp"
@@ -33,6 +33,22 @@
 
 #include "matplotlibcpp.h"
 #include <algorithm>
+
+#include "ldelay_monitor_macros.hpp"
+
+#include "register_policies.hpp"
+
+#ifndef NDEBUG
+
+static LatencyStats world_stats("world_model", 500);
+static LatencyStats policy_stats("policy_model", 500);
+static LatencyStats forward_stats("forward", 50);
+static LatencyStats run_model_stats("run_model", 50);
+
+#else
+#endif
+
+
 namespace plt = matplotlibcpp;
 
 class Button

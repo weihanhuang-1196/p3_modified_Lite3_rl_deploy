@@ -6,6 +6,9 @@
 #include "joystick_sony.hpp"
 #include "joystick_onexplayer.hpp"
 #include "joystick_beitong.hpp"
+#include "joystick_web.hpp"
+#include "joystick_xiaoji.hpp"
+#include "joystick_feizhi.hpp"
 
 
 

@@ -24,12 +24,13 @@ public:
 
     void Run() override
     {
+        auto index_list = rl.params.Get<std::vector<int>>("joint_mapping");
         for (int i = 0; i < rl.params.Get<int>("num_of_dofs"); ++i)
         {
             fsm_command->motor_command.q[i] = fsm_state->motor_state.q[i];
             fsm_command->motor_command.dq[i] = 0;
             fsm_command->motor_command.kp[i] = 0;
-            fsm_command->motor_command.kd[i] = rl.params.Get<double>("damping_kd");
+            fsm_command->motor_command.kd[i] = rl.params.Get<std::vector<float>>("damping_kd")[index_list[i]];
             fsm_command->motor_command.tau[i] = 0;
         }
     }
@@ -46,10 +47,6 @@ public:
             
             return "RLFSMStateGetUp";
         }
-        // else if (rl.motor_enabled && (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A))
-        // {
-        //     return "RLFSMStateRLStand";
-        // }
         return state_name_;
     }
 };
@@ -112,15 +109,11 @@ public:
         }
         if (percent_getup >= 1.0f)
         {
-            if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::X)
+            if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::Y)
             {
                 return "RLFSMStateRLWalk";
             }
-            else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
-            {
-                return "RLFSMStateRLStand";
-            }
-            else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
+            else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::X)
             {
                 return "RLFSMStateRLWmp";
             }
@@ -187,77 +180,6 @@ public:
     }
 };
 
-class RLFSMStateRLStand : public RLFSMState
-{
-public:
-    RLFSMStateRLStand(RL *rl) : RLFSMState(*rl, "RLFSMStateRLStand") {}
-    float percent_transition = 0.0f;
-    void Enter() override
-    {
-        percent_transition = 0.0f;
-        rl.episode_length_buf = 0;
-
-        // read params from yaml
-        // rl.config_name = "himloco";
-        std::string robot_config_path = rl.robot_name + "/" + rl.config_name + "/stand";
-        try
-        {
-            rl.InitRL(robot_config_path, "RLFSMStateRLStand");
-            if(fsm_state == nullptr)
-                return;
-            rl.now_state = *fsm_state;
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << LOGGER::ERROR << "InitRL() failed: " << e.what() << std::endl;
-            rl.rl_init_done = false;
-            rl.fsm.RequestStateChange("RLFSMStatePassive");
-        }
-    }
-
-    void Run() override
-    {
-        // position transition from last default_dof_pos to current default_dof_pos
-        // if (Interpolate(percent_transition, rl.now_state.motor_state.q, rl.params.Get<std::vector<float>>("default_dof_pos"), 0.5f, "Policy transition", true)) return;
-
-        if (!rl.rl_init_done) rl.rl_init_done = true;
-
-        // std::cout << "\r\033[K" << std::flush << LOGGER::INFO << "RL Controller [" << rl.config_name << "] stand:" << rl.control.stand << std::flush;
-        RLControl();
-    }
-
-    void Exit() override
-    {
-        rl.rl_init_done = false;
-    }
-
-    std::string CheckChange() override
-    {
-        // if(CheckErrorCode(fsm_state->motor_state.status_word)) return "RLFSMStatePassive";
-        if (rl.control.current_keyboard == Input::Keyboard::P || rl.control.current_gamepad == Input::Gamepad::LB || rl.motor_enabled == false)
-        {
-            return "RLFSMStatePassive";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num5 || rl.control.current_gamepad == Input::Gamepad::RB)
-        {
-            return "RLFSMStateGetDown";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
-        {
-            return "RLFSMStateRLStand";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::X)
-        {
-            return "RLFSMStateRLWalk";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
-        {
-            return "RLFSMStateRLWmp";
-        }
-        return state_name_;
-    }
-    
-};
 
 
 
@@ -318,15 +240,11 @@ public:
         {
             return "RLFSMStateGetDown";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
-        {
-            return "RLFSMStateRLStand";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::X)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::Y)
         {
             return "RLFSMStateRLWalk";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::X)
         {
             return "RLFSMStateRLWmp";
         }
@@ -403,15 +321,11 @@ public:
         {
             return "RLFSMStateGetDown";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
-        {
-            return "RLFSMStateRLStand";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::X)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::Y)
         {
             return "RLFSMStateRLWalk";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::Y)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num6 || rl.control.current_gamepad == Input::Gamepad::X)
         {
             return "RLFSMStateRLWmp";
         }
@@ -473,11 +387,7 @@ public:
         {
             return "RLFSMStateGetDown";
         }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num0 || rl.control.current_gamepad == Input::Gamepad::A)
-        {
-            return "RLFSMStateRLStand";
-        }
-        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::X)
+        else if (rl.control.current_keyboard == Input::Keyboard::Num1 || rl.control.current_gamepad == Input::Gamepad::Y)
         {
             return "RLFSMStateRLWalk";
         }
@@ -520,8 +430,6 @@ public:
             return std::make_shared<panda3_fsm::RLFSMStateGetDown>(rl);
         else if (state_name == "RLFSMStateRLWalk")
             return std::make_shared<panda3_fsm::RLFSMStateRLWalk>(rl);
-        else if (state_name == "RLFSMStateRLStand")
-            return std::make_shared<panda3_fsm::RLFSMStateRLStand>(rl);
         else if (state_name == "RLFSMStateRLCrouch")
             return std::make_shared<panda3_fsm::RLFSMStateRLCrouch>(rl);
         else if (state_name == "RLFSMStateRLWmp")
@@ -536,7 +444,6 @@ public:
             "RLFSMStateGetUp",
             "RLFSMStateGetDown",
             "RLFSMStateRLWalk",
-            "RLFSMStateRLStand",
             "RLFSMStateRLCrouch",
             "RLFSMStateRLWmp"
         };

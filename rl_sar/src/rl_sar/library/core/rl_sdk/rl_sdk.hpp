@@ -221,7 +221,7 @@ struct Observations
 class RL
 {
 public:
-    RL():motor_enable_changed(false), motor_enabled(false), next_policy_changed(false), prev_policy_changed(false){};
+    RL():motor_enable_changed(false), motor_enabled(false), next_policy_changed(false), prev_policy_changed(false), stand_enable_changed(false), down_enable_changed(false){};
     ~RL() {};
 
     rl_policy::YamlParams params;
@@ -270,6 +270,8 @@ public:
     bool motor_enabled;
     // motor enable change flag
     bool motor_enable_changed;
+    bool stand_enable_changed;
+    bool down_enable_changed;
     void KeyboardInterface();
     bool next_policy_changed;
     bool prev_policy_changed;
