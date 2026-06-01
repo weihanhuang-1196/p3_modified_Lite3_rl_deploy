@@ -37,19 +37,22 @@ panda3:
   #                          "RL_hip_controller", "RL_thigh_controller", "RL_calf_controller"]
   joint_mapping: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
-  damping_kd: 8.0
+  damping_kd: [ 5, 6, 7,
+                5, 6, 7,
+                5, 6, 7,
+                5, 6, 7]
 
   rosbag_save_path: "/home/yong/Desktop/仿真数据/04-21"
   rosbag_save_name: "lyx"
 
-  joystick_type: "beitong" # xbox sony onexplayer beitong
+  joystick_type: "xiaoji" # xbox sony onexplayer beitong
 
-  algorithm: "wmp" # np3o himloco wmp
+  algorithm: "himloco" # np3o himloco wmp
 
 policies:
   RLFSMStateRLWalk:
     type: "himoloco_walk_ppo"
-    selected: tingtao-3-26
+    selected: policy-yuxuan-1-19
     policy_list:
       tingtao-3-26:
         policy_config_path: "himoloco_walk_ppo/policy_Mar25_21-24-28_10000_tingtao-3-26.yaml"
@@ -75,6 +78,8 @@ policies:
         policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
       tingtao-7-27:
         policy_config_path: "himoloco_walk_ppo/policy_Jan26_22-37-41_7400-tingtao-1-27.yaml"
+      policy-yuxuan-1-19:
+        policy_config_path: "himoloco_walk_ppo/policy-yuxuan-1-19.yaml"
 
 
 

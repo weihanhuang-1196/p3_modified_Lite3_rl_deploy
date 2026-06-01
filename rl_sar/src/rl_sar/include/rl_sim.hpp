@@ -57,7 +57,10 @@
 
 #include "robot_msgs/msg/controller_state.hpp"
 
-// #define ROS_BAG_RECORDER
+#ifndef NDEBUG
+    #define ROS_BAG_RECORDER
+#else
+#endif
 
 #ifdef ROS_BAG_RECORDER
 #include "ros_bag_recorder.hpp"

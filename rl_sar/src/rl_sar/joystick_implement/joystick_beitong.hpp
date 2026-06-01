@@ -74,15 +74,15 @@ public:
             this->user.control.y = 0.0f;
         }else
         {
-            this->user.control.x = this->joy_msg.axes[1]; // LY
-            this->user.control.y = this->joy_msg.axes[0]; // LX
+            this->user.control.x = applyDeadzone(this->joy_msg.axes[1], deadzone) ; // LY
+            this->user.control.y = applyDeadzone(this->joy_msg.axes[0], deadzone) ; // LX
         }
         if(this->joy_msg.axes[2] == 1.0f && this->joy_msg.axes[3] == 1.0f)
         {
             this->user.control.yaw = 0.0f;
         }else
         {
-            this->user.control.yaw = this->joy_msg.axes[2]; // RX
+            this->user.control.yaw = applyDeadzone(this->joy_msg.axes[2], deadzone) ; // RX
         }
 
 

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 panda3v2/himoloco_walk_ppo:
-  model_name: "policy_May28_07-46-09_10000.pt"
+  model_name: "policy_May30_12-56-26_3000.pt"
   num_observations: 45
   observations: ["commands", "ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
   observations_history: [0, 1, 2, 3, 4, 5]  # 0 is the latest observation
@@ -17,15 +17,15 @@ panda3v2/himoloco_walk_ppo:
                        100, 100, 100,
                        100, 100, 100,
                        100, 100, 100]
-  rl_kp:  [ 29.28, 58, 100,
-            29.28, 58, 100,
-            29.28, 58, 100,
-            29.28, 58, 100]
+  rl_kp:  [ 50, 50, 100,
+            50, 50, 100,
+            50, 50, 100,
+            50, 50, 100]
 
-  rl_kd:  [ 1.34, 2.1, 6.2,
-            1.34, 2.1, 6.2,
-            1.34, 2.1, 6.2,
-            1.34, 2.1, 6.2]
+  rl_kd:  [ 2.1, 2.0, 6.2,
+            2.1, 2.0, 6.2,
+            2.1, 2.0, 6.2,
+            2.1, 2.0, 6.2]
 
   fixed_kp: [80, 120, 130,
              80, 120, 130,
@@ -45,7 +45,7 @@ panda3v2/himoloco_walk_ppo:
   ang_vel_scale: 0.25
   dof_pos_scale: 1.0
   dof_vel_scale: 0.05
-  commands_scale: [1.0, 2.0, 0.25]
+  commands_scale: [2.0, 2.0, 0.25]
   num_of_command: 3
 
   torque_limits: [60, 60, 90,

@@ -68,9 +68,9 @@ public:
 
 
 
-        this->user.control.x = this->joy_msg.axes[1]; // LY
-        this->user.control.y = this->joy_msg.axes[0]; // LX
-        this->user.control.yaw = this->joy_msg.axes[3]; // RX
+        this->user.control.x = applyDeadzone(this->joy_msg.axes[1], deadzone); // LY
+        this->user.control.y = applyDeadzone(this->joy_msg.axes[0], deadzone); // LX
+        this->user.control.yaw = applyDeadzone(this->joy_msg.axes[3], deadzone); // RX
         // this->user.control.stand = (this->joy_msg.axes[7] == 1 ? 1.0f : 0.0f);
         this->user.control.height = this->joy_msg.axes[4];
 
@@ -93,6 +93,30 @@ public:
             this->user.stand_enable_changed = false;
             this->user.down_enable_changed = false;
         }
+
+
+        if(this->joy_msg.buttons[6] == 1)
+        {
+            
+            this->user.prev_policy_changed = true;
+        }
+
+        if(this->joy_msg.buttons[7] == 1)
+        {
+            this->user.next_policy_changed = true;
+        }
+        if(this->joy_msg.buttons[6] == 0 && this->user.prev_policy_changed == true)
+        {
+            this->user.prev_policy_changed = false;
+            this->user.prev_policy_switch.store(true);
+        }
+        else if(this->joy_msg.buttons[7] == 0 && this->user.next_policy_changed == true)
+        {
+            this->user.next_policy_changed = false;
+            this->user.next_policy_switch.store(true);
+        }
+
+
 
 
         if(this->joy_msg.buttons[9] == 1)

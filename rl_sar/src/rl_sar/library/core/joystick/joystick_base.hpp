@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include "logger.hpp"
+#include <cmath>
 
 #include "rl_sdk.hpp"
 #if defined(USE_ROS1)
@@ -33,10 +34,24 @@ public:
     std::string GetJoystickName() const{
         return state_name_;
     };
+    
 
 protected:
+    double deadzone = 0.3;
     std::string state_name_;
     RL& user;
+
+    double applyDeadzone(double value, double deadzone)
+    {
+        if (std::abs(value) < deadzone)
+        {
+            return 0.0;
+        }
+
+        // 死区外重新映射，避免输出突然从 deadzone 跳变
+        double sign = value > 0.0 ? 1.0 : -1.0;
+        return sign * (std::abs(value) - deadzone) / (1.0 - deadzone);
+    }
 
 public:
 #if defined(USE_ROS1)

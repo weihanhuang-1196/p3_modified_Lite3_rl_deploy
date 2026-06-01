@@ -42,8 +42,8 @@ panda3v2:
                 5, 6, 7,
                 5, 6, 7]
 
-  rosbag_save_path: "/home/yong/Desktop/仿真数据/04-14"
-  rosbag_save_name: "47000"
+  rosbag_save_path: "/home/yong/Desktop/仿真数据/05-30"
+  rosbag_save_name: "test"
 
   # joystick_type: ["beitong", "xbox", "sony", "onexplayer", "feizhi"] # xbox sony onexplayer beitong feizhi
   joystick_type: "xiaoji"
@@ -53,7 +53,7 @@ panda3v2:
 policies:
   RLFSMStateRLWalk:
     type: "himoloco_walk_ppo"
-    selected: May28_17-29-10_6000
+    selected: May30_10-19-05_5800
     policy_list:
       May25_16-13-47_4000:
         policy_config_path: "himoloco_walk_ppo/policy_May25_16-13-47_4000.yaml"
@@ -91,6 +91,32 @@ policies:
         policy_config_path: "himoloco_walk_ppo/policy_May28_07-46-09_10000.yaml"
       May28_17-29-10_6000:
         policy_config_path: "himoloco_walk_ppo/policy_May28_17-29-10_6000.yaml"
+      May29_18-19-44_10000:
+        policy_config_path: "himoloco_walk_ppo/policy_May29_18-19-44_10000.yaml"
+      May29_21-37-23_-1:
+        policy_config_path: "himoloco_walk_ppo/policy_May29_21-37-23_-1.yaml"
+      May29_18-09-31_-1:
+        policy_config_path: "himoloco_walk_ppo/policy_May29_18-09-31_-1.yaml"
+      May28_14-59-46_10000:
+        policy_config_path: "himoloco_walk_ppo/policy_May28_14-59-46_10000.yaml"
+      May30_12-56-26_3000:
+        policy_config_path: "himoloco_walk_ppo/policy_May30_12-56-26_3000.yaml"
+      May30_10-04-41_5200:
+        policy_config_path: "himoloco_walk_ppo/policy_May30_10-04-41_5200.yaml"
+      May30_10-19-05_5000:
+        policy_config_path: "himoloco_walk_ppo/policy_May30_10-19-05_5000.yaml"
+      May30_23-44-11_10000:
+        policy_config_path: "himoloco_walk_ppo/policy_May30_23-44-11_10000.yaml"
+      May29_15-48-57_10000:
+        policy_config_path: "himoloco_walk_ppo/policy_May29_15-48-57_10000.yaml"
+      May30_06-58-54_10000:
+        policy_config_path: "himoloco_walk_ppo/policy_May30_06-58-54_10000.yaml"
+      May30_06-54-40_6000:
+        policy_config_path: "himoloco_walk_ppo/policy_May30_06-54-40_6000.yaml"
+      May29_14-53-54_10000:
+        policy_config_path: "himoloco_walk_ppo/policy_May29_14-53-54_10000.yaml"
+      May30_10-19-05_5800:
+        policy_config_path: "himoloco_walk_ppo/policy_May30_10-19-05_5800.yaml"
       # May13_16-34-14_10000:
       #   policy_config_path: "himoloco_walk_ppo/policy_May13_16-34-14_10000.yaml"
       # May13_16-30-17_10000:

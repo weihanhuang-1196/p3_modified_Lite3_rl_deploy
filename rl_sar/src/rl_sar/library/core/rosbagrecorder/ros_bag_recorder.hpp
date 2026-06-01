@@ -86,6 +86,12 @@ private:
             "/parameter_events",
             "/depth/depth_camera/depth/image_raw",
             "/robot_joint_controller/state",
-            "/robot_joint_controller/command"
+            "/robot_joint_controller/command",
+            "/dynamic_joint_states",
+            "/joint_state_broadcaster/transition_event",
+            "/base_odom",
+            "/robot_description",
+            "/controller_state",
+            "/joy"
         };
 };
